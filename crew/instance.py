@@ -2,7 +2,7 @@
 
 Loads, validates (rules V1-V10 of data_dictionary.md) and saves timetable files.
 Times are integer minutes; money is dollars; trip ids are 0..n-1 and equal the list position.
-make_instance (the rotation generator, task A4) is still to be written.
+make_instance is the rotation generator (task A4).
 """
 from __future__ import annotations
 
@@ -206,10 +206,124 @@ def save_instance(inst: Instance, path: str) -> None:
 
 # ---------------------------------------------------------------- generator and features
 
-def make_instance(name: str, n: int, m: int, L: int, W: int, seed: int, **gen_params) -> Instance:
-    """Rotation generator (task A4, still to be written). Must guarantee d_i <= W <= L for every trip
-    and reach a median of at least 3 trips per duty; stores a checked reference schedule."""
-    raise NotImplementedError("A4: rotation generator not written yet")
+# Default settings of the rotation generator. Every value used is stored in params, so a file can be rebuilt.
+ROUTES_DEFAULTS = {
+    "window": [300, 1320],          # buses leave the depot between 05:00 and 22:00 (minutes after midnight)
+    "peaks": [[420, 540], [960, 1140]],   # morning 07:00-09:00 and evening 16:00-19:00
+    "peak_weight": 3.0,             # buses start 3x as often in a peak as off-peak
+    "route_minutes": [30, 70],      # each route's typical one-way trip length is drawn from this range
+    "jitter": 5,                    # each single trip is +/- up to this many minutes from its route's length
+    "layover": [0, 15],             # extra minutes on top of tau before the bus turns around
+    "block_hours": [4, 10],         # how long one bus stays in service
+}
+
+
+def _routes(m: int) -> list[tuple[int, int]]:
+    """Pairs of terminals a bus can shuttle between (every pair, so drivers can change routes)."""
+    return [(a, b) for a in range(m) for b in range(a + 1, m)]
+
+
+def _draw_dispatch(rng, p: dict) -> int:
+    """One bus start time; peaks are peak_weight times more likely than off-peak minutes."""
+    lo, hi = p["window"]
+    while True:
+        t = rng.randint(lo, hi)
+        in_peak = any(a <= t < b for a, b in p["peaks"])
+        if rng.random() < (1.0 if in_peak else 1.0 / p["peak_weight"]):
+            return t
+
+
+def _bus_rotation(rng, p: dict, route: tuple[int, int], base_len: int, W: int, tau: int) -> list[tuple]:
+    """One bus going back and forth on a route: trip, layover, return trip, ... until its block ends."""
+    start = _draw_dispatch(rng, p)
+    block_end = start + 60 * rng.uniform(*p["block_hours"])
+    here, there = route if rng.random() < 0.5 else route[::-1]
+    t, trips = start, []
+    while True:
+        dur = base_len + rng.randint(-p["jitter"], p["jitter"])
+        while dur > W or dur < 1:                      # redraw: one driver per trip must always be legal
+            dur = rng.randint(1, W)
+        if t + dur > block_end:
+            break
+        trips.append((t, t + dur, here, there))
+        t = t + dur + tau + rng.randint(*p["layover"])  # layover of at least tau minutes
+        here, there = there, here
+    return trips
+
+
+def make_instance(name: str, n: int, m: int, L: int, W: int, seed: int,
+                  schedule_fn=None, **gen_params) -> Instance:
+    """Rotation generator (task A4).
+
+    Buses shuttle between pairs of terminals all day; their rotations are cut into single trips and pooled
+    (drivers are not tied to buses). Exactly n trips, d_i <= W <= L for every trip, same file for the same seed.
+
+    schedule_fn(inst) -> schedule builds the reference schedule. Pass C's greedy + local search once it exists;
+    until then a temporary greedy (same rule as task C1) is used.
+    """
+    import random
+    if not (2 <= m) or n < 1 or not (1 <= W <= L):
+        raise ValueError(f"need m >= 2, n >= 1 and 1 <= W <= L (got m={m}, n={n}, W={W}, L={L})")
+    p = {**ROUTES_DEFAULTS, **gen_params}
+    rng = random.Random(seed)
+    routes = _routes(m)
+    base = {r: rng.randint(*p["route_minutes"]) for r in routes}
+
+    # Keep adding whole bus rotations until there are at least n trips.
+    rotations = []
+    while sum(len(r) for r in rotations) < n:
+        route = routes[len(rotations) % len(routes)]
+        rot = _bus_rotation(rng, p, route, base[route], W, config.TAU)
+        if rot:
+            rotations.append(rot)
+    # Too many trips: shorten the last bus's rotation (it keeps its first trips, so chains stay intact).
+    extra = sum(len(r) for r in rotations) - n
+    rotations[-1] = rotations[-1][:len(rotations[-1]) - extra]
+
+    pooled = sorted(t for rot in rotations for t in rot)          # by start, then end, origin, dest
+    trips = [Trip(i, s, e, o, d, f"t{i}") for i, (s, e, o, d) in enumerate(pooled)]
+    params = {"n": n, "m": m, **p, "route_lengths": {f"{a}-{b}": v for (a, b), v in base.items()}}
+    inst = Instance(name=name, generator="routes", seed=seed, params=params, L=L, W=W, tau=config.TAU,
+                    F=config.F, c_per_min=config.C_PER_MIN, terminals=[f"T{k}" for k in range(m)],
+                    trips=trips, units={"time": "minutes after 00:00 of the service day (integer, may exceed 1440)",
+                                        "money": "USD"})
+
+    from crew.checker import check_schedule      # imported here to avoid a circular import
+    if schedule_fn is None:
+        schedule_fn, made_by = _temporary_greedy, "temporary greedy in instance.py (replace with C1 + C14)"
+    else:
+        made_by = getattr(schedule_fn, "__name__", "schedule_fn")
+    schedule = [list(map(int, d)) for d in schedule_fn(inst)]
+    result = check_schedule(inst, schedule)
+    if not result.ok:
+        raise RuntimeError(f"reference schedule for {name} rejected by the checker: {result.errors}")
+    inst.reference = {"schedule": schedule, "cost": result.cost, "kind": "heuristic",
+                      "verified_by": f"checker.py; made by {made_by}"}
+    errors = validate_instance(inst)
+    if errors:
+        raise RuntimeError(f"generated instance {name} is invalid: {errors}")
+    return inst
+
+
+def _temporary_greedy(inst: Instance) -> list[list[int]]:
+    """Stand-in for C's greedy (task C1), only so A4 can be tested before C1 exists.
+    Trips in start order; each goes to the open duty where it adds the least cost, else opens a new duty."""
+    duties: list[list[int]] = []
+    for j in sorted(inst.trips, key=lambda t: (t.start, t.id)):
+        best, best_cost = None, None
+        for k, duty in enumerate(duties):
+            first, last = inst.trips[duty[0]], inst.trips[duty[-1]]
+            driving = sum(inst.trips[i].end - inst.trips[i].start for i in duty)
+            if (last.dest == j.origin and last.end + inst.tau <= j.start
+                    and j.end - first.start <= inst.L and driving + (j.end - j.start) <= inst.W):
+                cost = inst.c_per_min * (j.end - last.end)      # wait + duration of j
+                if best_cost is None or cost < best_cost:
+                    best, best_cost = k, cost
+        if best is None:
+            duties.append([j.id])
+        else:
+            duties[best].append(j.id)
+    return duties
 
 
 def instance_features(inst: Instance) -> dict:
