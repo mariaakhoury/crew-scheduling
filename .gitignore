@@ -1,0 +1,18 @@
+# Never commit a licence file or key
+gurobi.lic
+*.lic
+# Local environments and caches
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+# Large solver logs (runs.csv and solutions ARE committed)
+results/logs/
+*.log
+# Runner scratch files: job files contain absolute (personal) paths; never committed
+results/tmp/
+*.tmp
+# Windows folder metadata
+desktop.ini
+Thumbs.db

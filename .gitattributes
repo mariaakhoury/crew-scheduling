@@ -1,0 +1,7 @@
+# Same bytes on Windows, macOS and Linux: text files are stored AND checked out with LF line endings.
+# Keeps instance fingerprints, code fingerprints and diffs identical on every member's laptop.
+* text=auto eol=lf
+*.png binary
+*.pdf binary
+*.pptx binary
+*.zip binary

@@ -1,0 +1,22 @@
+file,expected_rule,caught_by_json_schema,description
+I01_duplicate_id.json,V2,no,two trips have id 3
+I02_unordered_ids.json,V2,no,"ids 1,0 in list positions 0,1"
+I03_missing_id.json,V2,no,ids 0..6 then 8 (7 missing)
+I04_start_not_before_end.json,V3,no,trip 3 has start == end
+I05_float_time.json,V3,no,"start written as 360.0 (float, schema accepts it)"
+I06_bad_terminal_index.json,V4,no,origin 5 but only 2 terminals
+I07_origin_equals_dest.json,V4,no,trip 4 origin == dest
+I08_duration_above_W.json,V5,no,trip 6 lasts 301 min > W = 300
+I09_W_above_L.json,V5,no,W = 500 > L = 420
+I10_wrong_F.json,V6,no,F = 200 instead of 300
+I11_wrong_wage.json,V6,no,c_per_min = 0.333 instead of 0.5
+I12_wrong_tau.json,V6,no,tau = 5 instead of 10
+I13_name_not_filename.json,V7,no,name field differs from file name
+I14_duplicate_label.json,V8,no,two trips labelled T1
+I15_ref_missing_trip.json,V9,no,reference schedule omits trip 7
+I16_ref_wrong_order.json,V9,no,"reference duty not in time order [0,4,1,5]"
+I17_ref_wrong_cost.json,V9,no,reference cost 944.5 instead of 945.0
+I18_ref_illegal_spread.json,V9,no,"reference duty {2,3,6,7} illegal after L lowered to 400"
+I19_params_n_wrong.json,V10,no,params.n = 11 but 10 trips
+I20_unknown_field.json,V1,yes,extra top-level field "comment"
+I21_wrong_schema_version.json,V1,yes,"schema_version ""0.9"""

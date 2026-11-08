@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Group M crew scheduling instance, schema 1.0",
+  "type": "object",
+  "required": ["schema_version", "name", "generator", "seed", "params", "units", "L", "W", "tau", "F", "c_per_min", "terminals", "trips"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "name": {"type": "string", "pattern": "^[A-Za-z0-9_]+$"},
+    "generator": {"enum": ["hand", "timetable", "planted", "routes"]},
+    "seed": {"type": ["integer", "null"]},
+    "params": {"type": "object"},
+    "units": {"type": "object", "required": ["time", "money"]},
+    "L": {"type": "integer", "minimum": 1},
+    "W": {"type": "integer", "minimum": 1},
+    "tau": {"type": "integer", "minimum": 0},
+    "F": {"type": "number", "minimum": 0},
+    "c_per_min": {"type": "number", "minimum": 0},
+    "terminals": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "trips": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "start", "end", "origin", "dest"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "integer", "minimum": 0},
+          "label": {"type": "string"},
+          "start": {"type": "integer", "minimum": 0},
+          "end": {"type": "integer", "minimum": 1},
+          "origin": {"type": "integer", "minimum": 0},
+          "dest": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+    "reference": {
+      "type": ["object", "null"],
+      "required": ["schedule", "cost", "kind", "verified_by"],
+      "additionalProperties": false,
+      "properties": {
+        "schedule": {"type": "array", "items": {"type": "array", "items": {"type": "integer", "minimum": 0}, "minItems": 1}},
+        "cost": {"type": "number"},
+        "kind": {"enum": ["optimal", "heuristic", "planted"]},
+        "verified_by": {"type": "string"}
+      }
+    }
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "name": "P3_tt_n30_m3_L360_s1",
+  "generator": "timetable",
+  "seed": 1,
+  "params": {
+    "n": 30,
+    "m": 3
+  },
+  "units": {
+    "time": "minutes after 00:00 of the service day (integer, may exceed 1440)",
+    "money": "USD"
+  },
+  "L": 360,
+  "W": 270,
+  "tau": 10,
+  "F": 300.0,
+  "c_per_min": 0.5,
+  "terminals": [
+    "T0",
+    "T1",
+    "T2"
+  ],
+  "trips": [
+    {"id": 0, "label": "t0", "start": 334, "end": 404, "origin": 2, "dest": 0},
+    {"id": 1, "label": "t1", "start": 399, "end": 424, "origin": 1, "dest": 2},
+    {"id": 2, "label": "t2", "start": 402, "end": 439, "origin": 0, "dest": 1},
+    {"id": 3, "label": "t3", "start": 448, "end": 504, "origin": 0, "dest": 2},
+    {"id": 4, "label": "t4", "start": 450, "end": 515, "origin": 0, "dest": 2},
+    {"id": 5, "label": "t5", "start": 483, "end": 553, "origin": 0, "dest": 2},
+    {"id": 6, "label": "t6", "start": 496, "end": 552, "origin": 0, "dest": 2},
+    {"id": 7, "label": "t7", "start": 505, "end": 564, "origin": 2, "dest": 0},
+    {"id": 8, "label": "t8", "start": 517, "end": 582, "origin": 0, "dest": 2},
+    {"id": 9, "label": "t9", "start": 530, "end": 566, "origin": 0, "dest": 1},
+    {"id": 10, "label": "t10", "start": 787, "end": 811, "origin": 1, "dest": 2},
+    {"id": 11, "label": "t11", "start": 827, "end": 863, "origin": 2, "dest": 1},
+    {"id": 12, "label": "t12", "start": 888, "end": 925, "origin": 1, "dest": 0},
+    {"id": 13, "label": "t13", "start": 911, "end": 950, "origin": 1, "dest": 2},
+    {"id": 14, "label": "t14", "start": 981, "end": 1009, "origin": 0, "dest": 1},
+    {"id": 15, "label": "t15", "start": 1007, "end": 1065, "origin": 2, "dest": 0},
+    {"id": 16, "label": "t16", "start": 1011, "end": 1050, "origin": 0, "dest": 1},
+    {"id": 17, "label": "t17", "start": 1011, "end": 1052, "origin": 0, "dest": 1},
+    {"id": 18, "label": "t18", "start": 1017, "end": 1045, "origin": 2, "dest": 1},
+    {"id": 19, "label": "t19", "start": 1026, "end": 1088, "origin": 2, "dest": 0},
+    {"id": 20, "label": "t20", "start": 1034, "end": 1061, "origin": 2, "dest": 1},
+    {"id": 21, "label": "t21", "start": 1057, "end": 1085, "origin": 0, "dest": 1},
+    {"id": 22, "label": "t22", "start": 1065, "end": 1102, "origin": 1, "dest": 2},
+    {"id": 23, "label": "t23", "start": 1069, "end": 1104, "origin": 1, "dest": 2},
+    {"id": 24, "label": "t24", "start": 1086, "end": 1117, "origin": 2, "dest": 1},
+    {"id": 25, "label": "t25", "start": 1093, "end": 1132, "origin": 1, "dest": 2},
+    {"id": 26, "label": "t26", "start": 1100, "end": 1128, "origin": 2, "dest": 1},
+    {"id": 27, "label": "t27", "start": 1136, "end": 1165, "origin": 2, "dest": 1},
+    {"id": 28, "label": "t28", "start": 1268, "end": 1324, "origin": 2, "dest": 0},
+    {"id": 29, "label": "t29", "start": 1366, "end": 1407, "origin": 0, "dest": 1}
+  ],
+  "reference": {
+    "schedule": [
+      [0, 3],
+      [1, 7],
+      [2],
+      [4],
+      [5],
+      [6],
+      [8],
+      [9],
+      [10, 11, 12, 14],
+      [13, 15],
+      [16, 23, 27],
+      [17, 22],
+      [18],
+      [19],
+      [20, 25],
+      [21],
+      [24],
+      [26],
+      [28, 29]
+    ],
+    "cost": 6549.5,
+    "kind": "optimal",
+    "verified_by": "SP + AF (exact settings); = pilot-audit timetable_n30_L360_s1"
+  }
+}

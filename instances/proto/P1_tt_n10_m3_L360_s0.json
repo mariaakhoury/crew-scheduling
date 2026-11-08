@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "name": "P1_tt_n10_m3_L360_s0",
+  "generator": "timetable",
+  "seed": 0,
+  "params": {
+    "n": 10,
+    "m": 3
+  },
+  "units": {
+    "time": "minutes after 00:00 of the service day (integer, may exceed 1440)",
+    "money": "USD"
+  },
+  "L": 360,
+  "W": 270,
+  "tau": 10,
+  "F": 300.0,
+  "c_per_min": 0.5,
+  "terminals": [
+    "T0",
+    "T1",
+    "T2"
+  ],
+  "trips": [
+    {"id": 0, "label": "t0", "start": 390, "end": 422, "origin": 1, "dest": 2},
+    {"id": 1, "label": "t1", "start": 438, "end": 464, "origin": 1, "dest": 2},
+    {"id": 2, "label": "t2", "start": 521, "end": 577, "origin": 0, "dest": 1},
+    {"id": 3, "label": "t3", "start": 1011, "end": 1063, "origin": 0, "dest": 2},
+    {"id": 4, "label": "t4", "start": 1041, "end": 1066, "origin": 2, "dest": 1},
+    {"id": 5, "label": "t5", "start": 1063, "end": 1120, "origin": 0, "dest": 2},
+    {"id": 6, "label": "t6", "start": 1080, "end": 1115, "origin": 2, "dest": 1},
+    {"id": 7, "label": "t7", "start": 1089, "end": 1115, "origin": 1, "dest": 2},
+    {"id": 8, "label": "t8", "start": 1096, "end": 1143, "origin": 0, "dest": 1},
+    {"id": 9, "label": "t9", "start": 1101, "end": 1155, "origin": 0, "dest": 2}
+  ],
+  "reference": {
+    "schedule": [
+      [0],
+      [1],
+      [2],
+      [3, 6],
+      [4, 7],
+      [5],
+      [8],
+      [9]
+    ],
+    "cost": 2625.0,
+    "kind": "optimal",
+    "verified_by": "SP + AF (exact settings); brute force"
+  }
+}

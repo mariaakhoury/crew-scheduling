@@ -1,0 +1,87 @@
+{
+ "schema_version": "1.0",
+ "name": "I11_wrong_wage",
+ "generator": "hand",
+ "seed": null,
+ "params": {},
+ "units": {
+  "time": "minutes after 00:00 of the service day (integer, may exceed 1440)",
+  "money": "USD"
+ },
+ "L": 420,
+ "W": 300,
+ "tau": 10,
+ "F": 300.0,
+ "c_per_min": 0.333,
+ "terminals": [
+  "A",
+  "B"
+ ],
+ "trips": [
+  {
+   "id": 0,
+   "label": "T1",
+   "start": 360,
+   "end": 420,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 1,
+   "label": "T2",
+   "start": 435,
+   "end": 495,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 2,
+   "label": "T3",
+   "start": 390,
+   "end": 450,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 3,
+   "label": "T4",
+   "start": 465,
+   "end": 525,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 4,
+   "label": "T5",
+   "start": 510,
+   "end": 570,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 5,
+   "label": "T6",
+   "start": 585,
+   "end": 645,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 6,
+   "label": "T7",
+   "start": 660,
+   "end": 720,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 7,
+   "label": "T8",
+   "start": 735,
+   "end": 795,
+   "origin": 1,
+   "dest": 0
+  }
+ ],
+ "reference": null
+}

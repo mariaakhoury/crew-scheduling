@@ -1,0 +1,12 @@
+# Draft pins - confirm on Day 1, then change only together (all three members).
+# psutil: peak memory and machine facts on Windows (crew/sysinfo.py). Any OS can be the run machine (one machine for ALL final runs).
+gurobipy==13.0.3
+numpy
+pandas
+matplotlib
+jsonschema
+psutil>=5.9
+pytest
+nbformat
+nbconvert
+ipykernel
