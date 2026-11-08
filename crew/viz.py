@@ -3,6 +3,8 @@
 gantt:          one row per duty (driver), one bar per trip, coloured by the terminal the trip leaves from.
                 Gaps between bars are waiting time.
 plot_timetable: every trip of an instance over the day, plus how many trips start each hour (shows the peaks).
+case_study:     several schedules of one instance stacked on one time axis (the P0 story, task A11).
+cost_table:     drivers, paid minutes and cost of each schedule, split the way the plan's §2.5 table is.
 """
 from __future__ import annotations
 
@@ -38,9 +40,11 @@ def _legend(ax, inst: Instance) -> None:
     ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(1.01, 1), frameon=False, fontsize=8)
 
 
-def gantt(inst: Instance, schedule: list[list[int]], title: str | None = None, ax=None) -> matplotlib.figure.Figure:
+def gantt(inst: Instance, schedule: list[list[int]], title: str | None = None, ax=None,
+          highlight=()) -> matplotlib.figure.Figure:
     """Draw a schedule: row k = duty k, bars = its trips. The right margin shows each duty's cost.
-    The title adds the number of duties and the total cost, recomputed by the checker."""
+    The title adds the number of duties and the total cost, recomputed by the checker.
+    Trips in `highlight` get a thick red outline (e.g. the trip greedy strands)."""
     n_duties = len(schedule)
     if ax is None:
         fig, ax = plt.subplots(figsize=(11, max(2.5, 0.32 * n_duties + 1.2)))
@@ -50,8 +54,9 @@ def gantt(inst: Instance, schedule: list[list[int]], title: str | None = None, a
     for row, duty in enumerate(schedule):
         for i in duty:
             t = inst.trips[i]
-            ax.barh(row, t.end - t.start, left=t.start, height=0.7,
-                    color=_COLORS[t.origin % 10], edgecolor="white", linewidth=0.5)
+            hot = i in highlight
+            ax.barh(row, t.end - t.start, left=t.start, height=0.7, color=_COLORS[t.origin % 10],
+                    edgecolor="red" if hot else "white", linewidth=2.5 if hot else 0.5)
             if small:
                 ax.text((t.start + t.end) / 2, row, t.label or str(t.id),
                         ha="center", va="center", fontsize=7, color="white")
@@ -97,5 +102,33 @@ def plot_timetable(inst: Instance) -> matplotlib.figure.Figure:
     bottom.bar([h * 60 + 30 for h in hours], counts, width=54, color="0.55")
     bottom.set_ylabel("trips starting\nthis hour")
     _time_axis(bottom, lo, hi)
+    fig.tight_layout()
+    return fig
+
+
+def cost_table(inst: Instance, schedules: dict):
+    """One row per schedule: drivers, drivers x F, paid minutes (sum of spreads), minutes x c, total.
+    Every number is recomputed here and the total is checked against the checker."""
+    import pandas as pd
+    rows = []
+    for name, sched in schedules.items():
+        paid = sum(inst.trips[d[-1]].end - inst.trips[d[0]].start for d in sched)
+        total = len(sched) * inst.F + paid * inst.c_per_min
+        result = check_schedule(inst, sched)
+        assert result.ok and abs(result.cost - total) < 0.01, f"{name}: {result.errors}"
+        rows.append({"schedule": name, "drivers": len(sched), "drivers x $300": len(sched) * inst.F,
+                     "paid minutes": paid, "minutes x $0.50": paid * inst.c_per_min, "total $": total})
+    return pd.DataFrame(rows).set_index("schedule")
+
+
+def case_study(inst: Instance, schedules: dict, highlight=()) -> matplotlib.figure.Figure:
+    """Stack one Gantt chart per schedule (same time axis), e.g. greedy / after local search / optimal."""
+    k = len(schedules)
+    heights = [max(len(s), 1) * 0.45 + 0.9 for s in schedules.values()]
+    fig, axes = plt.subplots(k, 1, figsize=(11, sum(heights) + 0.5), sharex=True,
+                             gridspec_kw={"height_ratios": heights})
+    axes = [axes] if k == 1 else list(axes)
+    for ax, (name, sched) in zip(axes, schedules.items()):
+        gantt(inst, sched, title=name, ax=ax, highlight=highlight)
     fig.tight_layout()
     return fig
