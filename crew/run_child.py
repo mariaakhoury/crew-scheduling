@@ -98,6 +98,61 @@ def gap_pct(objective: Optional[float], bound: Optional[float]) -> Optional[floa
     return 100.0 * (objective - bound) / objective
 
 
+# ------------------------------------------------------------------ C12 instrumentation
+
+class IncumbentRecorder:
+    """Gurobi callback (task C12), attached to EVERY MIP run so its overhead is identical for all methods.
+
+    Records each strictly better incumbent as (runtime_s, incumbent, bound) and the best bound seen while still at
+    the root node. Work per callback is a few cbGet calls; nothing is printed and nothing is written until the end.
+    Reported (runs.csv): t_first_incumbent_s, first_incumbent_obj, n_incumbents, root_bound, trajectory_file.
+    """
+    _NO_INCUMBENT = 1e99            # Gurobi reports GRB.INFINITY (1e100) while no incumbent exists
+
+    def __init__(self) -> None:
+        from gurobipy import GRB
+        self._cb = GRB.Callback
+        self.points: list[tuple[float, float, float]] = []
+        self.root_bound: Optional[float] = None
+        self._best = math.inf
+
+    def _record(self, t: float, obj: float, bound: float) -> None:
+        if obj < self._NO_INCUMBENT and obj < self._best - 1e-9:
+            self._best = obj
+            self.points.append((t, obj, bound))
+
+    def callback(self, model, where: int) -> None:
+        cb = self._cb
+        if where == cb.MIP:
+            bound = model.cbGet(cb.MIP_OBJBND)
+            if model.cbGet(cb.MIP_NODCNT) == 0:
+                self.root_bound = bound
+            self._record(model.cbGet(cb.RUNTIME), model.cbGet(cb.MIP_OBJBST), bound)
+        elif where == cb.MIPSOL:
+            self._record(model.cbGet(cb.RUNTIME), model.cbGet(cb.MIPSOL_OBJ), model.cbGet(cb.MIPSOL_OBJBND))
+
+    def summary(self, model, results_dir: str, run_id: str) -> dict:
+        """Row fields after optimize(). If the search never left the root, the root bound is the final bound."""
+        root = self.root_bound
+        if model.NodeCount <= 1 and _attr(model, "ObjBound") is not None:
+            root = model.ObjBound
+        out = {"n_incumbents": len(self.points), "root_bound": _finite(root),
+               "t_first_incumbent_s": self.points[0][0] if self.points else None,
+               "first_incumbent_obj": self.points[0][1] if self.points else None}
+        if self.points:
+            rel = os.path.join("trajectories", run_id + ".csv")
+            os.makedirs(os.path.join(results_dir, "trajectories"), exist_ok=True)
+            with open(os.path.join(results_dir, rel), "w", encoding="utf-8", newline="") as fh:
+                fh.write("runtime_s,incumbent,bound\n")
+                fh.writelines(f"{t:.6f},{obj},{'' if _finite(b) is None else b}\n" for t, obj, b in self.points)
+            out["trajectory_file"] = rel.replace(os.sep, "/")
+        return out
+
+
+def _finite(x) -> Optional[float]:
+    return float(x) if x is not None and math.isfinite(x) and abs(x) < IncumbentRecorder._NO_INCUMBENT else None
+
+
 # ------------------------------------------------------------------ helpers
 
 class _Phase:
@@ -259,8 +314,14 @@ def _solve_mip(inst, arcs, heur, spec: MethodSpec, cfg, job, ph: _Phase, deadlin
     if time.perf_counter() > deadline:
         raise BuildStop("BUILD_LIMIT", "model build finished after the build limit")
 
+    recorder = None if spec.relax else IncumbentRecorder()
     with ph.timed("solve"):
-        model.optimize()
+        if recorder is None:
+            model.optimize()
+        else:
+            model.optimize(recorder.callback)
+    if recorder is not None:
+        out.update(recorder.summary(model, results, run_id))
 
     code, sols = model.Status, model.SolCount
     status = classify(code, sols)
