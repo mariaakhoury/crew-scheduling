@@ -135,7 +135,8 @@ def run_one(inst_path: str, method: str, cfg: dict, results_dir: str = "results"
         if os.path.exists(phase_path):
             with open(phase_path, encoding="utf-8") as fh:
                 phase = fh.read().strip() or "start"
-        result = {"status": "KILLED", "killed_phase": phase,
+        # config.py: KILLED_BUILD (killed before the solve: not built) vs KILLED (during the solve: runner failure)
+        result = {"status": "KILLED" if phase == "solve" else "KILLED_BUILD", "killed_phase": phase,
                   "error": f"hard kill after {cfg['HARD_KILL_S']} s in phase {phase!r}"}
     result.pop("traceback", None)
 

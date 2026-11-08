@@ -113,10 +113,10 @@ def test_changed_settings_never_reuse_old_rows():
         assert len(rows) == 2 and len({r["config_hash"] for r in rows}) == 2
 
 
-def test_forced_kill_gives_KILLED_with_phase():
+def test_forced_kill_before_the_solve_gives_KILLED_BUILD_with_phase():
     with tempfile.TemporaryDirectory() as d:
         row = run_one(P0_PATH, "H", config.config_snapshot(HARD_KILL_S=0.001), d)
-        assert row["status"] == "KILLED" and row["killed_phase"], row
+        assert row["status"] == "KILLED_BUILD" and row["killed_phase"] != "solve", row
         assert list(row) == COLUMNS
 
 

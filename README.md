@@ -12,6 +12,7 @@
 | `crew/version.py` | C0 | `git_commit()` (falls back to a source fingerprint without git), `file_sha256()` for MANIFEST.csv |
 | `crew/runner.py`, `crew/run_child.py` | C3/C4 | runner: one subprocess per run, runs.csv, statuses, resume, rerun-once, env.txt |
 | `crew/integration.py` | C2 | `start_arcflow`, `start_setpart` (complete MIP starts), `start_accepted(log, cost)` |
+| `crew/analysis.py` | C7 | `load_runs` (refuses stale/mixed rows), `summary_table(df, method)`, `comparison_table(df)`, `to_display` ("≥" on censored averages) |
 | `crew/run_child.py` (`IncumbentRecorder`) | C12 | callback on every MIP run: each better incumbent (time, value, bound), root bound, `results/trajectories/<run_id>.csv` |
 | `tests/test_greedy.py`, `test_localsearch.py`, `test_runner.py`, `test_integration.py`, `test_instrumentation.py` | | new tests; whole suite: 56 passed, 1 skipped (Model 1 start acceptance: activates when A2 exists) |
 | `tests/standins.py` | | test fixtures only: stand-in duty list / Model 2 that switch to B's real modules once they exist |
