@@ -262,8 +262,8 @@ def make_instance(name: str, n: int, m: int, L: int, W: int, seed: int,
     Buses shuttle between pairs of terminals all day; their rotations are cut into single trips and pooled
     (drivers are not tied to buses). Exactly n trips, d_i <= W <= L for every trip, same file for the same seed.
 
-    schedule_fn(inst) -> schedule builds the reference schedule. Pass C's greedy + local search once it exists;
-    until then a temporary greedy (same rule as task C1) is used.
+    The reference schedule comes from C's heuristic (greedy C1 + local search C14) unless schedule_fn(inst) -> schedule
+    is given.
     """
     import random
     if not (2 <= m) or n < 1 or not (1 <= W <= L):
@@ -294,7 +294,9 @@ def make_instance(name: str, n: int, m: int, L: int, W: int, seed: int,
 
     from crew.checker import check_schedule      # imported here to avoid a circular import
     if schedule_fn is None:
-        schedule_fn, made_by = _temporary_greedy, "temporary greedy in instance.py (replace with C1 + C14)"
+        from crew.localsearch import heuristic   # C1 + C14; imported here to avoid a circular import
+        schedule_fn = lambda i: heuristic(i).schedule
+        made_by = "localsearch.heuristic (greedy C1 + local search C14)"
     else:
         made_by = getattr(schedule_fn, "__name__", "schedule_fn")
     schedule = [list(map(int, d)) for d in schedule_fn(inst)]
@@ -307,27 +309,6 @@ def make_instance(name: str, n: int, m: int, L: int, W: int, seed: int,
     if errors:
         raise RuntimeError(f"generated instance {name} is invalid: {errors}")
     return inst
-
-
-def _temporary_greedy(inst: Instance) -> list[list[int]]:
-    """Stand-in for C's greedy (task C1), only so A4 can be tested before C1 exists.
-    Trips in start order; each goes to the open duty where it adds the least cost, else opens a new duty."""
-    duties: list[list[int]] = []
-    for j in sorted(inst.trips, key=lambda t: (t.start, t.id)):
-        best, best_cost = None, None
-        for k, duty in enumerate(duties):
-            first, last = inst.trips[duty[0]], inst.trips[duty[-1]]
-            driving = sum(inst.trips[i].end - inst.trips[i].start for i in duty)
-            if (last.dest == j.origin and last.end + inst.tau <= j.start
-                    and j.end - first.start <= inst.L and driving + (j.end - j.start) <= inst.W):
-                cost = inst.c_per_min * (j.end - last.end)      # wait + duration of j
-                if best_cost is None or cost < best_cost:
-                    best, best_cost = k, cost
-        if best is None:
-            duties.append([j.id])
-        else:
-            duties[best].append(j.id)
-    return duties
 
 
 def instance_features(inst: Instance) -> dict:
