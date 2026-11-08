@@ -214,7 +214,9 @@ ROUTES_DEFAULTS = {
     "route_minutes": [30, 70],      # each route's typical one-way trip length is drawn from this range
     "jitter": 5,                    # each single trip is +/- up to this many minutes from its route's length
     "layover": [0, 15],             # extra minutes on top of tau before the bus turns around
-    "block_hours": [4, 10],         # how long one bus stays in service
+    "block_hours": [4, 10],         # how long a regular bus stays in service
+    "peak_block_hours": [1.5, 3.5], # extra rush-hour buses only run for a short block
+    "service_end": 1440,            # no trip ends after midnight
 }
 
 
@@ -236,7 +238,9 @@ def _draw_dispatch(rng, p: dict) -> int:
 def _bus_rotation(rng, p: dict, route: tuple[int, int], base_len: int, W: int, tau: int) -> list[tuple]:
     """One bus going back and forth on a route: trip, layover, return trip, ... until its block ends."""
     start = _draw_dispatch(rng, p)
-    block_end = start + 60 * rng.uniform(*p["block_hours"])
+    in_peak = any(a <= start < b for a, b in p["peaks"])
+    hours = p["peak_block_hours"] if in_peak else p["block_hours"]
+    block_end = min(start + 60 * rng.uniform(*hours), p["service_end"])
     here, there = route if rng.random() < 0.5 else route[::-1]
     t, trips = start, []
     while True:
