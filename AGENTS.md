@@ -24,7 +24,8 @@ instructions win over both. Read the section for the member you are helping befo
 - `tests/standins.py` is a **test fixture**: a tiny duty list + set-partitioning model used ONLY so C's tests can
   run before B2/B3 exist. It switches to `crew.duties` / `crew.model_setpart` automatically once they exist.
   **Model 2 is still B's task (B2, B3); Model 1 is still A's task (A1, A2).**
-- `run_child._arcs()` falls back to an inline arc rule only until A's `crew/graph.py` exists.
+- `instance._temporary_greedy` only builds generated files' reference schedules until `make_instance` is called with
+  `schedule_fn=lambda inst: crew.localsearch.heuristic(inst).schedule` (C's greedy + local search, task A4 step 5).
 
 ## Who owns what
 | Member | Files (create them with exactly these names) |
@@ -37,9 +38,9 @@ instructions win over both. Read the section for the member you are helping befo
 ```python
 Schedule = list[list[int]]   # duties of trip ids, increasing start time
 # instance.py (A)      load_instance, save_instance, validate_instance, load_instance_raw_errors   DONE
-#                      make_instance(name, n, m, L, W, seed, **gen_params) -> Instance             TODO (A4)
-# graph.py (A)         build_arcs(inst) -> list[tuple[int, int]]                                    TODO (A1)
-#                      big_m_bounds(inst) -> tuple[list[int], list[int]]   # (ell, U)
+#                      make_instance(name, n, m, L, W, seed, schedule_fn=None, **gen_params)      DONE (A4)
+# graph.py (A)         build_arcs(inst) -> list[tuple[int, int]]                                    DONE (A1)
+#                      big_m_bounds(inst) -> tuple[list[int], list[int]]   # (ell, U)              DONE (A1)
 # model_arcflow.py (A) build_arcflow(inst, arcs, relax=False, naive_m=False) -> (gp.Model, {"x","u","v","T","D"})  TODO
 #                      decode_arcflow(inst, vars) -> Schedule
 # checker.py (B)       check_schedule, is_legal_duty, duty_cost                                     DONE
