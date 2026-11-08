@@ -8,7 +8,8 @@
 | `crew/config.py` | C0 | added `config_snapshot()` and `config_hash()` (nothing else changed) |
 | `crew/version.py` | C0 | `git_commit()` (falls back to a source fingerprint without git), `file_sha256()` for MANIFEST.csv |
 | `crew/runner.py`, `crew/run_child.py` | C3/C4 | runner: one subprocess per run, runs.csv, statuses, resume, rerun-once, env.txt |
-| `tests/test_greedy.py`, `test_localsearch.py`, `test_runner.py` | | 20 new tests; whole suite: 46 passed |
+| `crew/integration.py` | C2 | `start_arcflow`, `start_setpart` (complete MIP starts), `start_accepted(log, cost)` |
+| `tests/test_greedy.py`, `test_localsearch.py`, `test_runner.py`, `test_integration.py` | | 28 new tests; whole suite: 53 passed, 1 skipped (Model 1 start acceptance: activates when A2 exists) |
 
 Proposals for issue #1: H rows use status `HEURISTIC`; extra columns `t_solve_s`, `killed_phase`, `error`;
 `enumerate_duties` returns status `"complete"` / `"capped"` (else out of time) and takes an absolute `time.perf_counter()` deadline.
