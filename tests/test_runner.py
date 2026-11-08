@@ -53,6 +53,27 @@ def test_file_sha256_ignores_windows_line_endings():
         assert file_sha256(a) == file_sha256(b)
 
 
+# ------------------------------------------------------------------ overnight safety
+
+def test_keep_awake_is_active_during_a_batch_and_released_after():
+    from crew.runner import keep_awake
+    if sys.platform != "win32":
+        with keep_awake():                       # no-op elsewhere, must not fail
+            return
+    import ctypes
+    k32 = ctypes.windll.kernel32
+    CONT, SYS = 0x80000000, 0x00000001
+
+    def current():                               # SetThreadExecutionState returns the PREVIOUS state; set it back
+        prev = k32.SetThreadExecutionState(CONT) & 0xFFFFFFFF
+        k32.SetThreadExecutionState(prev)
+        return prev
+
+    with keep_awake():
+        assert current() & SYS, "system-required flag not set during the batch"
+    assert not current() & SYS, "flag not released after the batch"
+
+
 # ------------------------------------------------------------------ pure status logic (Master Plan §10.6)
 
 def test_classify_maps_every_gurobi_outcome():

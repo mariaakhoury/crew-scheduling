@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import csv
 import functools
 import glob
@@ -168,9 +169,34 @@ def _needs_run(existing: list[dict]) -> tuple[bool, Optional[dict]]:
     return False, None
 
 
+@contextlib.contextmanager
+def keep_awake():
+    """Stop Windows from sleeping while a batch runs (overnight runs). Solver work does not count as user activity,
+    so a laptop with "sleep after 60 min" would otherwise stop the night. Same mechanism media players use
+    (SetThreadExecutionState); released automatically when the batch ends or crashes. No-op on macOS/Linux.
+    The display may still turn off, which is fine. Closing the lid can still force sleep: keep it open."""
+    if sys.platform != "win32":
+        yield
+        return
+    import ctypes
+    es_continuous, es_system_required = 0x80000000, 0x00000001
+    kernel32 = ctypes.windll.kernel32
+    kernel32.SetThreadExecutionState(es_continuous | es_system_required)
+    try:
+        yield
+    finally:
+        kernel32.SetThreadExecutionState(es_continuous)
+
+
 def run_all(instance_paths: Iterable[str], methods: Iterable[str], cfg: dict, csv_path: str,
             results_dir: Optional[str] = None, log=print) -> None:
-    """Resumable batch (Master Plan §7.3). Safe to stop and restart at any moment."""
+    """Resumable batch (Master Plan §7.3). Safe to stop and restart at any moment. Keeps Windows awake while running."""
+    with keep_awake():
+        _run_all(instance_paths, methods, cfg, csv_path, results_dir, log)
+
+
+def _run_all(instance_paths: Iterable[str], methods: Iterable[str], cfg: dict, csv_path: str,
+             results_dir: Optional[str], log) -> None:
     results_dir = results_dir or os.path.dirname(os.path.abspath(csv_path))
     methods = sorted(set(methods), key=METHOD_ORDER.index)
     unknown = [m for m in methods if m not in METHODS]
