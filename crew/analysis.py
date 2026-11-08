@@ -65,7 +65,7 @@ def load_runs(csv_path: str, expected_config_hash: Optional[str] = None,
         raise ValueError(f"duplicate live rows for {sorted(set(zip(dup['instance'], dup['method'])))[:5]}")
     for col in NUMERIC:
         if col in df:
-            df[col] = pd.to_numeric(df[col].replace("", np.nan), errors="coerce")
+            df[col] = pd.to_numeric(df[col], errors="coerce").astype("float64")   # "" -> NaN; one dtype everywhere
     return df
 
 
@@ -109,6 +109,10 @@ def summary_table(df: pd.DataFrame, method: str) -> pd.DataFrame:
     features = [c for c in FEATURES if c != "class" or (rows["class"] != "").any()]
     table = rows.set_index("instance")[features + RESULTS].copy()
     table.index.name = f"{method}: instance"
+    text_cols = [c for c in table.columns if c in ("status", "class")]
+    # numeric columns as float64 and text columns as object BEFORE adding the Average/Sum rows, so no column ever
+    # changes dtype on assignment (pandas 2.x warns about that and pandas 3 forbids it)
+    table = table.astype({c: ("object" if c in text_cols else "float64") for c in table.columns})
 
     avg = {c: _mean(rows[c]) for c in ["n", "n_arcs", "objective", "best_bound", "gap_pct", "end_to_end_s"]}
     built = _built(rows)
