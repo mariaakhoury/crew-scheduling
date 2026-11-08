@@ -23,9 +23,7 @@ instructions win over both. Read the section for the member you are helping befo
 ## NOT real implementations (do not copy them into crew/)
 - `tests/standins.py` is a **test fixture**: a tiny duty list + set-partitioning model used ONLY so C's tests can
   run before B2/B3 exist. It switches to `crew.duties` / `crew.model_setpart` automatically once they exist.
-  **Model 2 is still B's task (B2, B3); Model 1 is still A's task (A1, A2).**
-- `instance._temporary_greedy` only builds generated files' reference schedules until `make_instance` is called with
-  `schedule_fn=lambda inst: crew.localsearch.heuristic(inst).schedule` (C's greedy + local search, task A4 step 5).
+  **Model 2 is still B's task (B2, B3).** Model 1 (A2) is done in `crew/model_arcflow.py`.
 
 ## Who owns what
 | Member | Files (create them with exactly these names) |
@@ -34,14 +32,14 @@ instructions win over both. Read the section for the member you are helping befo
 | B | `crew/checker.py` (B0), `crew/brute.py` (B1), `crew/duties.py` (B2), `crew/model_setpart.py` (B3), `tests/test_gate1.py` (B4), `pilot/run_pilot.py` (B5), `SELECTION.md`, `instances/final/` + `MANIFEST.csv` (B9), `qa/verify_results.py` (B8), `analysis_heuristic.py` (B12), `analysis_scaling.py` (B13), `notebook_src/model2.md` (B7) |
 | C | `crew/config.py`, `requirements.txt`, `crew/version.py`, `crew/sysinfo.py`, `crew/greedy.py` (C1), `crew/localsearch.py` (C14), `crew/integration.py` (C2), `crew/runner.py` + `crew/run_child.py` (C3, C4, C12), `crew/analysis.py` (C7, C9; A adds the A16 profile functions there by agreement) |
 
-## Interfaces (Master Plan §7.3) — status as of 8 Nov
+## Interfaces (Master Plan §7.3) — status as of 8 Nov, 14:30
 ```python
 Schedule = list[list[int]]   # duties of trip ids, increasing start time
 # instance.py (A)      load_instance, save_instance, validate_instance, load_instance_raw_errors   DONE
 #                      make_instance(name, n, m, L, W, seed, schedule_fn=None, **gen_params)      DONE (A4)
 # graph.py (A)         build_arcs(inst) -> list[tuple[int, int]]                                    DONE (A1)
 #                      big_m_bounds(inst) -> tuple[list[int], list[int]]   # (ell, U)              DONE (A1)
-# model_arcflow.py (A) build_arcflow(inst, arcs, relax=False, naive_m=False) -> (gp.Model, {"x","u","v","T","D"})  TODO
+# model_arcflow.py (A) build_arcflow(inst, arcs, relax=False, naive_m=False) -> (gp.Model, {"x","u","v","T","D"})  DONE (A2, A6)
 #                      decode_arcflow(inst, vars) -> Schedule
 # checker.py (B)       check_schedule, is_legal_duty, duty_cost                                     DONE
 # brute.py (B)         brute_force(inst, max_n=10) -> tuple[float, Schedule]                         TODO
