@@ -1,5 +1,8 @@
 # Group M crew scheduling - working repository (built on starter kit v1.6, schema 1.0)
 
+> **Teammates and AI assistants: read [`AGENTS.md`](AGENTS.md) first** — who owns which file, the exact function
+> names the runner expects, and what is only a test stand-in (`tests/standins.py` is NOT Model 2).
+
 ## Added by Member C (8 Nov), on top of starter kit v1.6
 | File | Task | What it is |
 |---|---|---|
