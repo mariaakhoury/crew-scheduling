@@ -24,13 +24,16 @@ from crew.instance import load_instance, save_instance  # noqa: E402
 
 
 def configurations(grid: dict) -> list[dict]:
-    """Expand the grid: every n with its allowed L values, every m, W = round(w_ratio * L), every seed."""
+    """Expand the grid: every n with its allowed L values, every m, W = round(w_ratio * L), every seed.
+    Names listed in grid["exclude"] are skipped (each exclusion must be justified in the grid's _comment)."""
     out = []
+    excluded = set(grid.get("exclude", []))
     for n, m, seed in itertools.product(grid["n"], grid["m"], grid["seeds"]):
         for L in grid["L_by_n"][str(n)]:
             W = int(round(grid["w_ratio"] * L))
-            out.append({"n": n, "m": m, "L": L, "W": W, "seed": seed,
-                        "name": f"rt_n{n}_m{m}_L{L}_s{seed}"})
+            name = f"rt_n{n}_m{m}_L{L}_s{seed}"
+            if name not in excluded:
+                out.append({"n": n, "m": m, "L": L, "W": W, "seed": seed, "name": name})
     return out
 
 

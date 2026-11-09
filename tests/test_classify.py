@@ -42,6 +42,28 @@ def test_neither_model_built_is_never_easy():
     assert c["class"] == "NOT_BUILT" and bool(c["SP_not_built"])
 
 
+def test_confirm_stage_keeps_only_stable_pilot_classes():
+    from pilot.classify import merge_with_pilot
+    pilot = classify_all(_rows(SPEC))
+    spec_only_buildable = {"bm": (100, 600, "TIME_LIMIT", 30.0, "COLUMN_CAP", None)}   # not re-run
+    pilot = pd.concat([pilot, classify_all(_rows({"b1": (60, 360, "OPTIMAL", 3.0, "BUILD_LIMIT", None)}))])
+    confirm = classify_all(_rows({"tl": (200, 360, "OPTIMAL", 80.0, "OPTIMAL", 2.0)}))      # TL at 30 s -> HARD
+    merged = merge_with_pilot(confirm, pilot).set_index("instance")
+    assert merged.loc["tl", "class"] == "HARD" and merged.loc["tl", "class_source"] == "confirmation"
+    assert merged.loc["e1", "class"] == "EASY" and merged.loc["md", "class"] == "MEDIUM"     # stable pilot classes
+    assert merged.loc["b1", "class"] == "UNCONFIRMED"           # MEDIUM only because SP was not built in 30 s
+    assert merged.loc["nb", "class"] == "UNCONFIRMED" and merged.loc["sp_only", "class"] == "UNCONFIRMED"
+    assert not spec_only_buildable.keys() & set(merged.index)
+
+
+def test_grid_exclusion():
+    from pilot.run_pilot import configurations
+    grid = {"n": [20], "m": [2, 3], "L_by_n": {"20": [360, 480]}, "w_ratio": 0.75, "seeds": [201],
+            "exclude": ["rt_n20_m3_L480_s201"]}
+    names = [c["name"] for c in configurations(grid)]
+    assert len(names) == 3 and "rt_n20_m3_L480_s201" not in names
+
+
 def test_confirmation_candidates_are_rechecks_plus_two_spares_per_class():
     cand = confirmation_candidates(classify_all(_rows(SPEC)))
     assert set(cand["instance"]) == {"e1", "e2", "md", "hd", "tl", "nb", "sp_only"}   # e3 = third EASY: not a spare

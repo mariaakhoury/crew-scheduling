@@ -28,7 +28,7 @@ PLAIN = ("AF", "SP")
 TIME_LIMIT_STATUSES = ("TIME_LIMIT", "TIME_LIMIT_NOSOL")
 TARGETS = {"EASY": 4, "MEDIUM": 5, "HARD": 5, "TIME_LIMIT": 6}      # selection targets, not results
 MIN_TIME_LIMIT = 3
-CLASS_ORDER = ["EASY", "MEDIUM", "HARD", "TIME_LIMIT", "NOT_BUILT", "UNUSABLE"]
+CLASS_ORDER = ["EASY", "MEDIUM", "HARD", "TIME_LIMIT", "NOT_BUILT", "UNCONFIRMED", "UNUSABLE"]
 MAX_CONFIRM_FILES = 24      # Master Plan §10.1: confirmation runs on at most 24 files (48 runs, <= 3.2 h)
 SPARES_PER_CLASS = 2
 
@@ -158,6 +158,23 @@ def confirmation_candidates(classes: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def merge_with_pilot(confirm: pd.DataFrame, pilot: pd.DataFrame) -> pd.DataFrame:
+    """Selection population for Wed 11 (B16): confirmation classes (final limits) win; an instance WITHOUT
+    confirmation rows keeps its pilot class only if that class cannot change at the final limits:
+      EASY, or MEDIUM because both models were OPTIMAL (both solved below the hard threshold, so a longer time
+      limit or build limit does not bind). A pilot MEDIUM that is a BUILD result (one model not built in 30 s)
+      may build at 120 s, so it - like every pilot HARD / TIME_LIMIT / NOT_BUILT - becomes UNCONFIRMED.
+    Column class_source says where each class comes from."""
+    conf = confirm.assign(class_source="confirmation")
+    rest = pilot[~pilot["instance"].isin(confirm["instance"])].copy()
+    stable = (rest["class"] == "EASY") | ((rest["class"] == "MEDIUM") & ~rest["reason"].str.startswith("BUILD"))
+    rest.loc[stable, "class_source"] = "pilot (both solved below the hard threshold)"
+    rest.loc[~stable, "reason"] = "not confirmed at the final limits (pilot: " + rest.loc[~stable, "class"] + ")"
+    rest.loc[~stable, "class"] = "UNCONFIRMED"
+    rest.loc[~stable, "class_source"] = "pilot only"
+    return pd.concat([conf, rest], ignore_index=True)
+
+
 def supply_report(classes: pd.DataFrame) -> list[str]:
     """Compare the class supply with the selection targets, so a shortage is visible BEFORE the freeze."""
     have = classes["class"].value_counts()
@@ -229,6 +246,10 @@ def write_selection_md(classes: pd.DataFrame, sel: pd.DataFrame, path: str, stag
         lines.append("\n**WARNING:** fewer than 15 instances - the professor's minimum is not met.")
     cols = ["instance", "class", "reason", "SP_not_built", "n", "m", "L", "W", "n_arcs", "n_duties",
             "AF_status", "AF_time", "SP_status", "SP_time"]
+    if "class_source" in classes:
+        cols.insert(2, "class_source")
+        lines.append("\nClasses come from the confirmation runs at the final limits; instances that were not re-run keep "
+                     "their pilot class only if it is EASY or a both-optimal MEDIUM (column class_source).")
     lines += ["", md_table(sel[cols]), "", "## Every candidate considered", "",
               md_table(classes.sort_values(["class", "n", "L", "instance"])[cols]), ""]
     with open(path, "w", encoding="utf-8") as fh:
@@ -243,8 +264,12 @@ def main(argv=None) -> None:
     ap.add_argument("--classes-csv", default=None, help="also write the per-instance classes as CSV")
     ap.add_argument("--selected-csv", default=None, help="write the selected instances (input of pilot.freeze)")
     ap.add_argument("--candidates-csv", default=None, help="pilot stage: write the confirmation candidates")
+    ap.add_argument("--pilot", default=None, help="confirm stage: results/pilot.csv, so EASY / both-optimal MEDIUM "
+                                                  "instances that were not re-run keep their pilot class")
     a = ap.parse_args(argv)
     classes = classify_all(load_runs(a.runs))
+    if a.stage == "confirm" and a.pilot:
+        classes = merge_with_pilot(classes, classify_all(load_runs(a.pilot)))
     if a.classes_csv:
         classes.to_csv(a.classes_csv, index=False)
     print(classes["class"].value_counts().reindex(CLASS_ORDER, fill_value=0).to_string())
