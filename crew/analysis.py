@@ -43,10 +43,12 @@ REQUIRED_METHODS = ("H", "AF", "AF+S", "SP", "SP+S")
 # ------------------------------------------------------------------ loading
 
 def load_runs(csv_path: str, expected_config_hash: Optional[str] = None,
-              manifest: Optional[dict[str, str]] = None) -> pd.DataFrame:
+              manifest: Optional[dict[str, str]] = None, allow_mixed_machines: bool = False) -> pd.DataFrame:
     """Read runs.csv, keep live rows, convert numbers, and refuse stale or ambiguous data.
     expected_config_hash: e.g. config.config_hash() for the final runs; rows with another hash are stale.
-    manifest: {instance name: sha256} from MANIFEST.csv (task B9); rows whose instance fingerprint differs are stale."""
+    manifest: {instance name: sha256} from MANIFEST.csv (task B9); rows whose instance fingerprint differs are stale.
+    allow_mixed_machines: rows from different machines are refused by default (one machine for all runs, plan 10.5);
+    pass True only for exploratory data, never for reported results."""
     df = pd.read_csv(csv_path, dtype=str, keep_default_na=False)
     df = df[df["superseded"] != "yes"].copy()
     hashes = sorted(set(df["config_hash"]))
@@ -57,6 +59,10 @@ def load_runs(csv_path: str, expected_config_hash: Optional[str] = None,
                              f"{sorted(set(stale['run_id']))[:5]}")
     elif len(hashes) > 1:
         raise ValueError(f"runs.csv mixes {len(hashes)} configuration hashes; pass expected_config_hash")
+    machines = sorted(set(df["machine_id"]) - {""})
+    if len(machines) > 1 and not allow_mixed_machines:
+        raise ValueError(f"runs.csv mixes {len(machines)} machines {machines}: all reported runs must come from one "
+                         "machine; pass allow_mixed_machines=True only for exploratory data")
     if manifest is not None:
         bad = df[[manifest.get(i) != s for i, s in zip(df["instance"], df["instance_sha256"])]]
         if len(bad):

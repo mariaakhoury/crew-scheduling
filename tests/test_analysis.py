@@ -181,3 +181,11 @@ def test_charts_on_the_real_pilot_results(tmp_path):
     assert ((bk["heuristic"] - bk["best"]) >= -0.01).all()                # heuristic never "beats" the best known
     out = save_charts(df, str(tmp_path), pd.read_csv(os.path.join(ROOT, "results", "pilot_classes.csv")))
     assert [k for k, v in out.items() if not v.endswith(".png")] == ["lp_vs_optimum"]   # pilot ran no LP methods
+
+
+def test_rows_from_two_machines_are_refused_unless_explicitly_allowed(tmp_path):
+    path = str(tmp_path / "runs.csv")
+    write_rows(path, [dict(ROWS[0], machine_id="laptop-a"), dict(ROWS[1], machine_id="laptop-b")])
+    with pytest.raises(ValueError, match="machines"):
+        load_runs(path)
+    assert len(load_runs(path, allow_mixed_machines=True)) == 2
