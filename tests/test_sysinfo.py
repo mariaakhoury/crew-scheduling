@@ -29,4 +29,5 @@ def test_machine_info_has_cpu_and_ram():
 
 def test_threads_fit_the_machine():
     assert isinstance(config.GUROBI_PARAMS["Threads"], int)
+    assert config.GUROBI_PARAMS["Threads"] <= machine_info()["physical_cores"]      # plan 10.5: threads <= cores
     assert suggested_mem_limit_gb() >= 1

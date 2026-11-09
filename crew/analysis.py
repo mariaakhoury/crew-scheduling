@@ -36,6 +36,8 @@ FEATURES = ["n", "m", "L", "W", "n_arcs", "class"]
 RESULTS = ["status", "objective", "best_bound", "gap_pct", "solver_time_s", "end_to_end_s",
            "n_vars", "n_constrs", "nodes"]
 SUM_COLUMNS = ["objective", "best_bound", "solver_time_s", "end_to_end_s", "n_vars", "n_constrs", "nodes"]
+# The professor's tables cover the solution methods (Master Plan §11.1); LP-* rows feed the strength analysis (A12)
+REQUIRED_METHODS = ("H", "AF", "AF+S", "SP", "SP+S")
 
 
 # ------------------------------------------------------------------ loading
@@ -134,11 +136,14 @@ def summary_table(df: pd.DataFrame, method: str) -> pd.DataFrame:
 
 def comparison_table(df: pd.DataFrame, methods: Optional[Iterable[str]] = None,
                      budget_s: Optional[float] = None) -> pd.DataFrame:
-    """Methods in rows. Status counts, time and gap averages/maxima, model sizes over built runs.
+    """Methods in rows (default: the required H, AF, AF+S, SP, SP+S; LP-* only if listed in `methods`).
+    Status counts, time and gap averages/maxima, model sizes over built runs.
     budget_s: equal-total-budget column "solved within budget_s end-to-end" (default GUROBI_TIME_LIMIT_S)."""
     budget_s = config.GUROBI_TIME_LIMIT_S if budget_s is None else budget_s
     out, censored = [], set()
-    for method in (list(methods) if methods is not None else _ordered_methods(df)):
+    if methods is None:                                            # default: the required methods present in df
+        methods = [m for m in _ordered_methods(df) if m in REQUIRED_METHODS]
+    for method in methods:
         rows = df[df["method"] == method]
         built = _built(rows)
         proven = rows["globally_proven"] == "yes"

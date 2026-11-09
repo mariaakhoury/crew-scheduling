@@ -1,6 +1,7 @@
 """Experiment runner (tasks C3/C4, C8). Owner: Member C.
 
     python -m crew.runner --instances instances/proto --methods H,AF,AF+S,SP,SP+S --out results/runs.csv
+    python -m crew.runner --instances-csv results/confirm_candidates.csv --methods AF,SP --out results/confirm.csv  # C15
 
 * One subprocess per (instance, method), killed after cfg["HARD_KILL_S"]: a crash or memory blow-up loses one run,
   never the night (status KILLED, with the phase it reached).
@@ -237,13 +238,30 @@ def _expand(paths: list[str]) -> list[str]:
     return out
 
 
+def instances_from_csv(csv_path: str, folder: str) -> list[str]:
+    """Instance files named in a CSV with an "instance" column (e.g. results/confirm_candidates.csv from B6),
+    resolved in `folder`, in the CSV's order. A missing file is an error, never silently skipped."""
+    with open(csv_path, newline="", encoding="utf-8") as fh:
+        names = [r["instance"] for r in csv.DictReader(fh)]
+    paths = [os.path.join(folder, name + ".json") for name in names]
+    missing = [p for p in paths if not os.path.exists(p)]
+    if missing:
+        raise FileNotFoundError(f"{len(missing)} instance files listed in {csv_path} do not exist: {missing[:3]}")
+    return paths
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Run every (instance, method) pair and append rows to runs.csv.")
-    ap.add_argument("--instances", nargs="+", required=True, help="instance files and/or folders of *.json")
+    src = ap.add_mutually_exclusive_group(required=True)
+    src.add_argument("--instances", nargs="+", help="instance files and/or folders of *.json")
+    src.add_argument("--instances-csv", help='CSV with an "instance" column, e.g. results/confirm_candidates.csv')
+    ap.add_argument("--folder", default=os.path.join("instances", "candidates"),
+                    help="where the --instances-csv files live (default: instances/candidates)")
     ap.add_argument("--methods", required=True, help="comma-separated, e.g. H,AF,AF+S,SP,SP+S")
     ap.add_argument("--out", default=os.path.join("results", "runs.csv"))
     args = ap.parse_args(argv)
-    run_all(_expand(args.instances), args.methods.split(","), config.config_snapshot(), args.out)
+    paths = instances_from_csv(args.instances_csv, args.folder) if args.instances_csv else _expand(args.instances)
+    run_all(paths, args.methods.split(","), config.config_snapshot(), args.out)
     return 0
 
 

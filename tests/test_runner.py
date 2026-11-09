@@ -2,6 +2,7 @@
     pytest -q tests/test_runner.py
 """
 import glob, importlib.util, json, os, sys, tempfile
+import pytest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
@@ -152,3 +153,16 @@ def test_missing_model_is_an_honest_error_rerun_once_then_kept():
         assert [r["status"] for r in rows] == ["ERROR", "ERROR"]          # first run + exactly one rerun
         assert [r["superseded"] for r in rows] == ["yes", "no"]          # never deleted, only marked
         assert "model_arcflow" in rows[1]["error"]
+
+
+def test_instances_from_csv_keeps_order_and_refuses_missing_files(tmp_path):
+    from crew.runner import instances_from_csv
+    folder = os.path.join(ROOT, "instances", "proto")
+    csv_path = tmp_path / "cand.csv"
+    csv_path.write_text("class,instance" + chr(10) + "EASY,P1_tt_n10_m3_L360_s0" + chr(10) + "HARD,P0_example8" + chr(10),
+                        encoding="utf-8")
+    names = [os.path.basename(p) for p in instances_from_csv(str(csv_path), folder)]
+    assert names == ["P1_tt_n10_m3_L360_s0.json", "P0_example8.json"]          # CSV order kept
+    csv_path.write_text("instance" + chr(10) + "not_there" + chr(10), encoding="utf-8")
+    with pytest.raises(FileNotFoundError):
+        instances_from_csv(str(csv_path), folder)

@@ -23,7 +23,7 @@ instructions win over both. Read the section for the member you are helping befo
 ## NOT real implementations (do not copy them into crew/)
 - `tests/standins.py` is a **test fixture**: a tiny duty list + set-partitioning model used ONLY so C's tests can
   run before B2/B3 exist. It switches to `crew.duties` / `crew.model_setpart` automatically once they exist.
-  **Model 2 is still B's task (B2, B3).** Model 1 (A2) is done in `crew/model_arcflow.py`.
+  Both models are done: Model 1 in `crew/model_arcflow.py` (A2), Model 2 in `crew/duties.py` + `crew/model_setpart.py` (B2, B3); the stand-ins now delegate to them.
 
 ## Who owns what
 | Member | Files (create them with exactly these names) |
@@ -32,7 +32,7 @@ instructions win over both. Read the section for the member you are helping befo
 | B | `crew/checker.py` (B0), `crew/brute.py` (B1), `crew/duties.py` (B2), `crew/model_setpart.py` (B3), `tests/test_gate1.py` (B4), `pilot/run_pilot.py` (B5), `SELECTION.md`, `instances/final/` + `MANIFEST.csv` (B9), `qa/verify_results.py` (B8), `analysis_heuristic.py` (B12), `analysis_scaling.py` (B13), `notebook_src/model2.md` (B7) |
 | C | `crew/config.py`, `requirements.txt`, `crew/version.py`, `crew/sysinfo.py`, `crew/greedy.py` (C1), `crew/localsearch.py` (C14), `crew/integration.py` (C2), `crew/runner.py` + `crew/run_child.py` (C3, C4, C12), `crew/analysis.py` (C7, C9; A adds the A16 profile functions there by agreement) |
 
-## Interfaces (Master Plan §7.3) — status as of 8 Nov, 14:30
+## Interfaces (Master Plan §7.3) — status as of 9 Nov
 ```python
 Schedule = list[list[int]]   # duties of trip ids, increasing start time
 # instance.py (A)      load_instance, save_instance, validate_instance, load_instance_raw_errors   DONE
@@ -42,10 +42,10 @@ Schedule = list[list[int]]   # duties of trip ids, increasing start time
 # model_arcflow.py (A) build_arcflow(inst, arcs, relax=False, naive_m=False) -> (gp.Model, {"x","u","v","T","D"})  DONE (A2, A6)
 #                      decode_arcflow(inst, vars) -> Schedule
 # checker.py (B)       check_schedule, is_legal_duty, duty_cost                                     DONE
-# brute.py (B)         brute_force(inst, max_n=10) -> tuple[float, Schedule]                         TODO
-# duties.py (B)        enumerate_duties(inst, arcs, cap, deadline) -> (list[tuple[int,...]] | None, status, count)  TODO
+# brute.py (B)         brute_force(inst, max_n=10) -> tuple[float, Schedule]                         DONE (B1)
+# duties.py (B)        enumerate_duties(inst, arcs, cap, deadline) -> (list[tuple[int,...]] | None, status, count)  DONE (B2)
 #                      count_duties(inst, arcs, cap, deadline) -> (count, stopped_early, seconds)
-# model_setpart.py (B) build_setpart(inst, duties, relax=False) -> (gp.Model, {"z"})   z keyed by index in duties  TODO
+# model_setpart.py (B) build_setpart(inst, duties, relax=False) -> (gp.Model, {"z"})   z keyed by index in duties  DONE (B3)
 #                      decode_setpart(inst, duties, vars) -> Schedule
 # greedy.py (C)        greedy_insertion(inst) -> Schedule                                           DONE
 # localsearch.py (C)   local_search(inst, schedule, max_rounds=1000) -> Schedule                    DONE
@@ -65,5 +65,6 @@ python -m venv .venv && .venv\Scripts\activate      # macOS: source .venv/bin/ac
 pip install -r requirements.txt
 pytest -q tests/                                      # before every push
 python -m crew.runner --instances instances/proto --methods H,AF,AF+S,SP,SP+S --out results/runs.csv
+python -m crew.runner --instances-csv results/confirm_candidates.csv --methods AF,SP --out results/confirm.csv   # C15
 ```
 Everyone pushes to `main`; `git pull` before starting work. Line endings are LF everywhere (`.gitattributes`).

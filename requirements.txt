@@ -10,3 +10,5 @@ pytest
 nbformat
 nbconvert
 ipykernel
+# Optional, NOT installed by default: highspy (B's development fallback when no Gurobi licence; never used for
+# reported results). Install with:  pip install highspy

@@ -109,3 +109,11 @@ def test_tables_on_real_heuristic_runs():
         c = comparison_table(df)
         assert c.loc["H", "heuristic only"] == len(PROTO) and c.loc["H", "OPTIMAL (proven)"] == 0
         assert to_display(c).shape == c.shape
+
+
+def test_lp_rows_are_left_out_of_the_comparison_table_unless_asked(tmp_path):
+    path = str(tmp_path / "runs.csv")
+    write_rows(path, ROWS[:3] + [row("i1", "LP-AF", "OPTIMAL", lp_obj=900, solver_time_s=0.1, n_vars=100)])
+    df = load_runs(path)
+    assert list(comparison_table(df).index) == ["AF"]
+    assert list(comparison_table(df, ["AF", "LP-AF"]).index) == ["AF", "LP-AF"]

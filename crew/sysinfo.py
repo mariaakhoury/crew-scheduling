@@ -13,6 +13,7 @@ import platform
 import sys
 
 MB = 1_000_000   # bytes per MB (decimal, like Windows Task Manager)
+GIB = 2 ** 30    # bytes per GiB: the unit Windows "Installed RAM" and config.MemLimit use (15.4 on a 16 GB laptop)
 
 
 def peak_memory_mb() -> float:
@@ -51,7 +52,7 @@ def machine_info() -> dict:
         "cpu": _cpu_name(),
         "physical_cores": psutil.cpu_count(logical=False),
         "logical_cores": psutil.cpu_count(logical=True),
-        "ram_gb": round(psutil.virtual_memory().total / 1e9, 1),
+        "ram_gb": round(psutil.virtual_memory().total / GIB, 1),   # GiB
         "os": f"{platform.system()} {platform.release()}",
         "python": platform.python_version(),
     }
@@ -64,6 +65,7 @@ def machine_info() -> dict:
 
 
 def suggested_mem_limit_gb() -> int:
-    """About 75% of this computer's RAM, rounded down (e.g. 15.4 GB RAM -> 11). Use for config.GUROBI_PARAMS['MemLimit']."""
+    """About 75% of this computer's RAM in GiB, rounded down (15.4 GiB -> 11). Use for config.GUROBI_PARAMS['MemLimit'];
+    rounding down and binary units keep Gurobi's limit on the safe side whichever GB definition it applies."""
     import psutil
-    return int(0.75 * psutil.virtual_memory().total / 1e9)
+    return int(0.75 * psutil.virtual_memory().total / GIB)
