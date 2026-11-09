@@ -69,3 +69,16 @@ def suggested_mem_limit_gb() -> int:
     rounding down and binary units keep Gurobi's limit on the safe side whichever GB definition it applies."""
     import psutil
     return int(0.75 * psutil.virtual_memory().total / GIB)
+
+
+def fingerprint_facts() -> dict:
+    """The facts behind runs.csv machine_id: hardware and OS identity only, each with its own fixed definition.
+
+    Deliberately independent of machine_info() (a display dict whose rounding/units may change) and of software
+    versions (Python, Gurobi: recorded in their own columns and in env.txt), so the same computer keeps the same id
+    across code changes and software updates. RAM is whole GiB of installed memory, so two laptops with the same CPU
+    model are still told apart. "v" versions the definition itself; changing it is a deliberate, one-time event."""
+    import psutil
+    return {"v": 2, "cpu": _cpu_name(), "physical_cores": psutil.cpu_count(logical=False),
+            "logical_cores": psutil.cpu_count(logical=True), "os": platform.system(),
+            "ram_gib": int(round(psutil.virtual_memory().total / GIB))}

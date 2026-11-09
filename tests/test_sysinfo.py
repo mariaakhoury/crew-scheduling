@@ -31,3 +31,19 @@ def test_threads_fit_the_machine():
     assert isinstance(config.GUROBI_PARAMS["Threads"], int)
     assert config.GUROBI_PARAMS["Threads"] <= machine_info()["physical_cores"]      # plan 10.5: threads <= cores
     assert suggested_mem_limit_gb() >= 1
+
+
+def test_machine_id_ignores_display_formatting_and_software_versions(monkeypatch):
+    import crew.sysinfo as si
+    from crew import runner
+    from crew.sysinfo import fingerprint_facts
+    runner.machine_id.cache_clear()
+    before = runner.machine_id()
+    facts = fingerprint_facts()
+    assert set(facts) == {"v", "cpu", "physical_cores", "logical_cores", "os", "ram_gib"}   # no python/gurobi
+    assert isinstance(facts["ram_gib"], int) and facts["ram_gib"] >= 1
+    # a change in how machine_info() DISPLAYS things (units, rounding, versions) must not change the id
+    monkeypatch.setattr(si, "machine_info", lambda: {"ram_gb": 999.9, "python": "9.9", "gurobi": "99"})
+    runner.machine_id.cache_clear()
+    assert runner.machine_id() == before
+    runner.machine_id.cache_clear()

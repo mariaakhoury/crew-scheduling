@@ -58,9 +58,12 @@ def _machine() -> dict:
     return sysinfo.machine_info()                  # imports gurobipy: compute once per process
 
 
+@functools.lru_cache(maxsize=1)
 def machine_id() -> str:
-    """Short, non-personal fingerprint of the hardware/software (no host or user names)."""
-    blob = json.dumps(_machine(), sort_keys=True).encode("utf-8")
+    """Short, non-personal fingerprint of the computer (no host or user names): SHA-256 of
+    sysinfo.fingerprint_facts(), i.e. CPU, cores, OS family and installed RAM in whole GiB. Stable across code
+    changes and Python/Gurobi updates; those versions have their own columns (gurobi_version) and env.txt."""
+    blob = json.dumps(sysinfo.fingerprint_facts(), sort_keys=True).encode("utf-8")
     return hashlib.sha256(blob).hexdigest()[:12]
 
 
