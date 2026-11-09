@@ -28,11 +28,11 @@ Step "4/7 generate + validate the candidate instances"
 Step "5/7 preview: density, |A|, |P|, SP buildability (no solver)"
 & $py -m pilot.preview --out results/pilot_preview.csv
 
-Step "6/7 PILOT RUNS: H, AF, AF+S, SP, SP+S at 30 s + 30 s (worst case about 1.6 h)"
+Step "6/7 PILOT RUNS: AF, AF+S, SP, SP+S at 30 s + 30 s (worst case about 1.6 h)"
 & $py -m pilot.run_pilot --grid pilot/grid.json --out results/pilot.csv
 
 Step "7/7 verify solutions + preliminary classes"
 & $py -m qa.verify_results results/pilot.csv --manifest none --instances instances/candidates
 & $py -m pilot.classify --runs results/pilot.csv --stage pilot --out results/SELECTION_pilot.md `
-    --classes-csv results/pilot_classes.csv --selected-csv results/pilot_selected.csv
-Step "DONE. Tuesday (B6): read results/pilot_classes.csv and results/SELECTION_pilot.md; candidates for the confirmation runs = preliminary HARD and TIME_LIMIT + 2 spares per class."
+    --classes-csv results/pilot_classes.csv --candidates-csv results/confirm_candidates.csv
+Step "DONE. Tuesday (B6): check results/SELECTION_pilot.md; give results/confirm_candidates.csv to C for the confirmation runs (plain AF and SP at the final limits)."

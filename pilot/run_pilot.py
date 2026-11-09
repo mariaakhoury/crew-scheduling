@@ -81,6 +81,13 @@ def main(argv=None) -> None:
     t, b = grid["pilot_time_limit_s"], grid["pilot_build_limit_s"]
     margin = config.HARD_KILL_S - config.GUROBI_TIME_LIMIT_S - config.BUILD_LIMIT_S
     cfg = config.config_snapshot(GUROBI_TIME_LIMIT_S=t, BUILD_LIMIT_S=b, HARD_KILL_S=t + b + margin)
+    # Gurobi's MemLimit must fit THIS machine (config.py: "about 75% of the run machine's RAM"). On a laptop with
+    # less RAM than config assumes, cap it for the pilot so a big model fails cleanly (MEM_LIMIT) instead of swapping.
+    from crew.sysinfo import suggested_mem_limit_gb
+    fit = suggested_mem_limit_gb()
+    if fit < cfg["GUROBI_PARAMS"]["MemLimit"]:
+        print(f"MemLimit {cfg['GUROBI_PARAMS']['MemLimit']} GB > 75% of this machine's RAM: using {fit} GB for the pilot")
+        cfg["GUROBI_PARAMS"]["MemLimit"] = fit
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
     runner.run_all(paths, grid["methods"], cfg, a.out)
     print(f"pilot rows -> {a.out}; next: python -m pilot.classify --runs {a.out} --stage pilot "

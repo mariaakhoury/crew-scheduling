@@ -28,7 +28,9 @@ PLAIN = ("AF", "SP")
 TIME_LIMIT_STATUSES = ("TIME_LIMIT", "TIME_LIMIT_NOSOL")
 TARGETS = {"EASY": 4, "MEDIUM": 5, "HARD": 5, "TIME_LIMIT": 6}      # selection targets, not results
 MIN_TIME_LIMIT = 3
-CLASS_ORDER = ["EASY", "MEDIUM", "HARD", "TIME_LIMIT", "UNUSABLE"]
+CLASS_ORDER = ["EASY", "MEDIUM", "HARD", "TIME_LIMIT", "NOT_BUILT", "UNUSABLE"]
+MAX_CONFIRM_FILES = 24      # Master Plan §10.1: confirmation runs on at most 24 files (48 runs, <= 3.2 h)
+SPARES_PER_CLASS = 2
 
 
 def md_table(df: pd.DataFrame) -> str:
@@ -79,6 +81,10 @@ def classify_instance(rows: pd.DataFrame) -> dict:
     built = {m: r for m, r in by.items() if is_built(r)}
     sp = by.get("SP")
     sp_not_built = sp is not None and not is_built(sp)
+    if not built:                         # neither plain model was built: no speed information at all
+        why = ", ".join(f"{m}:{r['status']}" for m, r in by.items())
+        return {"class": "NOT_BUILT", "reason": f"neither model built ({why}); recheck at the final limits",
+                "SP_not_built": sp_not_built}
 
     if any(str(r["status"]) in TIME_LIMIT_STATUSES for r in built.values()):
         who = [m for m, r in built.items() if str(r["status"]) in TIME_LIMIT_STATUSES]
@@ -137,10 +143,69 @@ def select(classes: pd.DataFrame) -> pd.DataFrame:
     return sel.sort_values(["n", "L", "instance"])
 
 
+def confirmation_candidates(classes: pd.DataFrame) -> pd.DataFrame:
+    """Pilot stage (Master Plan §10.1 B2, §10.3 step 2): the files to rerun with plain AF and SP at the FINAL limits.
+    = every preliminary HARD, TIME_LIMIT and NOT_BUILT instance (30 s cannot tell hard from time-limit, and a model
+    not built in 30 s may build in 120 s) + up to SPARES_PER_CLASS spares of EASY and MEDIUM, all in the rule order
+    (n, L, configuration id). If more than MAX_CONFIRM_FILES qualify, the spares are kept and the rest is cut in the
+    same order. UNUSABLE instances are never candidates (rerun the pilot row first)."""
+    ordered = classes.sort_values(["n", "L", "instance"])
+    spares = pd.concat([ordered[ordered["class"] == c].head(SPARES_PER_CLASS) for c in ("EASY", "MEDIUM")])
+    main = ordered[ordered["class"].isin(["HARD", "TIME_LIMIT", "NOT_BUILT"])]
+    main = main.head(max(0, MAX_CONFIRM_FILES - len(spares)))
+    out = pd.concat([spares, main]).sort_values(["n", "L", "instance"])
+    out["why_candidate"] = out["class"].map(lambda c: "spare" if c in ("EASY", "MEDIUM") else "recheck at 120 s")
+    return out
+
+
+def supply_report(classes: pd.DataFrame) -> list[str]:
+    """Compare the class supply with the selection targets, so a shortage is visible BEFORE the freeze."""
+    have = classes["class"].value_counts()
+    lines = ["| class | target | in this population |", "|---|---|---|"]
+    for c in ["EASY", "MEDIUM", "HARD", "TIME_LIMIT"]:
+        lines.append(f"| {c} | {TARGETS[c]} | {int(have.get(c, 0))} |")
+    return lines
+
+
+def write_candidates_md(classes: pd.DataFrame, cand: pd.DataFrame, path: str, runs_path: str) -> None:
+    """Pilot-stage SELECTION.md: the rule, the class supply, the confirmation candidates, the whole population."""
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    counts = {k: int(v) for k, v in classes["class"].value_counts().reindex(CLASS_ORDER, fill_value=0).items()}
+    lines = [
+        "# Benchmark selection (Group M) - pilot stage", "",
+        f"Source rows: `{runs_path}` (pilot limits). Written by `pilot/classify.py`. Pilot classes are PRELIMINARY:",
+        "at the pilot limit a hard instance and a time-limit instance look the same (Master Plan §10.3 step 1).", "",
+        "## Rule (fixed before the confirmation runs)",
+        "1. Classes from the plain AF and SP runs, first rule wins: NOT_BUILT (neither model built) -> TIME_LIMIT",
+        f"   (a built plain model hit the limit) -> HARD (max solver time > {config.HARD_THRESHOLD_S} s at the final",
+        "   limits) -> MEDIUM (both optimal and times differ x10, or only one model built) -> EASY.",
+        "2. Confirmation candidates = every HARD, TIME_LIMIT and NOT_BUILT instance + "
+        f"{SPARES_PER_CLASS} spares per EASY/MEDIUM class, at most {MAX_CONFIRM_FILES} files, in increasing n, L, id.",
+        "3. Final selection (after the confirmation runs): within each class take candidates in increasing n, then L,",
+        f"   then configuration id, up to the targets {TARGETS}; missing TIME_LIMIT places are filled with HARD.",
+        "4. No instance is hand-picked, replaced or removed after the final runs start.", "",
+        f"## Preliminary classes: {counts}", "", *supply_report(classes), "",
+    ]
+    short = [c for c in ("EASY", "MEDIUM") if int((classes["class"] == c).sum()) < TARGETS[c]]
+    if short:
+        lines.append(f"**WARNING:** too few {'/'.join(short)} instances in this population for the targets. "
+                     "Add smaller configurations to the candidate pool (same generator, same rule) and pilot them "
+                     "before the freeze; record the addition here.")
+    lines += ["", f"## Confirmation candidates ({len(cand)} files, {2 * len(cand)} runs: plain AF and SP at the final "
+              "limits)", "", md_table(cand[["instance", "class", "why_candidate", "reason", "SP_not_built", "n", "m",
+                                              "L", "W", "n_duties", "AF_status", "AF_time", "SP_status", "SP_time"]]),
+              "", "## Whole pilot population", "",
+              md_table(classes.sort_values(["class", "n", "L", "instance"])[
+                  ["instance", "class", "reason", "SP_not_built", "n", "m", "L", "W", "n_arcs", "n_duties",
+                   "AF_status", "AF_time", "SP_status", "SP_time"]]), ""]
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines))
+
+
 def write_selection_md(classes: pd.DataFrame, sel: pd.DataFrame, path: str, stage: str, runs_path: str) -> None:
     """SELECTION.md: the rule, every candidate considered and the chosen set (Master Plan §10.3, step 3)."""
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-    counts = sel["class"].value_counts().reindex(CLASS_ORDER, fill_value=0)
+    counts = {k: int(v) for k, v in sel["class"].value_counts().reindex(CLASS_ORDER, fill_value=0).items()}
     lines = [
         "# Benchmark selection (Group M)", "",
         f"Source rows: `{runs_path}` (stage: {stage}). Written by `pilot/classify.py`.", "",
@@ -152,7 +217,7 @@ def write_selection_md(classes: pd.DataFrame, sel: pd.DataFrame, path: str, stag
         f"   {TARGETS}. Missing TIME_LIMIT places are filled with HARD instances, and we say so.",
         "3. No instance is hand-picked, replaced or removed after the final runs start.", "",
         "## Selected instances", "",
-        f"Counts: {dict(counts)} (total {len(sel)}); SP_not_built inside the classes: {int(sel['SP_not_built'].sum())}.",
+        f"Counts: {counts} (total {len(sel)}); SP_not_built inside the classes: {int(sel['SP_not_built'].sum())}.",
     ]
     n_bad = int((classes["class"] == "UNUSABLE").sum())
     if n_bad:
@@ -177,12 +242,22 @@ def main(argv=None) -> None:
     ap.add_argument("--stage", choices=["pilot", "confirm", "final"], default="pilot")
     ap.add_argument("--classes-csv", default=None, help="also write the per-instance classes as CSV")
     ap.add_argument("--selected-csv", default=None, help="write the selected instances (input of pilot.freeze)")
+    ap.add_argument("--candidates-csv", default=None, help="pilot stage: write the confirmation candidates")
     a = ap.parse_args(argv)
     classes = classify_all(load_runs(a.runs))
     if a.classes_csv:
         classes.to_csv(a.classes_csv, index=False)
     print(classes["class"].value_counts().reindex(CLASS_ORDER, fill_value=0).to_string())
-    if a.stage != "final" and a.out:
+    if a.stage == "pilot":                                   # pilot: choose what to CONFIRM, never the benchmark
+        cand = confirmation_candidates(classes)
+        if a.out:
+            write_candidates_md(classes, cand, a.out, a.runs)
+        if a.candidates_csv:
+            cand.to_csv(a.candidates_csv, index=False)
+        print(f"{len(cand)} confirmation candidates ({2 * len(cand)} runs at the final limits)"
+              + (f" -> {a.out}" if a.out else ""))
+        return
+    if a.stage == "confirm" and a.out:
         sel = select(classes)
         write_selection_md(classes, sel, a.out, a.stage, a.runs)
         if a.selected_csv:
