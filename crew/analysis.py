@@ -211,3 +211,322 @@ def to_display(table: pd.DataFrame, decimals: int = 2) -> pd.DataFrame:
                 text = f"{float(v):,.{decimals}f}"
             shown.at[r, c] = ("≥ " + text) if (r, c) in censored and text != "–" else text
     return shown
+
+
+# ================================================================== C9: charts (Master Plan §11.1)
+# Static matplotlib figures for the notebook and slides; each function returns a Figure (no pyplot state).
+# Colour roles follow the reference data-viz palette, light mode: the MODEL is the identity (AF blue, SP orange:
+# categorical slots 1-2, documented as passing the all-pairs CVD and normal-vision floors); the WARM START is a
+# secondary encoding (hollow marker), so four methods need only two hues; run outcomes are marker SHAPES
+# (o proven, ^ time limit = censored, x not built), never colour. Ordered L values use one blue ramp,
+# steps 250/450/650 (no lighter than 250, the ordinal floor on the light surface).
+
+_INK = {"surface": "#fcfcfb", "primary": "#0b0b0b", "secondary": "#52514e", "muted": "#898781",
+        "grid": "#e1e0d9", "axis": "#c3c2b7"}
+MODEL_COLOR = {"AF": "#2a78d6", "SP": "#eb6834"}
+ORDINAL_BLUE = ("#86b6ef", "#2a78d6", "#104281")
+MIP_METHODS = ("AF", "AF+S", "SP", "SP+S")
+CLASS_ORDER = ("EASY", "MEDIUM", "HARD", "TIME_LIMIT")
+_FONT_PREFERENCE = ("Segoe UI", "Helvetica Neue", "Arial", "DejaVu Sans")
+
+
+def _font() -> dict:
+    """The first installed system sans from the preference list (no missing-font warnings), as rc settings."""
+    from matplotlib import font_manager
+    installed = {f.name for f in font_manager.fontManager.ttflist}
+    family = next((f for f in _FONT_PREFERENCE if f in installed), "DejaVu Sans")
+    return {"font.family": [family], "font.size": 9}
+
+
+def _figure(ncols: int = 1, width: float = 7.0, height: float = 4.0, sharey: bool = False):
+    from matplotlib.figure import Figure
+    fig = Figure(figsize=(width, height), dpi=150, facecolor=_INK["surface"], layout="constrained")
+    axes = fig.subplots(1, ncols, sharey=sharey, squeeze=False)[0]
+    for ax in axes:
+        ax.set_facecolor(_INK["surface"])
+        for side in ("top", "right"):
+            ax.spines[side].set_visible(False)
+        for side in ("left", "bottom"):
+            ax.spines[side].set_color(_INK["axis"])
+        ax.tick_params(colors=_INK["axis"], labelcolor=_INK["secondary"], labelsize=8)
+        ax.grid(True, axis="y", which="major", color=_INK["grid"], linewidth=0.6)
+        ax.set_axisbelow(True)
+    return fig, axes
+
+
+def _n_axis(ax, ns) -> None:
+    """Log-scale n axis with plain-number ticks at the n values present (50, 100, 200 ... not 6 x 10^1)."""
+    from matplotlib.ticker import FixedLocator, FuncFormatter, NullLocator
+    ax.set_xscale("log")
+    ax.xaxis.set_major_locator(FixedLocator(sorted({float(v) for v in ns if pd.notna(v)})))
+    ax.xaxis.set_minor_locator(NullLocator())
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
+
+
+def _labels(ax, title: str, xlabel: str, ylabel: str) -> None:
+    ax.set_title(title, loc="left", color=_INK["primary"], fontsize=10, fontweight="bold")
+    ax.set_xlabel(xlabel, color=_INK["secondary"])
+    ax.set_ylabel(ylabel, color=_INK["secondary"])
+
+
+def _method_style(method: str) -> dict:
+    """AF / SP -> hue; '+S' (warm start) -> hollow marker of the same hue."""
+    color = MODEL_COLOR[method.split("+")[0]]
+    face = _INK["surface"] if method.endswith("+S") else color
+    return {"color": color, "markerfacecolor": face, "markeredgecolor": color, "markeredgewidth": 1.4}
+
+
+def _legend(ax, handles, **kw) -> None:
+    ax.legend(handles=handles, frameon=False, fontsize=8, labelcolor=_INK["secondary"], **kw)
+
+
+def _method_handles(methods) -> list:
+    from matplotlib.lines import Line2D
+    return [Line2D([], [], linestyle="none", marker="o", markersize=7, label=m, **_method_style(m)) for m in methods]
+
+
+def _shape_handles(entries) -> list:
+    from matplotlib.lines import Line2D
+    return [Line2D([], [], linestyle="none", marker=mk, markersize=7, color=_INK["muted"], label=lab)
+            for mk, lab in entries]
+
+
+def best_known(df: pd.DataFrame) -> pd.DataFrame:
+    """Per instance: best known solution value (min over checked MIP incumbents AND the heuristic schedule, which the
+    runner also checks), whether the optimum is proven, the best valid lower bound (max of MIP best bounds and LP
+    relaxation values), and the heuristic cost. Index = instance."""
+    mip = df[df["method"].isin(MIP_METHODS)]
+    feasible = mip[mip["feasible_checked"] == "yes"]
+    lp = df[df["method"].str.startswith("LP-")]
+    bounds = pd.concat([mip[["instance", "best_bound"]].rename(columns={"best_bound": "b"}),
+                        lp[["instance", "lp_obj"]].rename(columns={"lp_obj": "b"})])
+    first = df.groupby("instance")[["n", "m", "L"]].first()
+    heuristic = df.groupby("instance")["heuristic_cost"].min()
+    best_mip = feasible.groupby("instance")["objective"].min()
+    out = first.assign(
+        best=pd.concat([best_mip, heuristic], axis=1).min(axis=1),   # the heuristic schedule is a checked solution too
+        proven=(mip.assign(p=mip["globally_proven"] == "yes").groupby("instance")["p"].any()),
+        bound=bounds.groupby("instance")["b"].max(),
+        heuristic=heuristic,
+    )
+    out["proven"] = out["proven"].astype("boolean").fillna(False).astype(bool)
+    return out
+
+
+def chart_time_vs_n(df: pd.DataFrame, time_col: str = "solver_time_s"):
+    """Solver time (log) against n for the four MIP methods. Time-limit runs are drawn as ^ at their stopped time
+    (true time is at least that); runs whose model was not built are drawn as x in a band above the limit."""
+    from matplotlib import rc_context
+    rows = df[df["method"].isin(MIP_METHODS)]
+    if rows.empty:
+        raise ValueError("no MIP rows to chart")
+    limit = float(rows["time_limit_s"].max())
+    band = limit * 4
+    shift = {"AF": 0.93, "AF+S": 0.97, "SP": 1.03, "SP+S": 1.07}        # side by side on the log x-axis
+    methods = [m for m in MIP_METHODS if m in set(rows["method"])]
+    counts = {"solved": 0, "time_limit": 0, "not_built": 0, "other": 0}
+    with rc_context(_font()):
+        fig, (ax,) = _figure()
+        for method in methods:
+            r = rows[rows["method"] == method]
+            x = r["n"] * shift[method]
+            solved = r["globally_proven"] == "yes"
+            timed = r["status"].isin(CENSORED_STATUSES)
+            unbuilt = r["status"].isin(NOT_BUILT)
+            st = _method_style(method)
+            ax.plot(x[solved], r.loc[solved, time_col], linestyle="none", marker="o", markersize=6, **st)
+            ax.plot(x[timed], r.loc[timed, time_col], linestyle="none", marker="^", markersize=7, **st)
+            ax.plot(x[unbuilt], [band] * int(unbuilt.sum()), linestyle="none", marker="x", markersize=7,
+                    color=st["color"], markeredgewidth=1.6)
+            counts["solved"] += int(solved.sum())
+            counts["time_limit"] += int(timed.sum())
+            counts["not_built"] += int(unbuilt.sum())
+            counts["other"] += int((~(solved | timed | unbuilt)).sum())
+        _n_axis(ax, rows["n"])
+        ax.set_yscale("log")
+        ax.set_ylim(top=band * 2.2)
+        x0 = ax.get_xlim()[0]
+        ax.axhline(limit, color=_INK["axis"], linewidth=1)
+        ax.text(x0, limit * 1.12, f" time limit {limit:g} s", color=_INK["muted"], fontsize=8)
+        ax.text(x0, band * 1.15, " not built", color=_INK["muted"], fontsize=8)
+        which = "Solver" if time_col == "solver_time_s" else "End-to-end"
+        _labels(ax, f"{which} time grows with n; SP is fast when it can be built",
+                "trips n (log scale)", "seconds (log scale)")
+        _legend(ax, _method_handles(methods)
+                + _shape_handles([("o", "proven optimal"), ("^", "time limit (≥)"), ("x", "not built")]),
+                loc="upper left", bbox_to_anchor=(1.01, 1), borderaxespad=0)
+    fig.crew_counts = counts
+    return fig
+
+
+def _class_series(df: pd.DataFrame, classes=None) -> pd.Series:
+    if classes is None:
+        s = df.groupby("instance")["class"].first()
+    elif isinstance(classes, pd.DataFrame):
+        s = classes.set_index("instance")["class"]
+    else:
+        s = pd.Series(classes)
+    s = s[s.notna() & (s.astype(str) != "")]
+    if s.empty:
+        raise ValueError("no instance classes: pass classes= (e.g. results/pilot_classes.csv) or fill runs.csv 'class'")
+    return s
+
+
+def chart_gap_by_class(df: pd.DataFrame, classes=None):
+    """Final MIP gap % of every run with an incumbent, by instance class and method. Runs without an incumbent are
+    counted under the class label, never plotted as 0 % or 100 %."""
+    from matplotlib import rc_context
+    cls = _class_series(df, classes)
+    rows = df[df["method"].isin(MIP_METHODS)].assign(cls=lambda d: d["instance"].map(cls)).dropna(subset=["cls"])
+    if rows.empty:
+        raise ValueError("no MIP rows for the classified instances")
+    order = [c for c in CLASS_ORDER if c in set(rows["cls"])] + sorted(set(rows["cls"]) - set(CLASS_ORDER))
+    offset = {"AF": -0.27, "AF+S": -0.09, "SP": 0.09, "SP+S": 0.27}
+    methods = [m for m in MIP_METHODS if m in set(rows["method"])]
+    with rc_context(_font()):
+        fig, (ax,) = _figure()
+        for method in methods:
+            r = rows[(rows["method"] == method) & rows["gap_pct"].notna()]
+            ax.plot([order.index(c) + offset[method] for c in r["cls"]], r["gap_pct"], linestyle="none",
+                    marker="o", markersize=6, **_method_style(method))
+        ticks = []
+        for c in order:
+            g = rows[rows["cls"] == c]
+            no_inc = int((g["status"] == "TIME_LIMIT_NOSOL").sum())
+            not_built = int(g["status"].isin(NOT_BUILT).sum())
+            k = g["instance"].nunique()
+            extra = "".join([f"\n{no_inc} runs without incumbent" if no_inc else "",
+                             f"\n{not_built} runs not built" if not_built else ""])
+            ticks.append(f"{c}\n{k} instance{'' if k == 1 else 's'}{extra}")
+        ax.set_xticks(range(len(order)), ticks)
+        ax.set_ylim(bottom=0)
+        _labels(ax, "Final gap by instance class (runs with an incumbent)", "", "gap % = (value − bound) / value")
+        _legend(ax, _method_handles(methods), loc="upper left")
+    return fig
+
+
+def chart_lp_vs_optimum(df: pd.DataFrame):
+    """LP relaxation value as % of the proven optimum, LP-AF vs LP-SP (the visual form of Theorem 3).
+    Only instances with a proven optimum are shown."""
+    from matplotlib import rc_context
+    lp = df[df["method"].isin(("LP-AF", "LP-SP")) & df["lp_obj"].notna()]
+    if lp.empty:
+        raise ValueError("no LP-AF / LP-SP rows: run those methods first")
+    bk = best_known(df)
+    opt = bk.loc[bk["proven"], "best"]
+    inst = sorted(set(lp["instance"]) & set(opt.index), key=lambda i: (bk.at[i, "n"], i))
+    if not inst:
+        raise ValueError("no instance has both an LP value and a proven optimum")
+    with rc_context(_font()):
+        fig, (ax,) = _figure()
+        for method in ("LP-AF", "LP-SP"):
+            r = lp[lp["method"] == method].set_index("instance")
+            xs = [k for k, i in enumerate(inst) if i in r.index]
+            ys = [100 * r.at[inst[k], "lp_obj"] / opt[inst[k]] for k in xs]
+            ax.plot(xs, ys, linestyle="none", marker="o", markersize=6, label=method,
+                    **_method_style(method.replace("LP-", "")))
+        ax.axhline(100, color=_INK["axis"], linewidth=1)
+        ax.set_xticks(range(len(inst)), [f"n={bk.at[i, 'n']:.0f}" for i in inst], rotation=60, ha="right")
+        _labels(ax, "LP relaxation as % of the optimum: SP's bound is much tighter", "", "LP value / optimum (%)")
+        _legend(ax, ax.get_legend_handles_labels()[0], loc="lower right")
+    return fig
+
+
+def chart_duties(df: pd.DataFrame):
+    """Number of legal duties |P| (log) against n, one line per L, one panel per m. Points where enumeration
+    stopped (cap or build limit) are lower bounds (^)."""
+    from matplotlib import rc_context
+    from matplotlib.lines import Line2D
+    sp = df[df["method"].isin(("SP", "SP+S", "LP-SP")) & df["n_duties"].notna()]
+    if sp.empty:
+        raise ValueError("no set-partitioning rows with a duty count")
+    per = (sp.assign(lower=sp["enumeration_complete"] != "yes")
+             .groupby("instance").agg(n=("n", "first"), m=("m", "first"), L=("L", "first"),
+                                      duties=("n_duties", "max"), lower=("lower", "all")))
+    ms, Ls = sorted(per["m"].unique()), sorted(per["L"].unique())
+    if len(Ls) > len(ORDINAL_BLUE):
+        raise ValueError(f"{len(Ls)} L values: more than {len(ORDINAL_BLUE)} ordered steps; facet by L instead")
+    steps = [ORDINAL_BLUE[-1]] if len(Ls) == 1 else (
+        [ORDINAL_BLUE[0], ORDINAL_BLUE[-1]] if len(Ls) == 2 else list(ORDINAL_BLUE))
+    colors = dict(zip(Ls, steps))
+    with rc_context(_font()):
+        fig, axes = _figure(ncols=len(ms), width=3.6 * len(ms) + 1.4, sharey=True)
+        for ax, m in zip(axes, ms):
+            for L in Ls:
+                r = per[(per["m"] == m) & (per["L"] == L)].sort_values("n")
+                if r.empty:
+                    continue
+                c = colors[L]
+                done, low = r[~r["lower"]], r[r["lower"]]
+                ax.plot(done["n"], done["duties"], color=c, linewidth=1.5)      # lower bounds are not joined
+                ax.plot(done["n"], done["duties"], linestyle="none", marker="o", markersize=6, color=c,
+                        markeredgecolor=_INK["surface"], markeredgewidth=1)
+                ax.plot(low["n"], low["duties"], linestyle="none", marker="^", markersize=7, color=c,
+                        markerfacecolor=_INK["surface"], markeredgewidth=1.4)
+            _n_axis(ax, per["n"])
+            ax.set_yscale("log")
+            ax.axhline(config.COLUMN_CAP, color=_INK["axis"], linewidth=1)
+            ax.text(ax.get_xlim()[0], config.COLUMN_CAP * 1.25, f" column cap {config.COLUMN_CAP:,}",
+                    color=_INK["muted"], fontsize=8)
+            _labels(ax, f"m = {m:.0f} terminals", "trips n (log scale)",
+                    "legal duties |P| (log scale)" if m == ms[0] else "")
+        fig.suptitle("Longer duty limits L multiply the number of duties SP must list", x=0.01, ha="left",
+                     color=_INK["primary"], fontsize=10, fontweight="bold")
+        handles = [Line2D([], [], color=colors[L], linewidth=1.5, label=f"L = {L:.0f} min") for L in Ls]
+        _legend(axes[-1], handles + _shape_handles([("o", "complete count"), ("^", "stopped early (≥)")]),
+                loc="upper left", bbox_to_anchor=(1.01, 1), borderaxespad=0)
+    return fig
+
+
+def chart_heuristic_gap(df: pd.DataFrame):
+    """Heuristic cost above the optimum, by n. Proven optimum: a dot. Otherwise the true gap lies between the gap
+    to the best incumbent and the gap to the best lower bound: drawn as a range with a hollow dot at the low end."""
+    from matplotlib import rc_context
+    from matplotlib.lines import Line2D
+    bk = best_known(df).dropna(subset=["heuristic", "best"])
+    if bk.empty:
+        raise ValueError("no instance has both a heuristic cost and a checked MIP incumbent")
+    lo = 100 * (bk["heuristic"] - bk["best"]) / bk["best"]
+    hi = 100 * (bk["heuristic"] - bk["bound"]) / bk["bound"]
+    color = MODEL_COLOR["AF"]
+    proven, open_ = bk["proven"], ~bk["proven"]
+    with rc_context(_font()):
+        fig, (ax,) = _figure()
+        for i in bk.index[open_]:
+            if pd.notna(hi[i]):
+                ax.plot([bk.at[i, "n"]] * 2, [lo[i], hi[i]], color=color, linewidth=1.5, alpha=0.6)
+        ax.plot(bk.loc[proven, "n"], lo[proven], linestyle="none", marker="o", markersize=6, color=color,
+                markeredgecolor=_INK["surface"], markeredgewidth=1)
+        ax.plot(bk.loc[open_, "n"], lo[open_], linestyle="none", marker="o", markersize=6, color=color,
+                markerfacecolor=_INK["surface"], markeredgewidth=1.4)
+        ax.axhline(0, color=_INK["axis"], linewidth=1)
+        _n_axis(ax, bk["n"])
+        _labels(ax, "How far greedy + local search is from the optimum", "trips n (log scale)",
+                "heuristic cost above optimum (%)")
+        _legend(ax, [Line2D([], [], linestyle="none", marker="o", markersize=6, color=color,
+                            label="vs proven optimum"),
+                     Line2D([], [], color=color, linewidth=1.5, alpha=0.6, marker="o", markersize=6,
+                            markerfacecolor=_INK["surface"], label="not proven: true gap lies in this range")],
+                loc="upper left")
+    fig.crew_points = {"proven": int(proven.sum()), "open": int(open_.sum())}
+    return fig
+
+
+def save_charts(df: pd.DataFrame, outdir: str, classes=None) -> dict[str, str]:
+    """Render every chart the data supports to PNG in outdir. Returns {name: path or 'skipped: reason'}."""
+    import os
+    os.makedirs(outdir, exist_ok=True)
+    makers = {"time_vs_n": lambda: chart_time_vs_n(df), "gap_by_class": lambda: chart_gap_by_class(df, classes),
+              "lp_vs_optimum": lambda: chart_lp_vs_optimum(df), "duties_vs_n_L": lambda: chart_duties(df),
+              "heuristic_gap": lambda: chart_heuristic_gap(df)}
+    out = {}
+    for name, make in makers.items():
+        try:
+            fig = make()
+        except ValueError as exc:
+            out[name] = f"skipped: {exc}"
+            continue
+        path = os.path.join(outdir, name + ".png")
+        fig.savefig(path, facecolor=_INK["surface"])
+        out[name] = path
+    return out

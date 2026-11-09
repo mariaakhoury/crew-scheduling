@@ -117,3 +117,67 @@ def test_lp_rows_are_left_out_of_the_comparison_table_unless_asked(tmp_path):
     df = load_runs(path)
     assert list(comparison_table(df).index) == ["AF"]
     assert list(comparison_table(df, ["AF", "LP-AF"]).index) == ["AF", "LP-AF"]
+
+
+# ------------------------------------------------------------------ C9 charts
+
+def _chart_rows():
+    return ROWS[:6] + [
+        row("i1", "SP+S", "OPTIMAL", n=50, proven="yes", objective=1000, best_bound=1000, gap_pct=0, solver_time_s=1,
+            heuristic_cost=1100, feasible_checked="yes", n_duties=40, enumeration_complete="yes", time_limit_s=120),
+        row("i2", "AF+S", "TIME_LIMIT", n=100, objective=1950, best_bound=1800, gap_pct=7.7, solver_time_s=120,
+            heuristic_cost=1900, feasible_checked="yes", time_limit_s=120),
+        row("i1", "LP-AF", "OPTIMAL", n=50, lp_obj=900), row("i1", "LP-SP", "OPTIMAL", n=50, lp_obj=1000),
+    ]
+
+
+@pytest.fixture
+def cdf(tmp_path):
+    rows = [dict(r, feasible_checked=r.get("feasible_checked") or ("yes" if r["objective"] != "" else ""),
+                 time_limit_s=r.get("time_limit_s") or 120) for r in _chart_rows()]
+    path = tmp_path / "runs.csv"
+    write_rows(str(path), rows)
+    return load_runs(str(path))
+
+
+def test_best_known_counts_the_heuristic_schedule_as_a_solution(cdf):
+    from crew.analysis import best_known
+    bk = best_known(cdf)
+    assert bk.at["i1", "best"] == 1000 and bool(bk.at["i1", "proven"])
+    # i2: the heuristic (1900) beats every MIP incumbent (2000, 1950) -> best known = 1900, never a negative gap
+    assert bk.at["i2", "best"] == 1900 and not bool(bk.at["i2", "proven"])
+    assert bk.at["i1", "bound"] == 1000                                   # max of MIP bounds and LP values
+
+
+def test_every_chart_renders_and_counts_runs_correctly(cdf, tmp_path):
+    from crew.analysis import (chart_duties, chart_gap_by_class, chart_heuristic_gap, chart_lp_vs_optimum,
+                               chart_time_vs_n, save_charts)
+    fig = chart_time_vs_n(cdf)
+    assert fig.crew_counts == {"solved": 3, "time_limit": 3, "not_built": 1, "other": 1}   # i3 SP is CHECK_FAILED
+    chart_gap_by_class(cdf, {"i1": "EASY", "i2": "TIME_LIMIT", "i3": "TIME_LIMIT"})
+    chart_lp_vs_optimum(cdf)
+    chart_duties(cdf)
+    assert chart_heuristic_gap(cdf).crew_points == {"proven": 1, "open": 1}
+    out = save_charts(cdf, str(tmp_path / "charts"), {"i1": "EASY", "i2": "TIME_LIMIT"})
+    assert all(v.endswith(".png") and os.path.getsize(v) > 10_000 for v in out.values()), out
+
+
+def test_charts_refuse_missing_inputs_with_a_clear_reason(df):
+    from crew.analysis import chart_gap_by_class, chart_lp_vs_optimum
+    with pytest.raises(ValueError, match="LP"):
+        chart_lp_vs_optimum(df)
+    with pytest.raises(ValueError, match="classes"):
+        chart_gap_by_class(df)                                            # runs.csv 'class' is still empty
+
+
+def test_charts_on_the_real_pilot_results(tmp_path):
+    pilot = os.path.join(ROOT, "results", "pilot.csv")
+    if not os.path.exists(pilot):
+        pytest.skip("results/pilot.csv not in this checkout")
+    import pandas as pd
+    from crew.analysis import best_known, save_charts
+    df = load_runs(pilot)
+    bk = best_known(df).dropna(subset=["heuristic", "best"])
+    assert ((bk["heuristic"] - bk["best"]) >= -0.01).all()                # heuristic never "beats" the best known
+    out = save_charts(df, str(tmp_path), pd.read_csv(os.path.join(ROOT, "results", "pilot_classes.csv")))
+    assert [k for k, v in out.items() if not v.endswith(".png")] == ["lp_vs_optimum"]   # pilot ran no LP methods
