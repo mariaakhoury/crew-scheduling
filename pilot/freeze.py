@@ -27,11 +27,11 @@ from crew.instance import instance_features, load_instance  # noqa: E402
 
 
 def sha256(path: str) -> str:
-    h = hashlib.sha256()
-    with open(path, "rb") as fh:
-        for block in iter(lambda: fh.read(1 << 20), b""):
-            h.update(block)
-    return h.hexdigest()
+    """The runner's instance fingerprint (crew.version.file_sha256: line endings normalised), so MANIFEST.csv matches
+    runs.csv's instance_sha256 on Windows and Mac/Linux alike. A raw-byte hash would differ for a CRLF copy of the
+    same file and make every final row look stale."""
+    from crew.version import file_sha256
+    return file_sha256(path)
 
 
 def freeze(selection: pd.DataFrame, src: str, dst: str) -> pd.DataFrame:
