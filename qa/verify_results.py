@@ -91,8 +91,16 @@ def verify(runs_path: str, manifest_path: str | None, inst_dir: str) -> list[str
             problems.append(f"Q13: {tag} has an objective but no solution file")
             continue
         if r["instance"] not in cache:
-            cache[r["instance"]] = load_instance(os.path.join(inst_dir, r["instance"] + ".json"))
+            path = os.path.join(inst_dir, r["instance"] + ".json")
+            try:
+                cache[r["instance"]] = load_instance(path)
+            except (OSError, ValueError) as exc:          # missing or invalid file: report it, keep checking the rest
+                cache[r["instance"]] = None
+                problems.append(f"Q13: instance file for {r['instance']} cannot be loaded ({type(exc).__name__}) - "
+                                f"its rows are not verified")
         inst = cache[r["instance"]]
+        if inst is None:
+            continue
         res = check_schedule(inst, load_solution(sol_path), float(r["objective"]))
         if not res.ok:
             problems.append(f"Q13: {tag} solution rejected: {res.errors[:3]}")
@@ -117,10 +125,27 @@ def main(argv=None) -> None:
     ap.add_argument("runs")
     ap.add_argument("--manifest", default=os.path.join(ROOT, "instances", "final", "MANIFEST.csv"))
     ap.add_argument("--instances", default=os.path.join(ROOT, "instances", "final"))
+    ap.add_argument("--report", default=None, help="also write a markdown report (evidence for Gate 3: Q13, Q23)")
     a = ap.parse_args(argv)
     problems = verify(a.runs, a.manifest, a.instances)
     for p in problems:
         print(p)
+    if a.report:
+        df = pd.read_csv(a.runs)
+        if "superseded" in df.columns:
+            df = df[~df["superseded"].map(_truthy)]
+        n_sol = int(df["objective"].notna().sum() - df["method"].astype(str).str.startswith("LP").sum())
+        lines = [f"# B8 result verification - `{a.runs}`", "",
+                 f"- Rows checked: {len(df)} (non-superseded); with a schedule: {max(n_sol, 0)}; "
+                 f"OPTIMAL rows (Q23 certificate): {int((df['status'] == 'OPTIMAL').sum())}.",
+                 f"- Manifest: `{a.manifest}`" + ("" if os.path.exists(str(a.manifest)) else " (not found: "
+                                                   "fingerprints not compared)"),
+                 f"- Statuses: {df['status'].value_counts().to_dict()}",
+                 f"- **Result: {'PASS' if not problems else f'{len(problems)} problem(s)'}**", ""]
+        lines += [f"- {p}" for p in problems]
+        os.makedirs(os.path.dirname(os.path.abspath(a.report)), exist_ok=True)
+        with open(a.report, "w", encoding="utf-8") as fh:
+            fh.write("\n".join(lines) + "\n")
     print(f"verify_results: {'PASS' if not problems else f'{len(problems)} problem(s)'}")
     sys.exit(1 if problems else 0)
 
