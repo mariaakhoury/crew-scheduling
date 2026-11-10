@@ -199,7 +199,7 @@ def load_instance(path: str) -> Instance:
 
 def save_instance(inst: Instance, path: str) -> None:
     """Write JSON in schema 1.0 (indent=1, documented field order). Round-trips with load_instance."""
-    with open(path, "w", encoding="utf-8") as fh:
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(_to_dict(inst), fh, indent=1)
         fh.write("\n")
 
