@@ -69,6 +69,23 @@ def test_reports_write_their_files(tmp_path):
         assert (tmp_path / f).exists(), f
 
 
+def test_reports_keep_the_notebook_chart_backend(tmp_path):
+    """Inside the notebook the backend is 'inline'; the reports must not switch it (or later charts vanish)."""
+    import subprocess
+    runs = tmp_path / "runs.csv"
+    RUNS.to_csv(runs, index=False)
+    code = ("import matplotlib, sys; sys.path.insert(0, r'%s')\n"
+            "matplotlib.use('module://matplotlib_inline.backend_inline')\n"
+            "from crew import analysis_heuristic as AH, analysis_scaling as AS\n"
+            "AH.report(r'%s', None, r'%s'); AS.report(r'%s', None, r'%s')\n"
+            "import matplotlib.pyplot as plt\n"
+            "assert 'inline' in matplotlib.get_backend(), matplotlib.get_backend()\n"
+            "assert not plt.get_fignums(), 'report figures must be closed'\n"
+            % (ROOT, runs, tmp_path / "b12", runs, tmp_path / "b13"))
+    r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr[-800:]
+
+
 def test_verify_reports_missing_instance_instead_of_crashing(tmp_path):
     from qa.verify_results import verify
     sol = tmp_path / "solutions"

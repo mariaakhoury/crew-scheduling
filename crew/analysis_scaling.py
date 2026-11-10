@@ -139,14 +139,16 @@ def h8_features(df: pd.DataFrame, features: pd.DataFrame | None = None) -> pd.Da
 
 
 def report(runs_csv: str, features_csv: str | None, out_dir: str) -> dict:
-    """Write the three B13 charts, the hypothesis checks and a markdown summary to out_dir."""
-    import matplotlib
-    matplotlib.use("Agg")
+    """Write the three B13 charts, the hypothesis checks and a markdown summary to out_dir.
+    Does NOT change the matplotlib backend (safe inside the notebook); each figure is closed after saving."""
+    import matplotlib.pyplot as plt
     df = pd.read_csv(runs_csv)
     feats = pd.read_csv(features_csv) if features_csv and os.path.exists(features_csv) else None
     os.makedirs(out_dir, exist_ok=True)
     for fn, name in ((plot_sizes, "sizes"), (plot_build_cost, "build_cost"), (plot_status_map, "status_map")):
-        fn(df).savefig(os.path.join(out_dir, f"{name}.png"), dpi=150, bbox_inches="tight")
+        fig = fn(df)
+        fig.savefig(os.path.join(out_dir, f"{name}.png"), dpi=150, bbox_inches="tight")
+        plt.close(fig)
     h4, h5, h8 = h4_build_share(df), h5_verdict(df), h8_features(df, feats)
     h8.to_csv(os.path.join(out_dir, "h8_correlations.csv"))
     lines = [f"# B13 scalability - source `{runs_csv}`", "",
@@ -168,6 +170,8 @@ def main(argv=None) -> None:
     ap.add_argument("--features", default=os.path.join("instances", "final", "MANIFEST.csv"))
     ap.add_argument("--out", default=os.path.join("results", "b13"))
     a = ap.parse_args(argv)
+    import matplotlib
+    matplotlib.use("Agg")                      # command line only: no screen needed
     r = report(a.runs, a.features, a.out)
     print(f"B13 written to {a.out}; H4 {r['H4']['verdict']}, H5 {r['H5']['verdict']}")
 

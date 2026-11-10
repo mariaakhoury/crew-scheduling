@@ -220,9 +220,9 @@ def plot_paired(df: pd.DataFrame, ax=None):
 
 
 def report(runs_csv: str, heuristic_dir: str | None, out_dir: str) -> dict:
-    """Write every B12 table (CSV), the chart (PNG) and a short markdown summary to out_dir; return the H6 verdict."""
-    import matplotlib
-    matplotlib.use("Agg")
+    """Write every B12 table (CSV), the chart (PNG) and a short markdown summary to out_dir; return the H6 verdict.
+    Does NOT change the matplotlib backend (safe inside the notebook); the figure is closed after saving."""
+    import matplotlib.pyplot as plt
     df = pd.read_csv(runs_csv)
     os.makedirs(out_dir, exist_ok=True)
     q = heuristic_quality(df, heuristic_dir)
@@ -231,7 +231,9 @@ def report(runs_csv: str, heuristic_dir: str | None, out_dir: str) -> dict:
     p.to_csv(os.path.join(out_dir, "paired_effect.csv"), index=False)
     s.to_csv(os.path.join(out_dir, "summary_paired.csv"), index=False)
     nh.to_csv(os.path.join(out_dir, "no_help.csv"), index=False)
-    plot_paired(df).savefig(os.path.join(out_dir, "paired_effect.png"), dpi=150, bbox_inches="tight")
+    fig = plot_paired(df)
+    fig.savefig(os.path.join(out_dir, "paired_effect.png"), dpi=150, bbox_inches="tight")
+    plt.close(fig)
     proven = q[q["gap_kind"] == "exact"]
     lines = [f"# B12 heuristic contribution - source `{runs_csv}`", "",
              f"- Instances with a heuristic: {len(q)}; proven optimum known for {len(proven)}.",
@@ -255,6 +257,8 @@ def main(argv=None) -> None:
     ap.add_argument("--heuristic", default=os.path.join("results", "heuristic"))
     ap.add_argument("--out", default=os.path.join("results", "b12"))
     a = ap.parse_args(argv)
+    import matplotlib
+    matplotlib.use("Agg")                      # command line only: no screen needed
     v = report(a.runs, a.heuristic, a.out)
     print(f"B12 written to {a.out}; H6: {v['verdict']}")
 

@@ -111,6 +111,9 @@ This covers the professor's three required groups:
 
 ### Limitations
 - One generator family: conclusions hold for rotation timetables of this kind, not for every real network.
+- One random timetable (seed 201) per configuration of n, m and L: a single instance per configuration can be
+  luckier or unluckier than its configuration's average, so results are read across the whole benchmark, not
+  from one instance.
 - W = 0.75 L ties the two duty limits, so their effects cannot be separated.
 - Costs are fixed, so the cost structure's effect on difficulty is not measured.
 - Pilot classes come from a different laptop than the final runs; the final classes are recomputed from the final
