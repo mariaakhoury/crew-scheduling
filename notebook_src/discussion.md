@@ -68,6 +68,46 @@ improved by a median of 7 %, on SP the solver time by 9 %. Where SP solved at th
 to add. The bound, not the incumbent, keeps AF's gap open, so a better start cannot close it. Local search improved
 greedy on 9 of 24 candidates.
 
+### H6 - the MIP start helps AF more than SP (C)
+
+**Rule (§10.9).** Confirmed if the median AF improvement (AF+S vs AF) is larger than the median SP improvement
+(SP+S vs SP), measured on time to first incumbent, solver time, and final gap on time-limit instances.
+
+**Why we expected it.** A start helps a MIP by giving it a good incumbent early. Model 2's LP bound is (almost)
+the optimum, so Gurobi usually finds and proves the optimum at the root node: a start has little left to do.
+Model 1's LP is weak, so Gurobi searches a long time for good solutions, and a ready-made one is worth more.
+
+**Heuristic quality [H-preview].** Greedy + local search on the 24 confirmation candidates: under 0.5 s each up to
+n = 500, every schedule passes the checker; median 2.5 % above the optimum where SP proves it (max 11.3 %, n = 50
+with L = 600); local search improved greedy on 9 of 24 (by 0.6-5.3 %). On two of the largest candidates (n = 400
+and n = 500) the heuristic schedule is cheaper than plain AF's incumbent after 120 s (−2.2 %, −1.4 %) *[confirm]*.
+
+**Verdict: _after Gate 3_.** Preliminary reading *[pilot]*: the start moved AF's first incumbent forward more than
+SP's (median time ratio 0.12 vs 0.27) and improved AF's time-limit gap by a median of 7 %; SP gained 9 % solver
+time where it was not already solved at the root. If the final runs agree, H6 is **confirmed**, with the caveat
+that the start improves only the incumbent side of AF's gap; the bound side, which dominates it, is untouched.
+List every instance where the start did not help (or hurt) and why.
+
+### Conclusions (C11)
+
+> Draft from the confirmation runs *[confirm]*; rewrite every number from `results/runs.csv` after Gate 3.
+
+1. **Model 2 wins whenever it can be built.** It proved the optimum on every candidate it could build (14 of 24),
+   mostly in under a second, because its LP bound is the optimum or very close to it.
+2. **Model 1 is the fallback that always runs.** It was built on every candidate, but proved optimality only on the
+   smallest ones (5 of 24); from n = 50 on it stopped at the time limit with proven gaps of 5-27 %, growing with n.
+   Its gap is mostly a weak bound, not a bad schedule: where SP knows the optimum, AF's incumbent was within 1.7 %.
+3. **The menu explodes.** Model 2 could not be built on 10 of 24 candidates (more than 2,000,000 duties): every
+   candidate with n ≥ 300, and already n = 100 when duties may last 10 hours.
+4. **The heuristic is cheap and useful as a start, not as an answer.** Half a second, always legal, a few percent
+   above the optimum; given as a complete start it [H6 verdict].
+5. **Practical rule for this problem family:** count the duties first; if the menu fits, solve Model 2; otherwise
+   solve Model 1 with the heuristic start and report its proven gap.
+
+**What the group learned.** A stronger formulation is worth more than a faster solver, until it no longer fits in
+memory; a "gap" is a statement about the bound as much as about the schedule; and every result we report is
+checked by code that shares nothing with the models (the independent checker).
+
 ### Negative and surprising results (all members)
 
 | Result | Explanation |
