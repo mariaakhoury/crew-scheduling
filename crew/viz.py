@@ -58,7 +58,7 @@ def gantt(inst: Instance, schedule: list[list[int]], title: str | None = None, a
             ax.barh(row, t.end - t.start, left=t.start, height=0.7, color=_COLORS[t.origin % 10],
                     edgecolor="red" if hot else "white", linewidth=2.5 if hot else 0.5)
             if small:
-                ax.text((t.start + t.end) / 2, row, t.label or str(t.id),
+                ax.text((t.start + t.end) / 2, row, str(t.id),
                         ha="center", va="center", fontsize=7, color="white")
         if small:
             last_end = inst.trips[duty[-1]].end
