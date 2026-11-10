@@ -66,5 +66,6 @@ pip install -r requirements.txt
 pytest -q tests/                                      # before every push
 python -m crew.runner --instances instances/proto --methods H,AF,AF+S,SP,SP+S --out results/runs.csv
 python -m crew.runner --instances-csv results/confirm_candidates.csv --methods AF,SP --out results/confirm.csv   # C15
+python -m crew.final_runs --night 1 --dry-run   # C8: pre-flight checks + time projection; then without --dry-run (night 2 the same)
 ```
 Everyone pushes to `main`; `git pull` before starting work. Line endings are LF everywhere (`.gitattributes`).
