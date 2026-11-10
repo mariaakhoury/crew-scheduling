@@ -87,7 +87,12 @@ def main(argv=None) -> None:
     # Gurobi's MemLimit must fit THIS machine (config.py: "about 75% of the run machine's RAM"). On a laptop with
     # less RAM than config assumes, cap it for the pilot so a big model fails cleanly (MEM_LIMIT) instead of swapping.
     from crew.sysinfo import suggested_mem_limit_gb
-    fit = suggested_mem_limit_gb()
+    if "mem_limit_gb" in grid:            # explicit value: lets a later batch reproduce an earlier pilot configuration
+        print(f"MemLimit {grid['mem_limit_gb']} GB (from the grid file)")
+        cfg["GUROBI_PARAMS"]["MemLimit"] = grid["mem_limit_gb"]
+        fit = cfg["GUROBI_PARAMS"]["MemLimit"]
+    else:
+        fit = suggested_mem_limit_gb()
     if fit < cfg["GUROBI_PARAMS"]["MemLimit"]:
         print(f"MemLimit {cfg['GUROBI_PARAMS']['MemLimit']} GB > 75% of this machine's RAM: using {fit} GB for the pilot")
         cfg["GUROBI_PARAMS"]["MemLimit"] = fit

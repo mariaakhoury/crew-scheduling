@@ -1,0 +1,827 @@
+{
+ "schema_version": "1.0",
+ "name": "rt_n80_m3_L360_s201",
+ "generator": "routes",
+ "seed": 201,
+ "params": {
+  "n": 80,
+  "m": 3,
+  "window": [
+   300,
+   1320
+  ],
+  "peaks": [
+   [
+    420,
+    540
+   ],
+   [
+    960,
+    1140
+   ]
+  ],
+  "peak_weight": 3.0,
+  "route_minutes": [
+   30,
+   70
+  ],
+  "jitter": 5,
+  "layover": [
+   0,
+   15
+  ],
+  "block_hours": [
+   4,
+   10
+  ],
+  "peak_block_hours": [
+   1.5,
+   3.5
+  ],
+  "service_end": 1440,
+  "route_lengths": {
+   "0-1": 34,
+   "0-2": 50,
+   "1-2": 56
+  }
+ },
+ "units": {
+  "time": "minutes after 00:00 of the service day (integer, may exceed 1440)",
+  "money": "USD"
+ },
+ "L": 360,
+ "W": 270,
+ "tau": 10,
+ "F": 300.0,
+ "c_per_min": 0.5,
+ "terminals": [
+  "T0",
+  "T1",
+  "T2"
+ ],
+ "trips": [
+  {
+   "id": 0,
+   "label": "t0",
+   "start": 306,
+   "end": 335,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 1,
+   "label": "t1",
+   "start": 349,
+   "end": 387,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 2,
+   "label": "t2",
+   "start": 401,
+   "end": 433,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 3,
+   "label": "t3",
+   "start": 438,
+   "end": 498,
+   "origin": 2,
+   "dest": 1
+  },
+  {
+   "id": 4,
+   "label": "t4",
+   "start": 443,
+   "end": 479,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 5,
+   "label": "t5",
+   "start": 483,
+   "end": 533,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 6,
+   "label": "t6",
+   "start": 493,
+   "end": 540,
+   "origin": 2,
+   "dest": 0
+  },
+  {
+   "id": 7,
+   "label": "t7",
+   "start": 500,
+   "end": 530,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 8,
+   "label": "t8",
+   "start": 513,
+   "end": 570,
+   "origin": 1,
+   "dest": 2
+  },
+  {
+   "id": 9,
+   "label": "t9",
+   "start": 530,
+   "end": 567,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 10,
+   "label": "t10",
+   "start": 554,
+   "end": 586,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 11,
+   "label": "t11",
+   "start": 558,
+   "end": 610,
+   "origin": 2,
+   "dest": 0
+  },
+  {
+   "id": 12,
+   "label": "t12",
+   "start": 577,
+   "end": 616,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 13,
+   "label": "t13",
+   "start": 578,
+   "end": 631,
+   "origin": 1,
+   "dest": 2
+  },
+  {
+   "id": 14,
+   "label": "t14",
+   "start": 603,
+   "end": 633,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 15,
+   "label": "t15",
+   "start": 620,
+   "end": 665,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 16,
+   "label": "t16",
+   "start": 643,
+   "end": 681,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 17,
+   "label": "t17",
+   "start": 650,
+   "end": 710,
+   "origin": 2,
+   "dest": 1
+  },
+  {
+   "id": 18,
+   "label": "t18",
+   "start": 685,
+   "end": 720,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 19,
+   "label": "t19",
+   "start": 730,
+   "end": 781,
+   "origin": 1,
+   "dest": 2
+  },
+  {
+   "id": 20,
+   "label": "t20",
+   "start": 738,
+   "end": 767,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 21,
+   "label": "t21",
+   "start": 752,
+   "end": 803,
+   "origin": 2,
+   "dest": 0
+  },
+  {
+   "id": 22,
+   "label": "t22",
+   "start": 783,
+   "end": 818,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 23,
+   "label": "t23",
+   "start": 792,
+   "end": 853,
+   "origin": 2,
+   "dest": 1
+  },
+  {
+   "id": 24,
+   "label": "t24",
+   "start": 808,
+   "end": 858,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 25,
+   "label": "t25",
+   "start": 825,
+   "end": 874,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 26,
+   "label": "t26",
+   "start": 832,
+   "end": 864,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 27,
+   "label": "t27",
+   "start": 867,
+   "end": 918,
+   "origin": 1,
+   "dest": 2
+  },
+  {
+   "id": 28,
+   "label": "t28",
+   "start": 874,
+   "end": 907,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 29,
+   "label": "t29",
+   "start": 875,
+   "end": 929,
+   "origin": 2,
+   "dest": 0
+  },
+  {
+   "id": 30,
+   "label": "t30",
+   "start": 898,
+   "end": 944,
+   "origin": 2,
+   "dest": 0
+  },
+  {
+   "id": 31,
+   "label": "t31",
+   "start": 898,
+   "end": 946,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 32,
+   "label": "t32",
+   "start": 927,
+   "end": 957,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 33,
+   "label": "t33",
+   "start": 930,
+   "end": 988,
+   "origin": 2,
+   "dest": 1
+  },
+  {
+   "id": 34,
+   "label": "t34",
+   "start": 939,
+   "end": 976,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 35,
+   "label": "t35",
+   "start": 954,
+   "end": 1001,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 36,
+   "label": "t36",
+   "start": 955,
+   "end": 1009,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 37,
+   "label": "t37",
+   "start": 964,
+   "end": 1018,
+   "origin": 2,
+   "dest": 0
+  },
+  {
+   "id": 38,
+   "label": "t38",
+   "start": 975,
+   "end": 1009,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 39,
+   "label": "t39",
+   "start": 1000,
+   "end": 1030,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 40,
+   "label": "t40",
+   "start": 1010,
+   "end": 1046,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 41,
+   "label": "t41",
+   "start": 1023,
+   "end": 1077,
+   "origin": 2,
+   "dest": 0
+  },
+  {
+   "id": 42,
+   "label": "t42",
+   "start": 1025,
+   "end": 1058,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 43,
+   "label": "t43",
+   "start": 1033,
+   "end": 1080,
+   "origin": 2,
+   "dest": 0
+  },
+  {
+   "id": 44,
+   "label": "t44",
+   "start": 1033,
+   "end": 1094,
+   "origin": 1,
+   "dest": 2
+  },
+  {
+   "id": 45,
+   "label": "t45",
+   "start": 1037,
+   "end": 1084,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 46,
+   "label": "t46",
+   "start": 1055,
+   "end": 1085,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 47,
+   "label": "t47",
+   "start": 1071,
+   "end": 1102,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 48,
+   "label": "t48",
+   "start": 1092,
+   "end": 1149,
+   "origin": 1,
+   "dest": 2
+  },
+  {
+   "id": 49,
+   "label": "t49",
+   "start": 1096,
+   "end": 1149,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 50,
+   "label": "t50",
+   "start": 1097,
+   "end": 1148,
+   "origin": 2,
+   "dest": 0
+  },
+  {
+   "id": 51,
+   "label": "t51",
+   "start": 1097,
+   "end": 1152,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 52,
+   "label": "t52",
+   "start": 1106,
+   "end": 1142,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 53,
+   "label": "t53",
+   "start": 1117,
+   "end": 1176,
+   "origin": 2,
+   "dest": 1
+  },
+  {
+   "id": 54,
+   "label": "t54",
+   "start": 1119,
+   "end": 1152,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 55,
+   "label": "t55",
+   "start": 1127,
+   "end": 1156,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 56,
+   "label": "t56",
+   "start": 1137,
+   "end": 1171,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 57,
+   "label": "t57",
+   "start": 1156,
+   "end": 1193,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 58,
+   "label": "t58",
+   "start": 1164,
+   "end": 1215,
+   "origin": 2,
+   "dest": 1
+  },
+  {
+   "id": 59,
+   "label": "t59",
+   "start": 1166,
+   "end": 1195,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 60,
+   "label": "t60",
+   "start": 1167,
+   "end": 1220,
+   "origin": 2,
+   "dest": 0
+  },
+  {
+   "id": 61,
+   "label": "t61",
+   "start": 1171,
+   "end": 1224,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 62,
+   "label": "t62",
+   "start": 1174,
+   "end": 1226,
+   "origin": 2,
+   "dest": 0
+  },
+  {
+   "id": 63,
+   "label": "t63",
+   "start": 1176,
+   "end": 1236,
+   "origin": 1,
+   "dest": 2
+  },
+  {
+   "id": 64,
+   "label": "t64",
+   "start": 1176,
+   "end": 1237,
+   "origin": 2,
+   "dest": 1
+  },
+  {
+   "id": 65,
+   "label": "t65",
+   "start": 1194,
+   "end": 1223,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 66,
+   "label": "t66",
+   "start": 1205,
+   "end": 1236,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 67,
+   "label": "t67",
+   "start": 1205,
+   "end": 1243,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 68,
+   "label": "t68",
+   "start": 1238,
+   "end": 1293,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 69,
+   "label": "t69",
+   "start": 1241,
+   "end": 1293,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 70,
+   "label": "t70",
+   "start": 1252,
+   "end": 1311,
+   "origin": 1,
+   "dest": 2
+  },
+  {
+   "id": 71,
+   "label": "t71",
+   "start": 1253,
+   "end": 1310,
+   "origin": 2,
+   "dest": 1
+  },
+  {
+   "id": 72,
+   "label": "t72",
+   "start": 1307,
+   "end": 1354,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 73,
+   "label": "t73",
+   "start": 1308,
+   "end": 1359,
+   "origin": 2,
+   "dest": 0
+  },
+  {
+   "id": 74,
+   "label": "t74",
+   "start": 1312,
+   "end": 1366,
+   "origin": 2,
+   "dest": 1
+  },
+  {
+   "id": 75,
+   "label": "t75",
+   "start": 1321,
+   "end": 1372,
+   "origin": 1,
+   "dest": 2
+  },
+  {
+   "id": 76,
+   "label": "t76",
+   "start": 1323,
+   "end": 1378,
+   "origin": 2,
+   "dest": 1
+  },
+  {
+   "id": 77,
+   "label": "t77",
+   "start": 1369,
+   "end": 1414,
+   "origin": 0,
+   "dest": 2
+  },
+  {
+   "id": 78,
+   "label": "t78",
+   "start": 1376,
+   "end": 1428,
+   "origin": 2,
+   "dest": 0
+  },
+  {
+   "id": 79,
+   "label": "t79",
+   "start": 1383,
+   "end": 1436,
+   "origin": 1,
+   "dest": 2
+  }
+ ],
+ "reference": {
+  "schedule": [
+   [
+    0,
+    1,
+    2,
+    4,
+    7
+   ],
+   [
+    3,
+    8
+   ],
+   [
+    5,
+    11,
+    15,
+    21
+   ],
+   [
+    6,
+    10,
+    14,
+    16
+   ],
+   [
+    9,
+    12,
+    24
+   ],
+   [
+    13,
+    17,
+    19,
+    23
+   ],
+   [
+    18,
+    20,
+    22,
+    26,
+    28,
+    32,
+    38
+   ],
+   [
+    49,
+    62,
+    68,
+    74,
+    79
+   ],
+   [
+    25,
+    30,
+    35,
+    43,
+    56
+   ],
+   [
+    27,
+    33,
+    44,
+    53,
+    65
+   ],
+   [
+    29,
+    36,
+    41,
+    51,
+    58
+   ],
+   [
+    31,
+    37,
+    45,
+    50,
+    61
+   ],
+   [
+    34,
+    39,
+    54,
+    59,
+    66
+   ],
+   [
+    40,
+    48,
+    60,
+    69,
+    73
+   ],
+   [
+    42,
+    47,
+    55,
+    63,
+    71,
+    75
+   ],
+   [
+    57,
+    67,
+    72,
+    78
+   ],
+   [
+    46,
+    52,
+    77
+   ],
+   [
+    64,
+    70,
+    76
+   ]
+  ],
+  "cost": 8062.5,
+  "kind": "heuristic",
+  "verified_by": "checker.py; made by greedy_plus_local_search"
+ }
+}

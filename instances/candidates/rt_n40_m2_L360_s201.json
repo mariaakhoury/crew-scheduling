@@ -1,0 +1,450 @@
+{
+ "schema_version": "1.0",
+ "name": "rt_n40_m2_L360_s201",
+ "generator": "routes",
+ "seed": 201,
+ "params": {
+  "n": 40,
+  "m": 2,
+  "window": [
+   300,
+   1320
+  ],
+  "peaks": [
+   [
+    420,
+    540
+   ],
+   [
+    960,
+    1140
+   ]
+  ],
+  "peak_weight": 3.0,
+  "route_minutes": [
+   30,
+   70
+  ],
+  "jitter": 5,
+  "layover": [
+   0,
+   15
+  ],
+  "block_hours": [
+   4,
+   10
+  ],
+  "peak_block_hours": [
+   1.5,
+   3.5
+  ],
+  "service_end": 1440,
+  "route_lengths": {
+   "0-1": 34
+  }
+ },
+ "units": {
+  "time": "minutes after 00:00 of the service day (integer, may exceed 1440)",
+  "money": "USD"
+ },
+ "L": 360,
+ "W": 270,
+ "tau": 10,
+ "F": 300.0,
+ "c_per_min": 0.5,
+ "terminals": [
+  "T0",
+  "T1"
+ ],
+ "trips": [
+  {
+   "id": 0,
+   "label": "t0",
+   "start": 395,
+   "end": 434,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 1,
+   "label": "t1",
+   "start": 415,
+   "end": 444,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 2,
+   "label": "t2",
+   "start": 443,
+   "end": 475,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 3,
+   "label": "t3",
+   "start": 447,
+   "end": 481,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 4,
+   "label": "t4",
+   "start": 454,
+   "end": 493,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 5,
+   "label": "t5",
+   "start": 455,
+   "end": 491,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 6,
+   "label": "t6",
+   "start": 490,
+   "end": 528,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 7,
+   "label": "t7",
+   "start": 493,
+   "end": 524,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 8,
+   "label": "t8",
+   "start": 500,
+   "end": 531,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 9,
+   "label": "t9",
+   "start": 506,
+   "end": 541,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 10,
+   "label": "t10",
+   "start": 513,
+   "end": 545,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 11,
+   "label": "t11",
+   "start": 524,
+   "end": 561,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 12,
+   "label": "t12",
+   "start": 539,
+   "end": 576,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 13,
+   "label": "t13",
+   "start": 542,
+   "end": 579,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 14,
+   "label": "t14",
+   "start": 549,
+   "end": 588,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 15,
+   "label": "t15",
+   "start": 551,
+   "end": 580,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 16,
+   "label": "t16",
+   "start": 564,
+   "end": 601,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 17,
+   "label": "t17",
+   "start": 582,
+   "end": 616,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 18,
+   "label": "t18",
+   "start": 603,
+   "end": 638,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 19,
+   "label": "t19",
+   "start": 612,
+   "end": 647,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 20,
+   "label": "t20",
+   "start": 639,
+   "end": 670,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 21,
+   "label": "t21",
+   "start": 651,
+   "end": 682,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 22,
+   "label": "t22",
+   "start": 1013,
+   "end": 1042,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 23,
+   "label": "t23",
+   "start": 1027,
+   "end": 1059,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 24,
+   "label": "t24",
+   "start": 1031,
+   "end": 1070,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 25,
+   "label": "t25",
+   "start": 1057,
+   "end": 1093,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 26,
+   "label": "t26",
+   "start": 1071,
+   "end": 1107,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 27,
+   "label": "t27",
+   "start": 1082,
+   "end": 1113,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 28,
+   "label": "t28",
+   "start": 1102,
+   "end": 1136,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 29,
+   "label": "t29",
+   "start": 1116,
+   "end": 1154,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 30,
+   "label": "t30",
+   "start": 1121,
+   "end": 1159,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 31,
+   "label": "t31",
+   "start": 1130,
+   "end": 1167,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 32,
+   "label": "t32",
+   "start": 1161,
+   "end": 1197,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 33,
+   "label": "t33",
+   "start": 1173,
+   "end": 1211,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 34,
+   "label": "t34",
+   "start": 1177,
+   "end": 1210,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 35,
+   "label": "t35",
+   "start": 1184,
+   "end": 1213,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 36,
+   "label": "t36",
+   "start": 1213,
+   "end": 1250,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 37,
+   "label": "t37",
+   "start": 1269,
+   "end": 1305,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 38,
+   "label": "t38",
+   "start": 1318,
+   "end": 1356,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 39,
+   "label": "t39",
+   "start": 1375,
+   "end": 1412,
+   "origin": 1,
+   "dest": 0
+  }
+ ],
+ "reference": {
+  "schedule": [
+   [
+    0,
+    5,
+    10,
+    16,
+    19
+   ],
+   [
+    1,
+    4,
+    9,
+    15,
+    18,
+    21
+   ],
+   [
+    2,
+    6,
+    12
+   ],
+   [
+    3,
+    7,
+    14
+   ],
+   [
+    8,
+    13
+   ],
+   [
+    11,
+    17,
+    20
+   ],
+   [
+    22,
+    25,
+    29,
+    35
+   ],
+   [
+    23,
+    26,
+    30,
+    33
+   ],
+   [
+    24,
+    27,
+    31,
+    34
+   ],
+   [
+    28,
+    32
+   ],
+   [
+    36,
+    37,
+    38,
+    39
+   ]
+  ],
+  "cost": 4237.5,
+  "kind": "heuristic",
+  "verified_by": "checker.py; made by greedy_plus_local_search"
+ }
+}

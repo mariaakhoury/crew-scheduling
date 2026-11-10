@@ -11,12 +11,14 @@ from crew import analysis_scaling as AS  # noqa: E402
 
 
 def _row(inst, method, status, t=None, gap=None, nodes=1, n=50, duties=None, **kw):
-    return {"instance": inst, "method": method, "status": status, "solver_time_s": t, "gap_pct": gap,
-            "nodes": nodes, "n": n, "L": 360, "n_arcs": 10, "n_duties": duties, "objective": 100.0,
-            "best_bound": 100.0 if status == "OPTIMAL" else 90.0, "t_first_incumbent_s": 1.0,
-            "start_accepted": "yes" if method.endswith("+S") else None, "heuristic_cost": 110.0,
-            "feasible_checked": "yes", "end_to_end_s": (t or 0) + 1, "t_enum_s": 0.5, "t_build_s": 0.5,
-            "time_limit_s": 120, **kw}
+    row = {"instance": inst, "method": method, "status": status, "solver_time_s": t, "gap_pct": gap,
+           "nodes": nodes, "n": n, "L": 360, "n_arcs": 10, "n_duties": duties, "objective": 100.0,
+           "best_bound": 100.0 if status == "OPTIMAL" else 90.0, "t_first_incumbent_s": 1.0,
+           "start_accepted": "yes" if method.endswith("+S") else None, "heuristic_cost": 110.0,
+           "feasible_checked": "yes", "end_to_end_s": (t or 0) + 1, "t_enum_s": 0.5, "t_build_s": 0.5,
+           "time_limit_s": 120}
+    row.update(kw)
+    return row
 
 
 RUNS = pd.DataFrame([
@@ -43,6 +45,14 @@ def test_h6_and_no_help_reasons():
     nh = AH.no_help_list(RUNS).set_index(["model", "instance"])
     assert "root node" in nh.loc[("SP", "a"), "reason"]
     assert "not comparable" in nh.loc[("SP", "b"), "reason"]
+
+
+def test_best_known_includes_the_heuristic_schedule():
+    runs = pd.DataFrame([_row("z", "AF", "TIME_LIMIT", 120, gap=20, objective=120.0, best_bound=90.0),
+                         _row("z", "H", "HEURISTIC", objective=110.0)])
+    q = AH.heuristic_quality(runs).loc["z"]
+    assert q["best_value"] == 110.0 and bool(q["ls_is_best_known"])      # never "worse than the best known"
+    assert q["ls_gap_pct"] >= 0                                          # gap to the bound, upper bound only
 
 
 def test_h5_counts_build_failures_never_as_timeouts():

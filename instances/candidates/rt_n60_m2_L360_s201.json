@@ -1,0 +1,634 @@
+{
+ "schema_version": "1.0",
+ "name": "rt_n60_m2_L360_s201",
+ "generator": "routes",
+ "seed": 201,
+ "params": {
+  "n": 60,
+  "m": 2,
+  "window": [
+   300,
+   1320
+  ],
+  "peaks": [
+   [
+    420,
+    540
+   ],
+   [
+    960,
+    1140
+   ]
+  ],
+  "peak_weight": 3.0,
+  "route_minutes": [
+   30,
+   70
+  ],
+  "jitter": 5,
+  "layover": [
+   0,
+   15
+  ],
+  "block_hours": [
+   4,
+   10
+  ],
+  "peak_block_hours": [
+   1.5,
+   3.5
+  ],
+  "service_end": 1440,
+  "route_lengths": {
+   "0-1": 34
+  }
+ },
+ "units": {
+  "time": "minutes after 00:00 of the service day (integer, may exceed 1440)",
+  "money": "USD"
+ },
+ "L": 360,
+ "W": 270,
+ "tau": 10,
+ "F": 300.0,
+ "c_per_min": 0.5,
+ "terminals": [
+  "T0",
+  "T1"
+ ],
+ "trips": [
+  {
+   "id": 0,
+   "label": "t0",
+   "start": 306,
+   "end": 335,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 1,
+   "label": "t1",
+   "start": 349,
+   "end": 387,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 2,
+   "label": "t2",
+   "start": 395,
+   "end": 434,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 3,
+   "label": "t3",
+   "start": 401,
+   "end": 433,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 4,
+   "label": "t4",
+   "start": 415,
+   "end": 444,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 5,
+   "label": "t5",
+   "start": 443,
+   "end": 475,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 6,
+   "label": "t6",
+   "start": 443,
+   "end": 479,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 7,
+   "label": "t7",
+   "start": 447,
+   "end": 481,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 8,
+   "label": "t8",
+   "start": 454,
+   "end": 493,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 9,
+   "label": "t9",
+   "start": 455,
+   "end": 491,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 10,
+   "label": "t10",
+   "start": 490,
+   "end": 528,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 11,
+   "label": "t11",
+   "start": 493,
+   "end": 524,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 12,
+   "label": "t12",
+   "start": 500,
+   "end": 530,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 13,
+   "label": "t13",
+   "start": 500,
+   "end": 531,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 14,
+   "label": "t14",
+   "start": 506,
+   "end": 541,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 15,
+   "label": "t15",
+   "start": 513,
+   "end": 545,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 16,
+   "label": "t16",
+   "start": 524,
+   "end": 561,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 17,
+   "label": "t17",
+   "start": 539,
+   "end": 576,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 18,
+   "label": "t18",
+   "start": 542,
+   "end": 579,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 19,
+   "label": "t19",
+   "start": 549,
+   "end": 588,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 20,
+   "label": "t20",
+   "start": 551,
+   "end": 580,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 21,
+   "label": "t21",
+   "start": 554,
+   "end": 586,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 22,
+   "label": "t22",
+   "start": 564,
+   "end": 601,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 23,
+   "label": "t23",
+   "start": 582,
+   "end": 616,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 24,
+   "label": "t24",
+   "start": 603,
+   "end": 633,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 25,
+   "label": "t25",
+   "start": 603,
+   "end": 638,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 26,
+   "label": "t26",
+   "start": 612,
+   "end": 647,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 27,
+   "label": "t27",
+   "start": 639,
+   "end": 670,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 28,
+   "label": "t28",
+   "start": 643,
+   "end": 681,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 29,
+   "label": "t29",
+   "start": 651,
+   "end": 682,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 30,
+   "label": "t30",
+   "start": 697,
+   "end": 734,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 31,
+   "label": "t31",
+   "start": 752,
+   "end": 787,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 32,
+   "label": "t32",
+   "start": 809,
+   "end": 842,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 33,
+   "label": "t33",
+   "start": 898,
+   "end": 930,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 34,
+   "label": "t34",
+   "start": 948,
+   "end": 986,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 35,
+   "label": "t35",
+   "start": 1005,
+   "end": 1036,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 36,
+   "label": "t36",
+   "start": 1013,
+   "end": 1042,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 37,
+   "label": "t37",
+   "start": 1027,
+   "end": 1059,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 38,
+   "label": "t38",
+   "start": 1031,
+   "end": 1070,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 39,
+   "label": "t39",
+   "start": 1049,
+   "end": 1084,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 40,
+   "label": "t40",
+   "start": 1057,
+   "end": 1093,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 41,
+   "label": "t41",
+   "start": 1071,
+   "end": 1107,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 42,
+   "label": "t42",
+   "start": 1082,
+   "end": 1113,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 43,
+   "label": "t43",
+   "start": 1102,
+   "end": 1136,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 44,
+   "label": "t44",
+   "start": 1107,
+   "end": 1144,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 45,
+   "label": "t45",
+   "start": 1116,
+   "end": 1154,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 46,
+   "label": "t46",
+   "start": 1121,
+   "end": 1159,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 47,
+   "label": "t47",
+   "start": 1127,
+   "end": 1159,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 48,
+   "label": "t48",
+   "start": 1130,
+   "end": 1167,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 49,
+   "label": "t49",
+   "start": 1161,
+   "end": 1197,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 50,
+   "label": "t50",
+   "start": 1164,
+   "end": 1202,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 51,
+   "label": "t51",
+   "start": 1169,
+   "end": 1208,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 52,
+   "label": "t52",
+   "start": 1173,
+   "end": 1211,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 53,
+   "label": "t53",
+   "start": 1177,
+   "end": 1210,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 54,
+   "label": "t54",
+   "start": 1184,
+   "end": 1213,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 55,
+   "label": "t55",
+   "start": 1213,
+   "end": 1250,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 56,
+   "label": "t56",
+   "start": 1223,
+   "end": 1256,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 57,
+   "label": "t57",
+   "start": 1269,
+   "end": 1305,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 58,
+   "label": "t58",
+   "start": 1318,
+   "end": 1356,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 59,
+   "label": "t59",
+   "start": 1375,
+   "end": 1412,
+   "origin": 1,
+   "dest": 0
+  }
+ ],
+ "reference": {
+  "schedule": [
+   [
+    0,
+    1,
+    3,
+    6,
+    12,
+    19,
+    24
+   ],
+   [
+    2,
+    9,
+    15,
+    22,
+    26
+   ],
+   [
+    4,
+    8,
+    14,
+    20,
+    25,
+    29,
+    30
+   ],
+   [
+    5,
+    10,
+    17,
+    28,
+    31
+   ],
+   [
+    7,
+    11,
+    21
+   ],
+   [
+    13,
+    18
+   ],
+   [
+    16,
+    23,
+    27,
+    32
+   ],
+   [
+    33,
+    34,
+    35,
+    39,
+    45,
+    50,
+    55
+   ],
+   [
+    36,
+    40,
+    44,
+    54,
+    56,
+    57,
+    58
+   ],
+   [
+    37,
+    41,
+    46,
+    51
+   ],
+   [
+    38,
+    42,
+    47,
+    52
+   ],
+   [
+    43,
+    49,
+    59
+   ],
+   [
+    48,
+    53
+   ]
+  ],
+  "cost": 5512.0,
+  "kind": "heuristic",
+  "verified_by": "checker.py; made by greedy_plus_local_search"
+ }
+}

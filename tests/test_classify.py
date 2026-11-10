@@ -56,6 +56,16 @@ def test_confirm_stage_keeps_only_stable_pilot_classes():
     assert not spec_only_buildable.keys() & set(merged.index)
 
 
+def test_several_pilot_files_are_read_together(tmp_path):
+    from pilot.classify import load_runs
+    a, b = _rows({"e1": SPEC["e1"]}), _rows({"tl": SPEC["tl"]}).assign(superseded="no")
+    b = pd.concat([b, b.assign(superseded="yes", status="ERROR")])          # superseded rows never count
+    a.to_csv(tmp_path / "a.csv", index=False)
+    b.to_csv(tmp_path / "b.csv", index=False)
+    df = load_runs([str(tmp_path / "a.csv"), str(tmp_path / "b.csv")])
+    assert sorted(df["instance"].unique()) == ["e1", "tl"] and "ERROR" not in set(df["status"])
+
+
 def test_grid_exclusion():
     from pilot.run_pilot import configurations
     grid = {"n": [20], "m": [2, 3], "L_by_n": {"20": [360, 480]}, "w_ratio": 0.75, "seeds": [201],
@@ -66,5 +76,63 @@ def test_grid_exclusion():
 
 def test_confirmation_candidates_are_rechecks_plus_two_spares_per_class():
     cand = confirmation_candidates(classify_all(_rows(SPEC)))
-    assert set(cand["instance"]) == {"e1", "e2", "md", "hd", "tl", "nb", "sp_only"}   # e3 = third EASY: not a spare
-    assert set(cand.loc[cand["instance"].isin(["e1", "e2", "md"]), "why_candidate"]) == {"spare"}
+    # spread spares: of the three EASY instances (e1 < e2 < e3 by n, L) the smallest and the largest are kept
+    assert set(cand["instance"]) == {"e1", "e3", "md", "hd", "tl", "nb", "sp_only"}
+    assert set(cand.loc[cand["instance"].isin(["e1", "e3", "md"]), "why_candidate"]) == {"spare"}
+
+
+def test_spread_take_keeps_both_ends():
+    from pilot.classify import spread_take
+    pool = pd.DataFrame({"x": range(10)})
+    assert list(spread_take(pool, 4)["x"]) == [0, 3, 6, 9]
+    assert list(spread_take(pool, 1)["x"]) == [5]
+    assert len(spread_take(pool, 20)) == 10 and spread_take(pool, 0).empty
+
+
+def _many_time_limit(k, flagged_ns):
+    spec = {}
+    for i, n in enumerate(range(50, 50 + 50 * k, 50)):
+        sp = ("COLUMN_CAP", None) if n in flagged_ns else ("OPTIMAL", 1.0)
+        spec[f"t{i:02d}"] = (n, 360, "TIME_LIMIT", 30.0, *sp)
+    return classify_all(_rows(spec))
+
+
+def test_selection_is_spread_and_keeps_two_sp_not_built():
+    from pilot.classify import select
+    classes = _many_time_limit(12, flagged_ns={550, 600})      # only the two largest have SP not built
+    sel = select(classes)
+    tl = sel[(sel["class"] == "TIME_LIMIT") & (sel["selected_as"] == "class target")]   # fill-up adds the rest
+    assert len(tl) == 6
+    assert int(tl["SP_not_built"].sum()) >= 2                    # the reserve takes both flagged instances
+    assert tl["n"].min() == 50 and tl["n"].max() == 600          # smallest and largest both present
+
+
+def test_fill_up_to_15_from_unused_time_limit_then_hard_then_easy():
+    from pilot.classify import select
+    spec = {f"tl{i:02d}": (50 + 10 * i, 360, "TIME_LIMIT", 30.0, "OPTIMAL", 1.0) for i in range(10)}
+    spec.update({f"e{i}": (20 + i, 360, "OPTIMAL", 0.1, "OPTIMAL", 0.1) for i in range(8)})
+    spec["nb1"], spec["nb2"] = (400, 360, "TIME_LIMIT", 30.0, "COLUMN_CAP", None), (500, 360, "TIME_LIMIT", 30.0,
+                                                                                    "COLUMN_CAP", None)
+    sel = select(classify_all(_rows(spec)))          # targets: 6 TIME_LIMIT + 4 EASY = 10 -> 5 places to fill
+    assert len(sel) == 15
+    filled = sel[sel["selected_as"] == "fill-up to 15"]
+    assert len(filled) == 5 and set(filled["class"]) == {"TIME_LIMIT"}      # 12 TL available: fill from TL first
+    assert int(sel["SP_not_built"].sum()) >= 2
+
+
+def test_no_fill_up_when_targets_reach_15():
+    from pilot.classify import select
+    spec = {f"tl{i:02d}": (50 + 10 * i, 360, "TIME_LIMIT", 30.0, "OPTIMAL", 1.0) for i in range(6)}
+    spec.update({f"h{i}": (100 + i, 360, "OPTIMAL", 60.0, "OPTIMAL", 1.0) for i in range(5)})
+    spec.update({f"m{i}": (60 + i, 360, "OPTIMAL", 5.0, "OPTIMAL", 0.1) for i in range(5)})
+    spec.update({f"e{i}": (20 + i, 360, "OPTIMAL", 0.1, "OPTIMAL", 0.1) for i in range(4)})
+    sel = select(classify_all(_rows(spec)))
+    assert len(sel) == 20 and set(sel["selected_as"]) == {"class target"}
+
+
+def test_cap_keeps_large_and_sp_not_built_candidates():
+    from pilot import classify as C
+    classes = _many_time_limit(30, flagged_ns={1450, 1500})
+    cand = C.confirmation_candidates(classes)
+    assert len(cand) == C.MAX_CONFIRM_FILES
+    assert cand["n"].max() == 1500 and int(cand["SP_not_built"].sum()) >= 2

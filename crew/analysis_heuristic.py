@@ -72,6 +72,9 @@ def heuristic_quality(df: pd.DataFrame, heuristic_dir: str | None = None) -> pd.
     if greedy:
         out["greedy_cost"] = pd.Series(greedy)
     out = out.join(best_known(df))
+    # the heuristic's own schedule is a feasible solution too: the best known value can never be worse than it
+    # (same fix as C's analysis.py, 9 Nov; otherwise a missing +S row could show an impossible negative gap)
+    out["best_value"] = out[["best_value", "ls_cost"]].min(axis=1)
     ref = np.where(out["proven"], out["best_value"], out["best_bound"])
     out["ls_gap_pct"] = 100 * (out["ls_cost"] - ref) / out["ls_cost"]
     if "greedy_cost" in out:

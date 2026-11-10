@@ -1,0 +1,260 @@
+{
+ "schema_version": "1.0",
+ "name": "rt_n20_m2_L480_s201",
+ "generator": "routes",
+ "seed": 201,
+ "params": {
+  "n": 20,
+  "m": 2,
+  "window": [
+   300,
+   1320
+  ],
+  "peaks": [
+   [
+    420,
+    540
+   ],
+   [
+    960,
+    1140
+   ]
+  ],
+  "peak_weight": 3.0,
+  "route_minutes": [
+   30,
+   70
+  ],
+  "jitter": 5,
+  "layover": [
+   0,
+   15
+  ],
+  "block_hours": [
+   4,
+   10
+  ],
+  "peak_block_hours": [
+   1.5,
+   3.5
+  ],
+  "service_end": 1440,
+  "route_lengths": {
+   "0-1": 34
+  }
+ },
+ "units": {
+  "time": "minutes after 00:00 of the service day (integer, may exceed 1440)",
+  "money": "USD"
+ },
+ "L": 480,
+ "W": 360,
+ "tau": 10,
+ "F": 300.0,
+ "c_per_min": 0.5,
+ "terminals": [
+  "T0",
+  "T1"
+ ],
+ "trips": [
+  {
+   "id": 0,
+   "label": "t0",
+   "start": 493,
+   "end": 524,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 1,
+   "label": "t1",
+   "start": 549,
+   "end": 588,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 2,
+   "label": "t2",
+   "start": 1013,
+   "end": 1042,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 3,
+   "label": "t3",
+   "start": 1027,
+   "end": 1059,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 4,
+   "label": "t4",
+   "start": 1031,
+   "end": 1070,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 5,
+   "label": "t5",
+   "start": 1057,
+   "end": 1093,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 6,
+   "label": "t6",
+   "start": 1071,
+   "end": 1107,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 7,
+   "label": "t7",
+   "start": 1082,
+   "end": 1113,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 8,
+   "label": "t8",
+   "start": 1102,
+   "end": 1136,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 9,
+   "label": "t9",
+   "start": 1116,
+   "end": 1154,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 10,
+   "label": "t10",
+   "start": 1121,
+   "end": 1159,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 11,
+   "label": "t11",
+   "start": 1130,
+   "end": 1167,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 12,
+   "label": "t12",
+   "start": 1161,
+   "end": 1197,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 13,
+   "label": "t13",
+   "start": 1173,
+   "end": 1211,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 14,
+   "label": "t14",
+   "start": 1177,
+   "end": 1210,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 15,
+   "label": "t15",
+   "start": 1184,
+   "end": 1213,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 16,
+   "label": "t16",
+   "start": 1213,
+   "end": 1250,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 17,
+   "label": "t17",
+   "start": 1269,
+   "end": 1305,
+   "origin": 1,
+   "dest": 0
+  },
+  {
+   "id": 18,
+   "label": "t18",
+   "start": 1318,
+   "end": 1356,
+   "origin": 0,
+   "dest": 1
+  },
+  {
+   "id": 19,
+   "label": "t19",
+   "start": 1375,
+   "end": 1412,
+   "origin": 1,
+   "dest": 0
+  }
+ ],
+ "reference": {
+  "schedule": [
+   [
+    0,
+    1
+   ],
+   [
+    2,
+    5,
+    9,
+    15
+   ],
+   [
+    3,
+    6,
+    10,
+    13
+   ],
+   [
+    4,
+    7,
+    11,
+    14
+   ],
+   [
+    8,
+    12
+   ],
+   [
+    16,
+    17,
+    18,
+    19
+   ]
+  ],
+  "cost": 2276.0,
+  "kind": "heuristic",
+  "verified_by": "checker.py; made by greedy_plus_local_search"
+ }
+}
