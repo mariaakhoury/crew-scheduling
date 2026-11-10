@@ -9,20 +9,22 @@
 
 ---
 
-## Slide 10 - "Greedy strands trip 8; swap-then-merge saves a whole driver ($232.50)" (1:00)
+## Slide 10 - "Greedy strands trip 7; swap-then-merge saves a whole driver ($232.50)" (1:00)
 
 **Key message:** the greedy choice that looks cheapest (shortest wait) can cost a whole extra driver; local search
 repairs it with a move that is only good as a pair.
 
-**Show:** the three Gantt charts of P0 from A11 (`case_study`): greedy $1,177.50 with T8 alone in red, after local
+**Show:** the three Gantt charts of P0 from A11 (`case_study`): greedy $1,177.50 with trip 7 alone in red, after local
 search $945.00, optimal $945.00. Under them the cost table: drivers −$300, paid minutes +$67.50, total −$232.50.
+**Trip numbers:** trip ids 0-7, as on slide 6 (duties {0,1,4,5} and {2,3,6,7}). The Gantt bars carry the file's
+labels T1-T8 (T8 = trip 7): before merging, relabel the bars with the ids (or say "T8, trip 7") so slides 6 and 10 match.
 
 **Script (128 words):**
 "Before any solver runs, we build a schedule by hand-style rules. Greedy takes the trips in time order and gives
-each one to the driver who waits least. On our 8-trip example that looks clever until trip 7: greedy gives it to
-driver 1, who is then at the 5-hour driving limit. Trip 8 now has nowhere to go, and greedy hires a third driver
-for one single trip: $1,177.50. Local search fixes it with a pair of moves: first move trip 7 to driver 2 - alone
-that costs *more* - then attach trip 8 to driver 2. One driver fewer: $945, the optimum. The lesson: a driver costs
+each one to the driver who waits least. On our 8-trip example that looks clever until trip 6: greedy gives it to
+driver 1, who is then at the 5-hour driving limit. Trip 7 now has nowhere to go, and greedy hires a third driver
+for one single trip: $1,177.50. Local search fixes it with a pair of moves: first move trip 6 to driver 2 - alone
+that costs *more* - then attach trip 7 to driver 2. One driver fewer: $945, the optimum. The lesson: a driver costs
 $300, as much as 10 hours of paid waiting, so it is worth waiting a lot to save one."
 
 **Likely questions:** *Why accept a move that makes things worse?* - only together with the merge that follows;
@@ -54,7 +56,7 @@ SP vs SP+S: time to first incumbent, final gap).
 trips - and it is always a legal schedule. That lets us give Gurobi a *complete* start: for Model 1 we translate
 the duties into every variable - arcs, start and end markers, spread and driving times; for Model 2 we switch on
 exactly the duty columns we used. Gurobi's log confirms it accepted the start every time. Did it help? It made the
-first good solution appear much earlier, and on the biggest instances our half-second heuristic was already better
+first good solution appear much earlier, and on two of the largest instances our half-second heuristic was already better
 than what plain Model 1 found in two minutes. But the start mostly changes the *upper* side. Model 1's gap stays
 open because its *lower* bound is weak - a better start cannot fix that. And where Model 2 solves at the root node,
 there is nothing left for a start to do."
