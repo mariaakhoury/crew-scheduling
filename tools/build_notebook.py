@@ -263,6 +263,15 @@ if runs is not None:
     for png in ["a12/gap_vs_time.png", "a12/time_split.png", "a16/performance_profile.png", "b12/paired_effect.png"]:
         display(Image(os.path.join("figures", png)))"""
 
+SCALING = """from crew import analysis_scaling
+if runs is not None:
+    b13 = analysis_scaling.report(RUNS_CSV, "instances/final/MANIFEST.csv", "figures/b13")
+    print("H4:", b13["H4"]["verdict"], "| H5:", b13["H5"]["verdict"])
+    display(b13["H8"])                        # rank correlations of difficulty with n, L, trips per duty
+    from IPython.display import Image
+    for f in ("sizes", "build_cost", "status_map"):
+        display(Image(f"figures/b13/{f}.png"))"""
+
 LARGE_GANTT = """if final_paths:
     big = max((load_instance(p) for p in final_paths), key=lambda i: len(i.trips))
     plot_timetable(big); plt.show()
@@ -296,7 +305,8 @@ def build_notebook() -> nbf.NotebookNode:
     C += [md("## 17. Results: summary tables and the comparison table\n\nAverages over time-limit runs are "
              "lower bounds and are marked with ≥."), code(RESULTS_TABLES)]
     C += [md("## 18. Charts\n\nModel strength (A12), performance profiles (A16) and the heuristic's effect "
-             "(B12), all recomputed from `results/runs.csv`."), code(CHARTS)]
+             "(B12), all recomputed from `results/runs.csv`."), code(CHARTS),
+          md("Scalability (B13): model sizes, build cost and status by instance."), code(SCALING)]
     C += [md("## 19. A large instance"), code(LARGE_GANTT)]
     disc = _md_file("discussion.md")
     C += [md("## 20. Discussion" + ("\n\n" + disc if disc else ""))]

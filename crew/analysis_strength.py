@@ -161,8 +161,7 @@ def summary(df: pd.DataFrame) -> pd.DataFrame:
 
 def report(runs_csv: str, out_dir: str) -> pd.DataFrame:
     """Write every A12 table (CSV), both charts (PNG) and a short markdown summary; return the Q22 check."""
-    import matplotlib
-    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
     df = pd.read_csv(runs_csv)
     os.makedirs(out_dir, exist_ok=True)
     t, s, q = strength_table(df), summary(df), q22_check(df)
@@ -170,8 +169,9 @@ def report(runs_csv: str, out_dir: str) -> pd.DataFrame:
     s.to_csv(os.path.join(out_dir, "strength_summary.csv"), index=False)
     q.to_csv(os.path.join(out_dir, "q22_check.csv"))
     gap = "lp" if t["lp_gap_pct"].notna().any() else "root"
-    plot_gap_vs_time(df, gap=gap).savefig(os.path.join(out_dir, "gap_vs_time.png"), dpi=150, bbox_inches="tight")
-    plot_time_split(df).savefig(os.path.join(out_dir, "time_split.png"), dpi=150, bbox_inches="tight")
+    for fig, name in ((plot_gap_vs_time(df, gap=gap), "gap_vs_time.png"), (plot_time_split(df), "time_split.png")):
+        fig.savefig(os.path.join(out_dir, name), dpi=150, bbox_inches="tight")
+        plt.close(fig)
     lines = [f"# A12 model strength - source `{runs_csv}`", "",
              f"- Chart 1 uses the **{'LP' if gap == 'lp' else 'root-node'}** gap"
              + ("" if gap == "lp" else " (no LP-AF / LP-SP rows in this file yet)") + ".",
@@ -183,6 +183,8 @@ def report(runs_csv: str, out_dir: str) -> pd.DataFrame:
 
 
 def main(argv=None) -> None:
+    import matplotlib
+    matplotlib.use("Agg")      # command line only: no screen needed. Never inside report(), so notebooks keep showing charts
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", default=os.path.join("results", "runs.csv"))
     ap.add_argument("--out", default=os.path.join("results", "a12"))

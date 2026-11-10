@@ -148,15 +148,16 @@ def win_tie_loss(df: pd.DataFrame, metric: str = "end_to_end") -> pd.DataFrame:
 
 def report(runs_csv: str, out_dir: str, metric: str = "end_to_end") -> pd.DataFrame:
     """Write the A16 tables (CSV), the profile chart (PNG) and a markdown summary; return the summary table."""
-    import matplotlib
-    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
     df = pd.read_csv(runs_csv)
     os.makedirs(out_dir, exist_ok=True)
     s, w = summary_table(df, metric), win_tie_loss(df, metric)
     s.to_csv(os.path.join(out_dir, "profile_summary.csv"))
     w.to_csv(os.path.join(out_dir, "win_tie_loss.csv"), index=False)
     ratios(df, metric).to_csv(os.path.join(out_dir, "time_ratios.csv"))
-    plot_profile(df, metric).savefig(os.path.join(out_dir, "performance_profile.png"), dpi=150, bbox_inches="tight")
+    fig = plot_profile(df, metric)
+    fig.savefig(os.path.join(out_dir, "performance_profile.png"), dpi=150, bbox_inches="tight")
+    plt.close(fig)
     lines = [f"# A16 performance profiles - source `{runs_csv}`, metric: {metric} time", "",
              "## Per method", "", s.to_string(), "", "## Win / tie / loss", "", w.to_string(index=False), ""]
     with open(os.path.join(out_dir, "A16_summary.md"), "w", encoding="utf-8") as fh:
@@ -165,6 +166,8 @@ def report(runs_csv: str, out_dir: str, metric: str = "end_to_end") -> pd.DataFr
 
 
 def main(argv=None) -> None:
+    import matplotlib
+    matplotlib.use("Agg")      # command line only: no screen needed. Never inside report(), so notebooks keep showing charts
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", default=os.path.join("results", "runs.csv"))
     ap.add_argument("--out", default=os.path.join("results", "a16"))
