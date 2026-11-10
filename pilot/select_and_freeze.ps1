@@ -10,12 +10,15 @@ $ErrorActionPreference = "Continue"     # decide on exit codes; warnings printed
 Set-Location (Split-Path $PSScriptRoot -Parent)
 $py = ".venv\Scripts\python.exe"
 if (-not (Test-Path $py)) { $py = "python" }
+$git = (Get-Command git -ErrorAction SilentlyContinue).Source            # Git on PATH, else its standard location
+if (-not $git) { $git = "C:\Program Files\Git\cmd\git.exe" }
+if (-not (Test-Path $git)) { Write-Host "STOP: Git not found." -ForegroundColor Red; exit 1 }
 function Step($name) { Write-Host "`n=== $(Get-Date -Format 'HH:mm:ss')  $name" }
 function Stop-Here($why) { Write-Host "`nSTOP: $why" -ForegroundColor Red; exit 1 }
 
 if (-not $SkipPull) {
     Step "1/8 git pull (C pushes results/confirm.csv)"
-    git pull --ff-only
+    & $git pull --ff-only
     if ($LASTEXITCODE -ne 0) { Stop-Here "git pull failed - resolve it first." }
 }
 if (-not (Test-Path "results/confirm.csv")) { Stop-Here "results/confirm.csv not found - has C pushed the confirmation runs?" }

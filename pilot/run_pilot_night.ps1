@@ -16,7 +16,9 @@ Step "1/7 Gurobi licence check (a model above the free 2,000-variable limit)"
 if ($LASTEXITCODE -ne 0) { Write-Host "STOP: no full Gurobi licence on this machine (free version limited to 2,000 variables)."; exit 1 }
 
 Step "2/7 git pull"
-git pull --ff-only
+$git = (Get-Command git -ErrorAction SilentlyContinue).Source            # Git on PATH, else its standard location
+if (-not $git) { $git = "C:\Program Files\Git\cmd\git.exe" }
+& $git pull --ff-only
 if ($LASTEXITCODE -ne 0) { Write-Host "STOP: git pull failed - resolve it first."; exit 1 }
 
 Step "3/7 test suite (never start a night on red tests)"

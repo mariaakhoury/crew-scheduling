@@ -1,0 +1,16 @@
+class,reason,SP_not_built,instance,n,m,L,W,n_arcs,n_duties,AF_status,AF_time,SP_status,SP_time,class_source,selected_as
+EASY,both fast / similar,False,rt_n20_m2_L360_s201,20,2,360,270,84,371.0,OPTIMAL,0.0,OPTIMAL,0.015000104904174805,confirmation,class target
+EASY,both fast / similar,False,rt_n30_m3_L360_s201,30,3,360,270,143,525.0,OPTIMAL,0.14599990844726562,OPTIMAL,0.012000083923339844,pilot (both solved below the hard threshold),class target
+EASY,both fast / similar,False,rt_n40_m2_L480_s201,40,2,480,360,350,922.0,OPTIMAL,0.039999961853027344,OPTIMAL,0.0280001163482666,pilot (both solved below the hard threshold),class target
+TIME_LIMIT,AF hit the time limit,False,rt_n50_m2_L600_s201,50,2,600,450,560,14599.0,TIME_LIMIT,120.00599980354309,OPTIMAL,0.11100006103515625,confirmation,class target
+MEDIUM,SP faster by x35.3,False,rt_n50_m3_L600_s201,50,3,600,450,386,9982.0,OPTIMAL,3.5250000953674316,OPTIMAL,0.06400012969970703,confirmation,class target
+EASY,both fast / similar,False,rt_n60_m2_L360_s201,60,2,360,270,818,6650.0,OPTIMAL,0.7070000171661377,OPTIMAL,0.04699993133544922,confirmation,class target
+MEDIUM,SP faster by x66.7,False,rt_n60_m3_L360_s201,60,3,360,270,559,1911.0,OPTIMAL,6.666000127792358,OPTIMAL,0.018999814987182617,confirmation,class target
+HARD,max solver time 38.6 s > 24 s,False,rt_n60_m2_L480_s201,60,2,480,360,818,16064.0,OPTIMAL,38.58799982070923,OPTIMAL,0.11700010299682617,confirmation,class target
+TIME_LIMIT,AF hit the time limit,False,rt_n80_m2_L360_s201,80,2,360,270,1456,22644.0,TIME_LIMIT,120.02999997138977,OPTIMAL,0.14100003242492676,confirmation,fill-up to 15
+TIME_LIMIT,AF hit the time limit,False,rt_n100_m3_L480_s201,100,3,480,360,1539,63633.0,TIME_LIMIT,120.02500009536743,OPTIMAL,0.5980000495910645,confirmation,class target
+TIME_LIMIT,AF hit the time limit,True,rt_n100_m2_L600_s201,100,2,600,450,2245,2000001.0,TIME_LIMIT,120.03500008583069,COLUMN_CAP,,confirmation,class target
+TIME_LIMIT,AF hit the time limit,True,rt_n300_m3_L480_s201,300,3,480,360,13392,2000001.0,TIME_LIMIT,120.29900002479553,COLUMN_CAP,,confirmation,class target
+TIME_LIMIT,AF hit the time limit,True,rt_n500_m3_L360_s201,500,3,360,270,37302,2000001.0,TIME_LIMIT,120.07799983024597,COLUMN_CAP,,confirmation,fill-up to 15
+TIME_LIMIT,AF hit the time limit,True,rt_n500_m2_L480_s201,500,2,480,360,56864,2000001.0,TIME_LIMIT,120.22699999809265,COLUMN_CAP,,confirmation,class target
+TIME_LIMIT,AF hit the time limit,True,rt_n500_m3_L480_s201,500,3,480,360,37302,2000001.0,TIME_LIMIT,120.08699989318848,COLUMN_CAP,,confirmation,class target

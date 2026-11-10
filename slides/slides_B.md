@@ -13,8 +13,9 @@
 covered exactly once.
 
 **Show:** left, the 8-trip example P0 as a timetable; right, the "menu": a matrix with trips as rows and a few of
-the 40 legal duties as columns (1 = the duty covers the trip). Highlight the 2 chosen columns {0,1,4,5} and
-{2,3,6,7} = $945. Under it, the whole model in one line:
+the 40 legal duties as columns (1 = the duty covers the trip). Highlight the 2 chosen columns {0, 1, 4, 5} and
+{2, 3, 6, 7} = $945. Trips are numbered 0-7 on every slide, like the Gantt charts (A7) and slide 10 (group
+decision, 10 Nov). Under it, the whole model in one line:
 min Σ c_p z_p subject to Σ_{p ∋ i} z_p = 1 for every trip i, z_p ∈ {0, 1}.
 
 **Script (106 words):**
@@ -83,11 +84,12 @@ every cost is a multiple of $0.50, so a gap below $0.50 leaves no better schedul
 **Key message:** 15-20 generated rotation timetables that cover the professor's three groups, selected by a rule
 fixed before the final runs - no hand-picking.
 
-**Show:** left, a small feature table (n, terminals, L, duties, class) of the final benchmark
-(`instances/final/README.md`); right, the class counts against the targets (from `SELECTION.md`) and the three
-groups: *every model fast* (easy), *models differ clearly* (medium + hard), *no model finishes* (time limit).
-Footnote: limitation - W = 0.75 L ties the two duty limits.
-**[final]**: _N_ instances; easy _a_ / medium _b_ / hard _c_ / time limit _d_; SP not built _e_; n from _x_ to _y_.
+**Show (done 10 Nov, from the frozen benchmark):** three cards for the professor's groups - *every model fast* 4,
+*models differ clearly* 6 (medium 2, hard 1, and 3 time-limit instances Model 2 solves in under 0.6 s), *no model
+finishes* 5 (Model 1 times out, Model 2 not built) - and a class summary table (instances, n, terminals, duty
+length, |P|, Model 1 / Model 2 times). Footer: the rule, 15 of 43 candidates, 2 by the fill-up; limitation
+W = 0.75 L. Full 15-row table: `notebook_src/benchmark.md`. Classes are recomputed from the final runs (Fri 13):
+update the cards and table if any instance changes class.
 
 **Script (147 words):**
 "Our instances imitate real timetables: buses shuttle between terminals all day, busier in the morning and evening
@@ -142,7 +144,8 @@ shortest path with spread and driving limits on the acyclic trip graph.
 | **Total** | **5:00** | **649** | **≈5:00** - no slack: speak calmly, and cut a sentence if a rehearsal runs over |
 
 ### To finish on Sun 15
-- [ ] Replace every *[pilot]* number with the final one; fill every **[final]** blank
+- [ ] Replace every *[pilot]* number with the final one (slide 9 already uses the frozen benchmark; recheck its
+      classes against the final runs)
 - [ ] Slide 7 right chart: `results/b13/sizes.png` from the final runs
 - [ ] Slide 8 chart: ask A for the A12 chart; fallback `results/b13/build_cost.png`
 - [ ] Slide 13 chart: `results/b13/status_map.png`; H4/H5 verdicts from `B13_summary.md`

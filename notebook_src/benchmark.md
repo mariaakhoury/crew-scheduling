@@ -1,9 +1,9 @@
 ## Benchmark: where the instances come from and what makes them hard
 
 > **Owner: B (tasks B5, B6, B9, B16).** Numbers marked *[pilot]* come from the 30 s + 30 s pilot on 43 candidate
-> instances (`results/pilot.csv` + `results/pilot_small.csv`) and are preliminary. The final counts, classes and
-> table below are filled in from `instances/final/MANIFEST.csv` and `instances/final/SELECTION.md` after the freeze
-> on Wed 11 Nov. *[final]* marks those places.
+> instances (`results/pilot.csv` + `results/pilot_small.csv`). The selected benchmark and its table come from the
+> confirmation runs at the final limits (`results/confirm.csv`, final-run machine) and the freeze
+> (`instances/final/`). Final classes and results are reported with the final runs.
 
 ### Source of the instances
 No public data set of bus timetables with our exact rules (terminal changes, 10-minute turnaround, spread and
@@ -72,14 +72,42 @@ least 2 SP-not-built instances are kept; if fewer than 15 are selected, the rema
 rule. The exact step-by-step procedure is in `instances/final/SELECTION.md`; no instance is hand-picked, replaced or
 removed after the final runs start.
 
-**[final]** Selected: _N_ instances (target 20, minimum 15): easy _a_, medium _b_, hard _c_, time limit _d_;
-SP not built _e_; n from _x_ to _y_. Fill-up used: _yes/no_ (why). Full table: `instances/final/README.md`;
-fingerprints: `instances/final/MANIFEST.csv`.
+**The selected benchmark (frozen 10 Nov, from the confirmation runs at 120 s + 120 s on the final-run machine).**
+15 instances (course minimum 15; plan target 20), n from 20 to 500 trips, 2 or 3 terminals, L = 6, 8 or 10 hours:
+
+| instance | n | terminals | L (h) | arcs per trip | duties \|P\| | class at selection | Model 1 (s) | Model 2 (s) |
+|---|---|---|---|---|---|---|---|---|
+| rt_n20_m2_L360 | 20 | 2 | 6 | 4.2 | 371 | easy | 0.00 | 0.02 |
+| rt_n30_m3_L360 | 30 | 3 | 6 | 4.8 | 525 | easy | 0.15 | 0.01 |
+| rt_n40_m2_L480 | 40 | 2 | 8 | 8.8 | 922 | easy | 0.04 | 0.03 |
+| rt_n60_m2_L360 | 60 | 2 | 6 | 13.6 | 6,650 | easy | 0.71 | 0.05 |
+| rt_n50_m3_L600 | 50 | 3 | 10 | 7.7 | 9,982 | medium | 3.53 | 0.06 |
+| rt_n60_m3_L360 | 60 | 3 | 6 | 9.3 | 1,911 | medium | 6.67 | 0.02 |
+| rt_n60_m2_L480 | 60 | 2 | 8 | 13.6 | 16,064 | hard | 38.59 | 0.12 |
+| rt_n50_m2_L600 | 50 | 2 | 10 | 11.2 | 14,599 | time limit | limit | 0.11 |
+| rt_n80_m2_L360 † | 80 | 2 | 6 | 18.2 | 22,644 | time limit | limit | 0.14 |
+| rt_n100_m3_L480 | 100 | 3 | 8 | 15.4 | 63,633 | time limit | limit | 0.60 |
+| rt_n100_m2_L600 | 100 | 2 | 10 | 22.5 | > 2 million | time limit, SP not built | limit | not built |
+| rt_n300_m3_L480 | 300 | 3 | 8 | 44.6 | > 2 million | time limit, SP not built | limit | not built |
+| rt_n500_m3_L360 † | 500 | 3 | 6 | 74.6 | > 2 million | time limit, SP not built | limit | not built |
+| rt_n500_m2_L480 | 500 | 2 | 8 | 113.7 | > 2 million | time limit, SP not built | limit | not built |
+| rt_n500_m3_L480 | 500 | 3 | 8 | 74.6 | > 2 million | time limit, SP not built | limit | not built |
+
+Times are solver seconds from the confirmation runs ("limit" = Model 1 hit the 120 s time limit; "not built" = more
+than 2,000,000 duties). † = selected by the fill-up rule. Class mix at selection: easy 4, medium 2, hard 1,
+time limit 8; SP not built 5. **The fill-up was used for 2 places** (both time-limit instances) because only 2
+medium and 1 hard instance existed (targets 5 and 5): on these timetables Model 1 mostly either finishes in
+seconds or not at all within 120 s, so few instances fall in between. The final classes are recomputed from the
+final runs (Master Plan §10.3 step 5) and reported with the results. Full documentation:
+`instances/final/README.md`; fingerprints: `instances/final/MANIFEST.csv`; the selection with every candidate
+considered: `instances/final/SELECTION.md`.
 
 This covers the professor's three required groups:
-- **instances every model solves quickly**: the easy class (both models optimal in under a second *[pilot]*);
-- **instances where the models differ clearly**: medium and hard (Model 2 up to 71x faster at n = 60 *[pilot]*);
-- **instances Gurobi cannot solve within the time limit**: the time-limit class.
+- **instances every model solves quickly**: the 4 easy instances (both models optimal in under a second);
+- **instances where the models differ clearly**: medium and hard (Model 1 takes 3.5-39 s, Model 2 under 0.2 s),
+  and the 3 time-limit instances that Model 2 solves in under 0.6 s while Model 1 cannot finish in 120 s;
+- **instances Gurobi cannot solve within the time limit**: the 5 time-limit instances where Model 1 runs out of
+  time and Model 2 cannot even be built.
 
 ### Limitations
 - One generator family: conclusions hold for rotation timetables of this kind, not for every real network.
