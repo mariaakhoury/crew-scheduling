@@ -79,7 +79,7 @@ Model 1's LP is weak, so Gurobi searches a long time for good solutions, and a r
 
 **Heuristic quality [H-preview].** Greedy + local search on the 24 confirmation candidates: under 0.5 s each up to
 n = 500, every schedule passes the checker; median 2.5 % above the optimum where SP proves it (max 11.3 %, n = 50
-with L = 600); local search improved greedy on 9 of 24 (by 0.6-5.3 %). On two of the largest candidates (n = 400
+with L = 600); local search improved greedy on 8 of 24 (by 0.6-5.3 %). On two of the largest candidates (n = 400
 and n = 500) the heuristic schedule is cheaper than plain AF's incumbent after 120 s (−2.2 %, −1.4 %) *[confirm]*.
 
 **Verdict: _after Gate 3_.** Preliminary reading *[pilot]*: the start moved AF's first incumbent forward more than
