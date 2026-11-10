@@ -41,7 +41,7 @@ and it cannot fix Model 1's weak bound.
 
 **Show:** left, a flow picture: timetable → greedy → local search → complete start (x, u, v, T, D for Model 1;
 z for Model 2) → Gurobi log line "User MIP start produced solution". Right, the B12 paired chart
-(`paired_effect.png`: AF vs AF+S and SP vs SP+S).
+(`slides/figures/C_slide11_start_effect.png`: AF vs AF+S and SP vs SP+S).
 
 **Numbers (final runs):**
 - heuristic time: at most 0.43 s on every instance up to n = 500; all 15 schedules pass the checker
@@ -80,7 +80,8 @@ one step.
 on; where SP cannot be built, AF still returns a feasible schedule with a proven gap - and AF's gap is the bound,
 not the schedule.
 
-**Show:** the comparison table (C9, `results/report/tables.md`, methods in rows) and the performance profile (A16).
+**Show:** the comparison table (C9, `results/report/tables.md`, methods in rows) and the performance profile (A16,
+`slides/figures/C_slide12_profile.png`).
 Highlight three numbers: SP optimal 10 / 15, AF optimal 7 / 15, SP not built 5 / 15.
 
 **Numbers (final runs):**
@@ -116,7 +117,8 @@ enumeration and build too: SP's worst end-to-end is still 0.9 s where it is buil
 ## Slide 14 - "Theory held for the bounds and the cliff; the start and the build share surprised us. Next: column generation" (1:30)
 
 **Show:** left, the hypothesis table below. Right, the Gantt chart of the largest final instance with a verified
-schedule (A7, `viz`): `rt_n500_m2_L480_s201`, AF+S, $35,342.00, 500 trips, time limit with a proven gap of 23.1 %.
+schedule (A7 `viz`, `slides/figures/C_slide14_gantt.png`): `rt_n500_m2_L480_s201`, AF+S, 77 duties,
+$35,342.00, 500 trips, time limit with a proven gap of 23.1 %, re-checked by the checker before drawing.
 Bottom line: limitations and "what next" in one sentence each.
 
 **Verdict table (final runs, rules of Master Plan §10.9):**
@@ -154,5 +156,5 @@ real timetables?* - only for this generator's family; we say so. *Why column gen
 
 ### Before Gate 3 - what is left
 1. A and B check the H1-H5 and H8 wording against their own write-ups (`notebook_src/discussion.md`).
-2. Slide 14 Gantt: draw `rt_n500_m2_L480_s201` (AF+S solution in `results/solutions/`) with A7 `viz`.
+2. Figures: `py slides/make_figures_C.py` (done, 10 Nov).
 3. Merge: A's slides 1-5 + B's `slides_B.pptx` (6-9, 13) + these four into `slides_groupM.pptx` / `.pdf`.
