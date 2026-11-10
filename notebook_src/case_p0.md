@@ -1,16 +1,16 @@
 ## The P0 story: why a cheap-looking choice costs a whole driver
 
 P0 has 8 one-hour trips between terminals A and B (L = 420, W = 300, turnaround 10 min).
-The labels T1–T8 are trip ids 0–7.
+Trips are numbered by id, 0–7, in the text, the charts and the slides.
 
 **Greedy ($1,177.50, 3 drivers).** Greedy takes the trips in start order and gives each one to the driver
-where it waits least. T1 and T3 overlap, so it opens two drivers. When T7 arrives, both drivers could take it;
+where it waits least. Trips 0 and 2 overlap, so it opens two drivers. When trip 6 arrives, both drivers could take it;
 greedy picks the shorter wait (driver 1). Driver 1 now has 300 minutes of driving, the limit W.
-Then T8 has nowhere to go: driver 1 is full, and driver 2 is at terminal A while T8 leaves from B.
-Greedy hires a **third driver for one trip** (T8, outlined in red).
+Then trip 7 has nowhere to go: driver 1 is full, and driver 2 is at terminal A while trip 7 leaves from B.
+Greedy hires a **third driver for one trip** (trip 7, outlined in red).
 
-**Local search ($945.00, 2 drivers).** It moves T7 from driver 1 to driver 2 (a tail swap), then appends
-T8 to driver 2 (a merge). The swap alone makes things worse ($1,237.50), so it is only accepted together
+**Local search ($945.00, 2 drivers).** It moves trip 6 from driver 1 to driver 2 (a tail swap), then appends
+trip 7 to driver 2 (a merge). The swap alone makes things worse ($1,237.50), so it is only accepted together
 with the merge: this is the *swap-then-merge* move. On P0 local search reaches the optimum.
 
 **Optimal ($945.00).** Model 1, Model 2 and brute force all agree.
