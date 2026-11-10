@@ -15,7 +15,7 @@
 | H3 | Where both are built and solved, SP needs fewer nodes and less solver time | _after Gate 3_ | paired nodes / times | A |
 | H4 | SP's end-to-end advantage shrinks as \|P\| grows (build share rises with \|P\|) | _after Gate 3_ | `results/b13` | A + B |
 | H5 | SP becomes unbuildable for long duties and large n; AF is built on every instance | _after Gate 3_ | `results/b13` | **B** |
-| H6 | The MIP start helps AF more than SP | _after Gate 3_ | `results/b12` | C (B12 data) |
+| H6 | The MIP start helps AF more than SP | **not confirmed** (median 2.6 % AF vs 2.6 % SP) | `results/b12` | C (B12 data) |
 | H8 | Difficulty grows with trips per duty more than with n alone | _after Gate 3_ | `results/b13` | **B** |
 
 ### H5 - SP becomes unbuildable, AF is always built (B)
@@ -77,36 +77,50 @@ greedy on 9 of 24 candidates.
 the optimum, so Gurobi usually finds and proves the optimum at the root node: a start has little left to do.
 Model 1's LP is weak, so Gurobi searches a long time for good solutions, and a ready-made one is worth more.
 
-**Heuristic quality [H-preview].** Greedy + local search on the 24 confirmation candidates: under 0.5 s each up to
-n = 500, every schedule passes the checker; median 2.5 % above the optimum where SP proves it (max 11.3 %, n = 50
-with L = 600); local search improved greedy on 8 of 24 (by 0.6-5.3 %). On two of the largest candidates (n = 400
-and n = 500) the heuristic schedule is cheaper than plain AF's incumbent after 120 s (−2.2 %, −1.4 %) *[confirm]*.
+**Heuristic quality (final runs).** Greedy + local search on the 15 benchmark instances: at most 0.43 s each up
+to n = 500, every schedule passes the checker; median 2.4 % above the optimum on the 10 instances where SP proves
+it (0 % on 2, max 11.3 % at n = 50 with L = 600); local search improved greedy on 2 of 15. Where SP cannot be built,
+the heuristic is within 0.8-7.8 % of plain AF's 120 s incumbent and 1.5 % cheaper than it on `rt_n500_m3_L360`.
 
-**Verdict: _after Gate 3_.** Preliminary reading *[pilot]*: the start moved AF's first incumbent forward more than
-SP's (median time ratio 0.12 vs 0.27) and improved AF's time-limit gap by a median of 7 %; SP gained 9 % solver
-time where it was not already solved at the root. If the final runs agree, H6 is **confirmed**, with the caveat
-that the start improves only the incumbent side of AF's gap; the bound side, which dominates it, is untouched.
-List every instance where the start did not help (or hurt) and why.
+**Verdict: not confirmed.** B12 (`crew.analysis_heuristic`, rule §10.9): median improvement AF+S vs AF 2.6 % (15
+pairs), SP+S vs SP 2.6 % (10 comparable pairs; 5 not built either way). Gurobi accepted every start (AF 15/15, SP
+10/10) and AF's first incumbent came at a median 0.16 of the time without the start, but the final result moved
+only in one place:
+- **Where it helped:** AF on the 4 largest instances (n = 300-500, time limit either way): the final schedule was
+  0.2-3.9 % cheaper with the start (`rt_n500_m3_L360`: $45,143.50 → $43,400.50). There AF is still searching for
+  good schedules at the time limit, so a ready-made one is worth something.
+- **Where it did not:** the other 4 AF time-limit instances ended with the same schedule (on the 3 where SP knows
+  the optimum, AF had already found it: the open gap is the bound, which a start cannot move). SP is solved at the
+  root node with or without the start; its differences are hundredths of a second.
+- **Where it hurt:** two AF instances that are proved in seconds took longer with the start (`rt_n60_m2_L480`
+  38.8 → 71.5 s, `rt_n60_m3_L360` 7.3 → 9.7 s). A different first incumbent sends branch-and-bound down a
+  different tree; with one seed this is performance variability, not a bad start.
+
+So the expectation was right about *why* SP needs no help, but wrong about AF: on most instances AF either proves
+the optimum quickly by itself or is stuck on its bound, and only on the largest ones is it short of good schedules.
 
 ### Conclusions (C11)
 
-> Draft from the confirmation runs *[confirm]*; rewrite every number from `results/runs.csv` after Gate 3.
+> From the final runs (`results/runs.csv`, 15 instances, verify PASS).
 
-1. **Model 2 wins whenever it can be built.** It proved the optimum on every candidate it could build (14 of 24),
-   mostly in under a second, because its LP bound is the optimum or very close to it.
-2. **Model 1 is the fallback that always runs.** It was built on every candidate, but proved optimality only on the
-   smallest ones (5 of 24); from n = 50 on it stopped at the time limit with proven gaps of 5-27 %, growing with n.
-   Its gap is mostly a weak bound, not a bad schedule: where SP knows the optimum, AF's incumbent was within 1.7 %.
-3. **The menu explodes.** Model 2 could not be built on 10 of 24 candidates (more than 2,000,000 duties): every
-   candidate with n ≥ 300, and already n = 100 when duties may last 10 hours.
-4. **The heuristic is cheap and useful as a start, not as an answer.** Half a second, always legal, a few percent
-   above the optimum; given as a complete start it [H6 verdict].
+1. **Model 2 wins whenever it can be built.** It proved the optimum on all 10 instances it could build, each in
+   under a second at the root node, because its LP bound equals the optimum on every one of them.
+2. **Model 1 is the fallback that always runs.** It was built on all 15, but proved optimality only on 7 (n ≤ 60);
+   from n = 50 on it can stop at the time limit, with proven gaps of 4.7-27.2 % growing with n. Its gap is a weak
+   bound, not a bad schedule: on all 3 time-limit instances where SP knows the optimum, AF's schedule *was* the
+   optimum.
+3. **The menu explodes.** Model 2 could not be built on 5 of 15 instances (more than 2,000,000 duties): every
+   instance with n ≥ 300, and already n = 100 when duties may last 10 hours.
+4. **The heuristic is cheap and useful as a start for big instances, not as an answer.** Under half a second,
+   always legal, a median 2.4 % above the optimum; as a complete start it improved Model 1 only on the largest
+   instances (up to 3.9 %) and never changed Model 2 (H6 not confirmed).
 5. **Practical rule for this problem family:** count the duties first; if the menu fits, solve Model 2; otherwise
-   solve Model 1 with the heuristic start and report its proven gap.
+   solve Model 1 with the heuristic start and report its proven gap, knowing the gap mostly measures the bound.
 
 **What the group learned.** A stronger formulation is worth more than a faster solver, until it no longer fits in
-memory; a "gap" is a statement about the bound as much as about the schedule; and every result we report is
-checked by code that shares nothing with the models (the independent checker).
+memory; a "gap" is a statement about the bound as much as about the schedule; two of our predictions (H4, H6) were
+wrong, and finding out why taught us more than the ones that held; and every result we report is checked by code
+that shares nothing with the models (the independent checker).
 
 ### Negative and surprising results (all members)
 
