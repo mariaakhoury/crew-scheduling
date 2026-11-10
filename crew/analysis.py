@@ -536,3 +536,79 @@ def save_charts(df: pd.DataFrame, outdir: str, classes=None) -> dict[str, str]:
         fig.savefig(path, facecolor=_INK["surface"])
         out[name] = path
     return out
+
+
+# ------------------------------------------------------------------ one-command report (C9)
+
+def _markdown(table: pd.DataFrame, title: str) -> str:
+    shown = to_display(table)
+    head = [str(shown.index.name or "")] + [str(c) for c in shown.columns]
+    lines = [f"### {title}", "", "| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
+    lines += ["| " + " | ".join([str(i)] + [str(v) for v in r]) + " |" for i, r in zip(shown.index, shown.values)]
+    return "\n".join(lines) + "\n"
+
+
+def write_report(runs_csv: str, outdir: str, manifest_csv: Optional[str] = None,
+                 expected_config_hash: Optional[str] = None) -> dict[str, str]:
+    """Every required table and chart from runs.csv in one call (task C9): tables/*.csv (plain numbers),
+    tables.md (displayed, with '≥' marks) and charts/*.png. Classes come from MANIFEST.csv (class_at_selection).
+    Refuses stale data exactly like load_runs. Returns {item: path or 'skipped: reason'}."""
+    import os
+    manifest = classes = None
+    if manifest_csv:
+        man = pd.read_csv(manifest_csv, dtype=str)
+        manifest = dict(zip(man["name"], man["sha256"]))
+        if "class_at_selection" in man:
+            classes = man.rename(columns={"name": "instance", "class_at_selection": "class"})[["instance", "class"]]
+    df = load_runs(runs_csv, expected_config_hash=expected_config_hash, manifest=manifest)
+    if manifest is not None:
+        missing = sorted(set(manifest) - set(df["instance"]))
+        if missing:
+            raise ValueError(f"{len(missing)} frozen instances have no rows yet: {missing[:5]}")
+    tables_dir = os.path.join(outdir, "tables")
+    os.makedirs(tables_dir, exist_ok=True)
+    out, md = {}, [f"## Results tables (recomputed from `{os.path.basename(runs_csv)}`, {len(df)} live rows)\n"]
+    for method in REQUIRED_METHODS:
+        try:
+            t = summary_table(df, method)
+        except ValueError as exc:
+            out[f"summary_{method}"] = f"skipped: {exc}"
+            continue
+        path = os.path.join(tables_dir, f"summary_{method.replace('+', 'plus')}.csv")
+        t.to_csv(path)
+        out[f"summary_{method}"] = path
+        md.append(_markdown(t, f"Summary: {method}"))
+    comp = comparison_table(df)
+    path = os.path.join(tables_dir, "comparison.csv")
+    comp.to_csv(path)
+    out["comparison"] = path
+    md.append(_markdown(comp, "Comparison of methods"))
+    md_path = os.path.join(outdir, "tables.md")
+    with open(md_path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write("\n".join(md))
+    out["tables.md"] = md_path
+    out.update(save_charts(df, os.path.join(outdir, "charts"), classes))
+    return out
+
+
+def main(argv=None) -> int:
+    import argparse
+    import matplotlib
+    matplotlib.use("Agg")                                       # only for the command line, never on import
+    ap = argparse.ArgumentParser(description="C9: every required table and chart from runs.csv.")
+    ap.add_argument("runs", nargs="?", default="results/runs.csv")
+    ap.add_argument("--manifest", default="instances/final/MANIFEST.csv", help="'none' for exploratory data")
+    ap.add_argument("--out", default="results/report")
+    ap.add_argument("--any-config", action="store_true",
+                    help="accept another configuration hash (exploratory data only)")
+    a = ap.parse_args(argv)
+    manifest = None if a.manifest.lower() == "none" else a.manifest
+    expected = None if a.any_config else config.config_hash(config.config_snapshot())
+    for item, result in write_report(a.runs, a.out, manifest, expected).items():
+        print(f"{item:<22} {result}")
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(main())

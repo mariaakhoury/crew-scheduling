@@ -1,0 +1,24 @@
+night 1: 15 instances x 7 methods; projected 106 min (worst case 366 min)
+pre-flight: all checks passed
+=== night 1: required methods + LP bounds (P0 + P1): H, AF, AF+S, SP, SP+S, LP-AF, LP-SP
+rt_n500_m3_L360_s201         AF+S         TIME_LIMIT        obj=43400.5    e2e=121.75 s
+rt_n500_m3_L360_s201         SP           COLUMN_CAP        obj=           e2e=32.67 s
+rt_n500_m3_L360_s201         SP+S         COLUMN_CAP        obj=           e2e=32.40 s
+rt_n500_m3_L360_s201         LP-AF        OPTIMAL           obj=32867.5    e2e=2.11 s
+rt_n500_m3_L360_s201         LP-SP        COLUMN_CAP        obj=           e2e=32.91 s
+rt_n500_m2_L480_s201         H            HEURISTIC         obj=35941.0    e2e=0.27 s
+rt_n500_m2_L480_s201         AF           TIME_LIMIT        obj=35659.5    e2e=122.46 s
+rt_n500_m2_L480_s201         AF+S         TIME_LIMIT        obj=35342.0    e2e=122.73 s
+rt_n500_m2_L480_s201         SP           COLUMN_CAP        obj=           e2e=75.40 s
+rt_n500_m2_L480_s201         SP+S         COLUMN_CAP        obj=           e2e=76.43 s
+rt_n500_m2_L480_s201         LP-AF        OPTIMAL           obj=27183.99999999999 e2e=4.26 s
+rt_n500_m2_L480_s201         LP-SP        COLUMN_CAP        obj=           e2e=75.62 s
+rt_n500_m3_L480_s201         H            HEURISTIC         obj=41013.5    e2e=0.43 s
+rt_n500_m3_L480_s201         AF           TIME_LIMIT        obj=40523.0    e2e=121.59 s
+rt_n500_m3_L480_s201         AF+S         TIME_LIMIT        obj=40459.0    e2e=122.07 s
+rt_n500_m3_L480_s201         SP           COLUMN_CAP        obj=           e2e=55.11 s
+rt_n500_m3_L480_s201         SP+S         COLUMN_CAP        obj=           e2e=54.00 s
+rt_n500_m3_L480_s201         LP-AF        OPTIMAL           obj=32867.5    e2e=2.03 s
+rt_n500_m3_L480_s201         LP-SP        COLUMN_CAP        obj=           e2e=54.82 s
+=== verify every saved solution (qa.verify_results, Q13/Q23)
+verify_results: PASS

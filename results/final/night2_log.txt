@@ -1,0 +1,21 @@
+night 2: 15 instances x 1 methods; projected 10 min (worst case 61 min)
+pre-flight: all checks passed
+=== night 2: reruns of crashed runs (once each): H, AF, AF+S, SP, SP+S, LP-AF, LP-SP
+=== night 2: naive big-M LP (P1): LP-AF-naive
+rt_n20_m2_L360_s201          LP-AF-naive  OPTIMAL           obj=2233.0     e2e=0.03 s
+rt_n30_m3_L360_s201          LP-AF-naive  OPTIMAL           obj=3138.0     e2e=0.03 s
+rt_n40_m2_L480_s201          LP-AF-naive  OPTIMAL           obj=3836.5     e2e=0.04 s
+rt_n50_m2_L600_s201          LP-AF-naive  OPTIMAL           obj=4395.0     e2e=0.05 s
+rt_n50_m3_L600_s201          LP-AF-naive  OPTIMAL           obj=4801.0     e2e=0.04 s
+rt_n60_m2_L360_s201          LP-AF-naive  OPTIMAL           obj=4881.5     e2e=0.07 s
+rt_n60_m3_L360_s201          LP-AF-naive  OPTIMAL           obj=5077.0     e2e=0.06 s
+rt_n60_m2_L480_s201          LP-AF-naive  OPTIMAL           obj=4881.5     e2e=0.06 s
+rt_n80_m2_L360_s201          LP-AF-naive  OPTIMAL           obj=6114.0     e2e=0.10 s
+rt_n100_m3_L480_s201         LP-AF-naive  OPTIMAL           obj=7635.5     e2e=0.10 s
+rt_n100_m2_L600_s201         LP-AF-naive  OPTIMAL           obj=7593.0     e2e=0.13 s
+rt_n300_m3_L480_s201         LP-AF-naive  OPTIMAL           obj=21093.499999999996 e2e=0.71 s
+rt_n500_m3_L360_s201         LP-AF-naive  OPTIMAL           obj=32867.5    e2e=2.00 s
+rt_n500_m2_L480_s201         LP-AF-naive  OPTIMAL           obj=27184.000000000007 e2e=3.18 s
+rt_n500_m3_L480_s201         LP-AF-naive  OPTIMAL           obj=32867.49999999999 e2e=1.97 s
+=== verify every saved solution (qa.verify_results, Q13/Q23)
+verify_results: PASS

@@ -16,3 +16,5 @@ results/tmp/
 # Windows folder metadata
 desktop.ini
 Thumbs.db
+# Local copy of the aborted 15:49 start of the final runs (kept for the record, never reported)
+results/aborted_*/

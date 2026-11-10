@@ -189,3 +189,36 @@ def test_rows_from_two_machines_are_refused_unless_explicitly_allowed(tmp_path):
     with pytest.raises(ValueError, match="machines"):
         load_runs(path)
     assert len(load_runs(path, allow_mixed_machines=True)) == 2
+
+
+CONFIRM = os.path.join(os.path.dirname(__file__), "..", "results", "confirm.csv")
+
+
+@pytest.mark.skipif(not os.path.exists(CONFIRM), reason="results/confirm.csv not present")
+def test_write_report_on_the_confirmation_runs(tmp_path):
+    import pandas as pd
+    from crew.analysis import write_report
+    out = write_report(CONFIRM, str(tmp_path), expected_config_hash=config.config_hash(config.config_snapshot()))
+    assert out["summary_H"].startswith("skipped") and os.path.exists(out["summary_AF"])
+    comp = pd.read_csv(out["comparison"], index_col=0)
+    assert comp.at["SP", "OPTIMAL (proven)"] == 14 and comp.at["AF", "OPTIMAL (proven)"] == 5   # C15 numbers
+    assert comp.at["SP", "not built"] == 10
+    md = open(out["tables.md"], encoding="utf-8").read()
+    assert "Summary: AF" in md and "Comparison of methods" in md and "≥" in md                  # censored marks
+    assert os.path.exists(out["time_vs_n"]) and out["lp_vs_optimum"].startswith("skipped")
+
+
+@pytest.mark.skipif(not os.path.exists(CONFIRM), reason="results/confirm.csv not present")
+def test_write_report_refuses_incomplete_or_stale_final_data(tmp_path):
+    import pandas as pd
+    from crew.analysis import write_report
+    rows = pd.read_csv(CONFIRM, dtype=str)
+    man = rows.drop_duplicates("instance")[["instance", "instance_sha256"]].rename(
+        columns={"instance": "name", "instance_sha256": "sha256"})
+    extra = pd.DataFrame([{"name": "never_run", "sha256": "0" * 64}])
+    pd.concat([man, extra]).to_csv(tmp_path / "MANIFEST.csv", index=False)
+    with pytest.raises(ValueError, match="no rows yet"):
+        write_report(CONFIRM, str(tmp_path / "r1"), str(tmp_path / "MANIFEST.csv"))
+    man.assign(sha256="f" * 64).to_csv(tmp_path / "MANIFEST.csv", index=False)
+    with pytest.raises(ValueError, match="MANIFEST"):
+        write_report(CONFIRM, str(tmp_path / "r2"), str(tmp_path / "MANIFEST.csv"))
