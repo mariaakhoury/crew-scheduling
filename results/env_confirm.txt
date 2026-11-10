@@ -1,0 +1,38 @@
+{
+ "config_hash": "d9b0982f3dd925db26cde0720f4f694d93c79c94075ac6779250465799b9965c",
+ "cpu": "Intel(R) Core(TM) Ultra 5 125U",
+ "git_commit": "0c0f1e4ea13aebf5d958baeec38678711666fde5",
+ "gurobi": "13.0.3",
+ "logical_cores": 14,
+ "machine_id": "b8796c6e6bd7",
+ "os": "Windows 11",
+ "physical_cores": 12,
+ "python": "3.13.2",
+ "ram_gb": 15.4,
+ "settings": {
+  "BUILD_LIMIT_S": 120,
+  "CLOCK_CHECK_EVERY": 10000,
+  "COLUMN_CAP": 2000000,
+  "COST_STEP": 0.5,
+  "COST_TOL": 0.01,
+  "C_PER_MIN": 0.5,
+  "F": 300.0,
+  "GUROBI_DEFAULT_TOLERANCES": {
+   "FeasibilityTol": 1e-06,
+   "IntFeasTol": 1e-05,
+   "OptimalityTol": 1e-06
+  },
+  "GUROBI_PARAMS": {
+   "LogToConsole": 0,
+   "MIPGap": 0.0,
+   "MIPGapAbs": 0.49,
+   "MemLimit": 11,
+   "Seed": 0,
+   "Threads": 4
+  },
+  "GUROBI_TIME_LIMIT_S": 120,
+  "HARD_KILL_S": 360,
+  "SCHEMA_VERSION": "1.0",
+  "TAU": 10
+ }
+}
