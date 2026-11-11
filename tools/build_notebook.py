@@ -347,12 +347,17 @@ def copy_data(dist: str) -> list[str]:
 
 
 def make_zip(dist: str) -> str:
+    """The optional data zip: everything the notebook needs next to it, but NOT the notebook itself (it is submitted
+    separately, so unzipping next to it must not clash) and nothing the notebook writes when it runs."""
     out = os.path.join(dist, "groupM_data.zip")
+    skip_files = {out, os.path.join(dist, NB_NAME), os.path.join(dist, "executed.ipynb")}
+    skip_dirs = {"__pycache__", ".ipynb_checkpoints", "crew", "figures"}   # crew/ and figures/ are written by the notebook
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
-        for folder, _, files in os.walk(dist):
+        for folder, dirs, files in os.walk(dist):
+            dirs[:] = [d for d in dirs if not (folder == dist and d in skip_dirs) and d not in ("__pycache__", ".ipynb_checkpoints")]
             for f in files:
                 p = os.path.join(folder, f)
-                if p == out or "__pycache__" in p:
+                if p in skip_files or f.endswith(".ipynb"):
                     continue
                 z.write(p, os.path.relpath(p, dist))
     return out

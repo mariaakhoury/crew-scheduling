@@ -41,3 +41,14 @@ def test_build_writes_notebook_and_data(tmp_path):
     assert (tmp_path / bn.NB_NAME).exists()
     assert (tmp_path / "instances" / "proto" / "P0_example8.json").exists()
     assert (tmp_path / "instance.schema.json").exists() and (tmp_path / "README.txt").exists()
+
+
+def test_zip_has_data_but_not_the_notebook(tmp_path):
+    import zipfile
+    bn.main(["--out", str(tmp_path), "--zip"])
+    (tmp_path / "crew").mkdir(exist_ok=True)                      # as if the notebook had been run here
+    (tmp_path / "crew" / "x.py").write_text("", encoding="utf-8")
+    names = zipfile.ZipFile(bn.make_zip(str(tmp_path))).namelist()
+    assert "instances/proto/P0_example8.json" in names and "README.txt" in names
+    assert not any(n.endswith(".ipynb") for n in names)
+    assert not any(n.startswith("crew/") for n in names)
