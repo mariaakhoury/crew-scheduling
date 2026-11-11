@@ -181,7 +181,8 @@ that shares nothing with the models (the independent checker).
 | Naive and tight big-M give exactly the same LP bound (H2) | Model 1's LP leaves the chain rows (4), (6) slack, so the size of M never matters; its weakness is the formulation |
 | SP's build share falls as \|P\| grows (H4) | building is cheap up to 63,633 duties; the root LP grows faster. The advantage ends at the 2,000,000 cap, as a cliff |
 | H8 cannot be decided (n 0.83 vs trips per duty 0.84) | n and trips per duty are almost perfectly correlated in our benchmark (ρ = 0.97), so their effects cannot be separated; 8 of 15 instances censored at 120 s |
-| The start made AF slower on two quick instances (`rt_n60_m2_L480` 38.8 → 71.5 s) | a different first incumbent sends branch-and-bound down a different tree (see H6) |
+| AF stopped at the time limit with gaps of 4.7-14.4 % on 3 instances where its schedule already was the optimum (SP proves it) | the gap measures AF's weak lower bound, not its schedule: AF lacks the proof, not the answer (C) |
+| The MIP start made two quick AF proofs slower (n = 60: 38.8 → 71.5 s, 7.3 → 9.7 s) | a different first incumbent sends branch-and-bound down a different tree; with one seed this is performance variability (H6, C) |
 | SP not built already at n = 100 when duties may last 10 h | 10-hour duties fit many more trips, and \|P\| is exponential in the trips per duty (H5) |
 | [pilot] SP time limit at n = 200 with 1.7 M duties; solved at the final 120 s limit in 64 s | each node LP has 1.7 M columns: a strong bound but a slow LP (§4.6) |
 | [pilot] one AF build took 38.8 s | memory swapping on the 7.7 GB pilot laptop; on the final-run machine every AF build took at most 2.2 s |
@@ -191,7 +192,8 @@ that shares nothing with the models (the independent checker).
   acyclic trip graph instead of enumerating \|P\|.
 - An exact arc reduction for Model 1: delete every arc i -> j whose two trips alone break a limit
   (e_j - s_i > L or d_i + d_j > W). That is 56,669 of 153,818 arcs (36.8 %) on our benchmark (B's count): Model 1
-  becomes about a third smaller with the same integer optimum, and its LP bound cannot get weaker. Found after the
-  code freeze, so not in the runs.
+  becomes about a third smaller with the same integer optimum. Found after the code freeze, so not in the runs.
+- Several seeds per configuration, to separate the effect of the MIP start from performance variability (H6: 3 of
+  15 AF pairs got worse with the start, which one seed cannot explain away) (C).
 - Separate the effect of n from trips per duty (H8): the L-sweep (one timetable, only L changed).
 - _add from the final results_
