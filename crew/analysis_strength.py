@@ -8,6 +8,7 @@ runs.csv (Q25); no new runs.
   reference_values(df)   per instance: the value gaps are measured against (proven optimum, else best known)
   strength_table(df)     per instance and model: LP gap %, root gap %, nodes, build time, solve time
   q22_check(df)          LP(AF) <= LP(SP) on every instance where both LPs exist (must hold: Theorem 3)
+  naive_vs_tight(df)     task A8: LP-AF with naive vs tight big-M constants (Q21: naive never stronger)
   plot_gap_vs_time(df)   chart 1: LP gap (or root gap) against solve time, one marker per model
   plot_time_split(df)    chart 2: stacked enumerate / build / solve time for AF and SP on every instance
 
@@ -92,6 +93,20 @@ def q22_check(df: pd.DataFrame, tol: float = 1e-6) -> pd.DataFrame:
     return out
 
 
+def naive_vs_tight(df: pd.DataFrame, tol: float = 1e-6) -> pd.DataFrame:
+    """Task A8 (backup slide, H2): LP bound of Model 1 with the naive constants (one M per family) and with the
+    tight per-arc constants, per instance. Q21: the naive bound must never be higher (it is a weaker relaxation)."""
+    df = _active(df)
+    ref = reference_values(df)["best_value"]
+    get = lambda m: df[(df["method"] == m) & (df["status"] == "OPTIMAL")].groupby("instance")["objective"].first()
+    out = pd.DataFrame({"LP tight": get("LP-AF"), "LP naive": get("LP-AF-naive")}).dropna()
+    out["difference"] = out["LP tight"] - out["LP naive"]
+    out["gap tight %"] = 100 * (ref.reindex(out.index) - out["LP tight"]) / ref.reindex(out.index)
+    out["gap naive %"] = 100 * (ref.reindex(out.index) - out["LP naive"]) / ref.reindex(out.index)
+    out["Q21 ok"] = out["LP naive"] <= out["LP tight"] + tol * np.maximum(1.0, out["LP tight"].abs())
+    return out
+
+
 def plot_gap_vs_time(df: pd.DataFrame, gap: str = "lp", ax=None):
     """Chart 1: bound gap against solve time (log scale), one marker per model. Instances that hit the time limit
     sit at the right edge. gap='lp' uses the LP runs; gap='root' the MIP root bound (useful before LP runs exist)."""
@@ -168,6 +183,8 @@ def report(runs_csv: str, out_dir: str) -> pd.DataFrame:
     t.to_csv(os.path.join(out_dir, "strength_table.csv"), index=False)
     s.to_csv(os.path.join(out_dir, "strength_summary.csv"), index=False)
     q.to_csv(os.path.join(out_dir, "q22_check.csv"))
+    nt = naive_vs_tight(df)
+    nt.to_csv(os.path.join(out_dir, "naive_vs_tight.csv"))
     gap = "lp" if t["lp_gap_pct"].notna().any() else "root"
     for fig, name in ((plot_gap_vs_time(df, gap=gap), "gap_vs_time.png"), (plot_time_split(df), "time_split.png")):
         fig.savefig(os.path.join(out_dir, name), dpi=150, bbox_inches="tight")
@@ -176,7 +193,9 @@ def report(runs_csv: str, out_dir: str) -> pd.DataFrame:
              f"- Chart 1 uses the **{'LP' if gap == 'lp' else 'root-node'}** gap"
              + ("" if gap == "lp" else " (no LP-AF / LP-SP rows in this file yet)") + ".",
              f"- Q22, LP(AF) <= LP(SP): {'not testable yet (no instance with both LPs)' if q.empty else ('holds on all ' + str(len(q)) + ' instances' if q['ok'].all() else 'VIOLATED on ' + str(int((~q['ok']).sum())) + ' instances: a bug, check before reporting')}.",
-             "", "## Per model", "", s.to_string(index=False), ""]
+             f"- Q21 / H2, naive vs tight big-M: {'no LP-AF-naive rows' if nt.empty else ('naive never stronger on all ' + str(len(nt)) + ' instances; largest difference ' + format(nt['difference'].abs().max(), '.2g'))}.",
+             "", "## Per model", "", s.to_string(index=False), "",
+             "## Naive vs tight big-M (A8)", "", nt.round(2).to_string() if not nt.empty else "(no rows)", ""]
     with open(os.path.join(out_dir, "A12_summary.md"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines))
     return q
