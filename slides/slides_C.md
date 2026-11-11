@@ -15,8 +15,7 @@ repairs it with a move that is only good as a pair.
 
 **Show:** the three Gantt charts of P0 from A11 (`case_study`): greedy $1,177.50 with trip 7 alone in red, after local
 search $945.00, optimal $945.00. Under them the cost table: drivers −$300, paid minutes +$67.50, total −$232.50.
-**Trip numbers:** trip ids 0-7, as on slide 6 (duties {0,1,4,5} and {2,3,6,7}). The Gantt bars carry the file's
-labels T1-T8 (T8 = trip 7): before merging, relabel the bars with the ids (or say "T8, trip 7") so slides 6 and 10 match.
+**Trip numbers:** trip ids 0-7, as on slide 6 (duties {0,1,4,5} and {2,3,6,7}); the Gantt bars show the same ids.
 
 **Script (128 words):**
 "Before any solver runs, we build a schedule by hand-style rules. Greedy takes the trips in time order and gives
@@ -133,8 +132,8 @@ Bottom line: limitations and "what next" in one sentence each.
 |---|---|---|---|
 | H1 | Model 1's LP ≤ Model 2's LP (Theorem 3) | **confirmed** | held on all 10 built instances; LP-SP = optimum on all 10, LP-AF 1.9-15.8 % lower |
 | H2 | Naive big-M is weaker, but only a little | **confirmed** (no difference at all) | LP-AF-naive = LP-AF on all 15 instances |
-| H3 | SP needs fewer nodes and less solver time | **confirmed** | 7 instances both proved: SP 1 node each (AF up to 77,832); faster on 6, n = 20 tie (0.04 s) |
-| H4 | SP's build share grows with \|P\| | **not confirmed** | Spearman ρ = −0.92 over 10 built SP runs; median build share 48 % |
+| H3 | SP needs fewer nodes and less solver time | **confirmed** | 7 instances both proved: SP 1 node each (AF up to 77,832); faster on 6, n = 20 tie (solver time 0.005 vs 0.006 s) |
+| H4 | SP's build share grows with \|P\| | **not confirmed** | Spearman ρ = −0.92 over 10 built SP runs: build share falls from 72 % to 32 % (median 48 %) |
 | H5 | SP becomes unbuildable; AF always built | **confirmed** | SP not built on 5 of 15, AF build failures 0 |
 | H6 | The MIP start helps AF more than SP | **not confirmed** | median improvement 2.6 % AF vs 2.6 % SP; AF: 2 wins, 10 ties, 3 losses |
 | H8 | Difficulty grows with trips per duty more than with n | **too close to call** | rank correlation with difficulty: trips per duty 0.84, n 0.83 |
@@ -151,9 +150,10 @@ limit tied to the spread. What next? Instead of writing Model 2's whole menu, ge
 improve the solution - column generation. Its pricing problem is a shortest path with two resources on our trip
 network: Model 2's strength without its explosion."
 
-**Likely questions:** *Why is H4 not confirmed?* - where SP is built, solving with tens of thousands of columns also
-grows with \|P\|, and the build is a near-constant share (median 48 %); the build cost shows its weight only as the
-cliff (H5), not as a rising share (B13). *Would the conclusions change with another seed?* - possibly in the
+**Likely questions:** *Why is H4 not confirmed?* - the build share *falls* as \|P\| grows (72 % → 32 %, median 48 %),
+because the root LP grows faster than the build: from 371 to 63,633 duties the solve time grows about 100 times
+(0.006 → 0.61 s), the enumeration + build only about 9 times (0.03 → 0.29 s). The build cost shows its weight only
+as the cliff (H5), not as a rising share (B13). *Would the conclusions change with another seed?* - possibly in the
 numbers, not in the direction; we used one seed per configuration (§10.10 limitation). *Do the results hold for
 real timetables?* - only for this generator's family; we say so. *Why column generation and not a bigger computer?* -
 \|P\| grows exponentially with trips per duty; more memory buys only a little more n.
