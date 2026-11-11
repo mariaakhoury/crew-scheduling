@@ -1,0 +1,29 @@
+instance,model,status,status_S,basis,improvement,wtl,reason
+rt_n100_m2_L600_s201,AF,TIME_LIMIT,TIME_LIMIT,final gap,2.6280280043836593e-14,tie,"time limit either way: the start gave an incumbent early, but the bound (not the incumbent) is what keeps the gap open"
+rt_n100_m3_L480_s201,AF,TIME_LIMIT,TIME_LIMIT,final gap,-0.001937984496124017,tie,"time limit either way: the start gave an incumbent early, but the bound (not the incumbent) is what keeps the gap open"
+rt_n20_m2_L360_s201,AF,OPTIMAL,OPTIMAL,time,0.0,tie,solved at the root node either way: the start had nothing to add
+rt_n300_m3_L480_s201,AF,TIME_LIMIT,TIME_LIMIT,final gap,0.0256481334970028,tie,"time limit either way: the start gave an incumbent early, but the bound (not the incumbent) is what keeps the gap open"
+rt_n30_m3_L360_s201,AF,OPTIMAL,OPTIMAL,time,0.03910599643037904,tie,solved in under 1 s either way
+rt_n40_m2_L480_s201,AF,OPTIMAL,OPTIMAL,time,0.2972955557417085,tie,solved at the root node either way: the start had nothing to add
+rt_n500_m2_L480_s201,AF,TIME_LIMIT,TIME_LIMIT,final gap,0.028813806836262824,tie,solved at the root node either way: the start had nothing to add
+rt_n500_m3_L480_s201,AF,TIME_LIMIT,TIME_LIMIT,final gap,0.0067913785775122375,tie,"time limit either way: the start gave an incumbent early, but the bound (not the incumbent) is what keeps the gap open"
+rt_n50_m2_L600_s201,AF,TIME_LIMIT,TIME_LIMIT,final gap,-0.2733333333333334,loss,"time limit either way: the start gave an incumbent early, but the bound (not the incumbent) is what keeps the gap open"
+rt_n60_m2_L360_s201,AF,OPTIMAL,OPTIMAL,time,0.02928289425456676,tie,solved in under 1 s either way
+rt_n60_m2_L480_s201,AF,OPTIMAL,OPTIMAL,time,-0.8448618436944053,loss,check the Gurobi log
+rt_n60_m3_L360_s201,AF,OPTIMAL,OPTIMAL,time,-0.34267182202694824,loss,check the Gurobi log
+rt_n80_m2_L360_s201,AF,TIME_LIMIT,TIME_LIMIT,final gap,0.08955223880597006,tie,"time limit either way: the start gave an incumbent early, but the bound (not the incumbent) is what keeps the gap open"
+rt_n100_m2_L600_s201,SP,COLUMN_CAP,COLUMN_CAP,not comparable,,n/a,not comparable (COLUMN_CAP / COLUMN_CAP)
+rt_n100_m3_L480_s201,SP,OPTIMAL,OPTIMAL,time,-0.054098357452047496,tie,solved at the root node either way: the start had nothing to add
+rt_n20_m2_L360_s201,SP,OPTIMAL,OPTIMAL,time,0.0,tie,solved at the root node either way: the start had nothing to add
+rt_n300_m3_L480_s201,SP,COLUMN_CAP,COLUMN_CAP,not comparable,,n/a,not comparable (COLUMN_CAP / COLUMN_CAP)
+rt_n30_m3_L360_s201,SP,OPTIMAL,OPTIMAL,time,0.1538348677695045,tie,solved at the root node either way: the start had nothing to add
+rt_n40_m2_L480_s201,SP,OPTIMAL,OPTIMAL,time,0.28572333577425446,tie,solved at the root node either way: the start had nothing to add
+rt_n500_m2_L480_s201,SP,COLUMN_CAP,COLUMN_CAP,not comparable,,n/a,not comparable (COLUMN_CAP / COLUMN_CAP)
+rt_n500_m3_L360_s201,SP,COLUMN_CAP,COLUMN_CAP,not comparable,,n/a,not comparable (COLUMN_CAP / COLUMN_CAP)
+rt_n500_m3_L480_s201,SP,COLUMN_CAP,COLUMN_CAP,not comparable,,n/a,not comparable (COLUMN_CAP / COLUMN_CAP)
+rt_n50_m2_L600_s201,SP,OPTIMAL,OPTIMAL,time,0.09090692346539564,tie,solved at the root node either way: the start had nothing to add
+rt_n50_m3_L600_s201,SP,OPTIMAL,OPTIMAL,time,-0.13846238491728724,tie,solved at the root node either way: the start had nothing to add
+rt_n60_m2_L360_s201,SP,OPTIMAL,OPTIMAL,time,0.1607154261093916,tie,solved at the root node either way: the start had nothing to add
+rt_n60_m2_L480_s201,SP,OPTIMAL,OPTIMAL,time,-0.3937001222128982,tie,solved at the root node either way: the start had nothing to add
+rt_n60_m3_L360_s201,SP,OPTIMAL,OPTIMAL,time,0.05264016463384025,tie,solved at the root node either way: the start had nothing to add
+rt_n80_m2_L360_s201,SP,OPTIMAL,OPTIMAL,time,0.0,tie,solved at the root node either way: the start had nothing to add
