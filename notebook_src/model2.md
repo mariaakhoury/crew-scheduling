@@ -47,6 +47,7 @@ finds 40 duties, and on P0–P2 the count equals a brute-force check of all $2^n
 * **Strongest LP bound.** Theorem 3: every LP solution of set partitioning can be turned into an LP solution of
   the arc-flow model with the same cost, so $z_{LP}(\text{AF}) \le z_{LP}(\text{SP})$. In the pilot the SP LP
   equalled the integer optimum on 23 of 23 tiny instances; arc-flow's LP was lower on 20 of 23 (up to 17.3 %).
+  In the final runs it equalled the optimum on all 10 benchmark instances where SP was built (H1).
   A tighter bound means fewer branch-and-bound nodes.
 * **No big-M constants**, so the LP does not "forget" the duty limits the way arc-flow's relaxation does.
 * **No symmetry**: a duty is a set of trips, not "driver $k$", so swapping drivers gives the same solution.
@@ -60,13 +61,14 @@ finds 40 duties, and on P0–P2 the count equals a brute-force check of all $2^n
 **Expected (to be tested, hypotheses H3–H5).** Where it can be built, SP needs fewer nodes and less solver
 time than arc-flow; its advantage in end-to-end time shrinks as $|P|$ grows; and for long duties and large $n$
 it cannot be built while arc-flow always can. A stronger bound is not automatically faster.
+What the experiments showed is in §20 (Discussion): H3 and H5 confirmed, H4 not confirmed.
 
 ### Warm start (used by SP+S)
 The heuristic schedule is a set of legal duties, so all of them are in the complete $P$. We set the start value
 $z_p = 1$ for those duties and 0 for all others; Gurobi logs "Loaded user MIP start with objective X".
 
 ### What if…? (questions to be ready for)
-* *Remove (8)?* The objective is minimised with nothing to cover, so the optimum is "no drivers" at $0.
+* *Remove (8)?* The objective is minimised with nothing to cover, so the optimum is "no drivers" at \$0.
 * *Use $\ge 1$ instead of $= 1$ (set covering)?* Valid here only if dropping a repeated trip from a duty keeps
   it legal and not more expensive — not true in general (removing a middle trip can break the terminal chain),
   so we keep set partitioning.
