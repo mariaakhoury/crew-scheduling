@@ -1,8 +1,8 @@
 # Slides 6-9 and 13 - Member B (Amani) - 5:00 in total
 
-> Draft, 10 Nov. Order and times from Master Plan §12; titles state the **finding**, not the topic.
-> *[pilot]* = preliminary number (30 s pilot): replace on Sun 15 with the final runs (`results/b13/`,
-> `instances/final/SELECTION.md`). Script length: about 130 words per minute.
+> Final, 11 Nov. Order and times from Master Plan §12; titles state the **finding**, not the topic.
+> Every number is from the final runs (`results/runs.csv`, tag `v1.0-final-run`), checked against `results/b13/`
+> and `results/a12/`. Script length: about 130 words per minute.
 > Slide 5 (A) ends with Model 1's weakness; slide 10 (C) starts with the heuristic. Handover lines are marked.
 
 ---
@@ -36,16 +36,16 @@ extends legal pieces trip by trip reaches every duty exactly once (we check: 40 
 **Key message:** Model 2's LP bound is at least as strong as Model 1's (Theorem 3) and in practice equals the
 optimum; but the number of possible duties grows exponentially with how many trips fit in one duty.
 
-**Show:** left, a two-bar picture "LP bound vs optimum" for both models on one instance (from LP-AF / LP-SP; P0:
-Model 1 897.6, Model 2 945.0 = optimum). Right, the B13 chart **|P| against n, one colour per L**, log scale, with
-crosses where Model 2 could not be built (`results/b13/sizes.png`).
-*[pilot]*: n = 100 has 63,633 duties at L = 480 (3 terminals) but more than 2,000,000 at L = 600 (2 terminals).
+**Show:** left, "LP bound as % of the optimum" for both models on the 10 benchmark instances Model 2 could build
+(Model 2: 100 % on all 10; Model 1: 84-98 %). Right, **|P| against n, one colour per L**, log scale; points on the
+dashed 2-million line = Model 2 not built. n = 100 has 63,633 duties at L = 480 (3 terminals) but more than
+2,000,000 at L = 600 (2 terminals).
 
-**Script (151 words):**
+**Script (152 words):**
 "Why bother with a huge menu? Because its LP relaxation is much stronger. Theorem 3 says every LP solution of
 Model 2 can be turned into an LP solution of Model 1 with the same cost - so Model 2's bound is never weaker. On
 the example: Model 1's LP says 898 dollars, Model 2's says 945 - already the optimum. A bound that tight means the
-solver barely has to branch: in our pilot, Model 2 solved almost everything it could build at the very first node.
+solver barely has to branch: in our final runs, Model 2 solved every model it could build at the very first node.
 The price is the menu itself. A longer working day fits more trips, and every extra trip multiplies the number of
 possible days. With 100 trips, going from 8 to 10 hours of spread takes us from sixty thousand duties to more than
 two million - past our memory guard, so the model cannot even be built. Model 1 never has this problem."
@@ -56,22 +56,24 @@ legal), so Model 2 may become unbuildable; Model 1 only gets more arcs.
 
 ---
 
-## Slide 8 - "Same problem, same optimum - but a stronger bound is not automatically faster" (0:50)
+## Slide 8 - "Same optimum - and the stronger bound wins, until the menu cannot be built" (0:50)
 
-**Key message:** both models always agree on the optimum (checked independently); where Model 2 is large, its
-strong bound does not save it - each LP is huge, and enumeration plus building costs time first.
+**Key message:** both models always agree on the optimum (checked independently); where Model 2 can be built its
+strong bound makes it fast, but on the largest instances it never gets to solve.
 
-**Show:** the A12 chart "LP gap vs solver time, one marker per model" (from Member A, Thu-Fri); if not ready, the
-stacked bars "enumerate / build / solve" for Model 2 from `results/b13/build_cost.png`.
-*[pilot]*: the largest Model 2 that could be built had 1.7 million duties and still hit the time limit.
+**Show:** "LP gap vs solver time" (same data as A12, `results/a12/gap_vs_time.png`, redrawn in the deck palette):
+Model 2 at 0 % gap and under 1 s; Model 1 at 2-16 % (to the optimum) and up to the 120 s limit; hollow markers
+= no optimum known, gap to the best schedule found (footnote). Two callouts: *10 of 10* built Model 2 models proven
+optimal at the root node (at most 0.9 s end to end); *5 of 15* never built (3-75 s spent listing duties).
+Backup if asked where the time goes: `results/a12/time_split.png`.
 
-**Script (106 words):**
+**Script (115 words):**
 "First, correctness: on every instance both models solve, they give the same cost, and an independent checker -
-written without looking at either model - confirms every schedule. But a stronger bound is not automatically
-faster. Total time is enumeration plus building plus solving, and Model 2 pays for every duty before Gurobi starts.
-And every node of its search solves an LP with as many columns as there are duties. Our largest buildable case had
-1.7 million duties: a near-perfect bound, but it still ran out of time. So the winner depends on the instance -
-which is what our benchmark is built to show."
+written without looking at either model - confirms every schedule. Now bound against speed. Model 2's dots sit at
+zero gap: its LP already equals the optimum, so all ten models it could build were solved at the first node, in
+under a second. Model 1's LP is 2 to 16 percent below the optimum, so it must branch - on the larger instances
+until the 120-second limit. The stronger bound wins - but only where the menu exists. On 5 of our 15 instances,
+Model 2 spent up to 75 seconds listing duties and never started."
 
 **Likely questions:** *Is it fair that Model 2 gets an extra build budget?* - both get the same two limits; the
 equal-budget column shows who solves within 120 s end to end. *How do you know "optimal" is really optimal?* -
@@ -88,8 +90,8 @@ fixed before the final runs - no hand-picking.
 *models differ clearly* 6 (medium 2, hard 1, and 3 time-limit instances Model 2 solves in under 0.6 s), *no model
 finishes* 5 (Model 1 times out, Model 2 not built) - and a class summary table (instances, n, terminals, duty
 length, |P|, Model 1 / Model 2 times). Footer: the rule, 15 of 43 candidates, 2 by the fill-up; limitation
-W = 0.75 L. Full 15-row table: `notebook_src/benchmark.md`. Classes are recomputed from the final runs (Fri 13):
-update the cards and table if any instance changes class.
+W = 0.75 L. Full 15-row table: `notebook_src/benchmark.md`. Classes recomputed from the final runs (Master Plan
+§10.3 step 5): identical to the selection on all 15 instances, so the cards and table stand.
 
 **Script (147 words):**
 "Our instances imitate real timetables: buses shuttle between terminals all day, busier in the morning and evening
@@ -106,22 +108,24 @@ mostly trips per duty (set by L and W), then connections per trip and n (H8).
 
 ---
 
-## Slide 13 - "Longer duties: Model 2's menu outgrows the computer before Model 1 runs out of time" (1:00)
+## Slide 13 - "Two different failures: Model 1 runs out of time from 80 trips, Model 2's menu stops fitting from 100" (1:00)
 
-> Master Plan: the L-sweep chart if the optional sweep ran, otherwise the B13 scalability chart (default).
+> Master Plan: the L-sweep chart if the optional sweep ran, otherwise the B13 scalability chart (default). The
+> sweep did not run, so this is the B13 outcome chart.
 
-**Key message:** build failures and time-outs are different results; Model 2 fails by not being built (memory /
-build time), Model 1 fails by not finishing (time limit).
+**Key message:** build failures and time-outs are different results; Model 2 fails by not being built (more than
+2 million duties), Model 1 fails by not finishing (time limit).
 
-**Show:** `results/b13/status_map.png` - solver time against n for all four methods; triangles = time limit,
-crosses = not built. Verdicts H4 and H5 in one line each (from `results/b13/B13_summary.md`).
-*[pilot]*: Model 2 not built on 13 of 24 main-pilot instances; Model 1 hit the time limit on 20 of 24.
+**Show:** outcome per method on the 15 instances, stacked: optimal / time limit / not built. Model 1 (AF, AF+S):
+7 optimal, 8 time limit (every n ≥ 80 and one n = 50 with 10 h duties; gaps 5-27 %). Model 2 (SP, SP+S): 10
+optimal at the root node, 5 not built (n = 100 with 10 h duties and every n ≥ 300). The start (+S) changes no
+outcome. Background chart: `results/b13/status_map.png`; verdicts in `results/b13/B13_summary.md` (H5 confirmed).
 
-**Script (139 words):**
-"This chart separates two kinds of failure that are easy to confuse. A triangle means the model was built but did
-not finish in time. A cross means the model could not even be built. Model 1 - always buildable - fails with
-triangles: from about 60 trips with long duties, it runs out of time. Model 2 fails with crosses: once the menu
-passes two million duties or the build time, it never starts. Where Model 2 can be built, it wins - Model 1 was
+**Script (138 words):**
+"This chart separates two kinds of failure that are easy to confuse. Orange means the model was built but did
+not finish in time. Grey means the model could not even be built. Model 1 - always buildable - fails in orange:
+from 80 trips, and once already at 50 trips with long duties, it runs out of time. Model 2 fails in grey: once
+the menu passes two million duties, it never starts. Where Model 2 can be built, it wins - Model 1 was
 faster only on the tiniest timetables, by thousandths of a second. So our recommendation is simple: use the menu while it fits; when it does not, you need Model 1 - or, as a next
 step, column generation, which builds only the duties that are worth adding instead of all of them."
 *→ handover to C (slide 14, verdicts and conclusions).*
@@ -137,16 +141,13 @@ shortest path with spread and driving limits on the acyclic trip graph.
 | Slide | Planned | Script words | Spoken (≈130 wpm) |
 |---|---|---|---|
 | 6 | 0:50 | 106 | 0:49 |
-| 7 | 1:10 | 151 | 1:10 |
-| 8 | 0:50 | 106 | 0:49 |
+| 7 | 1:10 | 152 | 1:10 |
+| 8 | 0:50 | 115 | 0:53 |
 | 9 | 1:10 | 147 | 1:08 |
-| 13 | 1:00 | 139 | 1:04 |
-| **Total** | **5:00** | **649** | **≈5:00** - no slack: speak calmly, and cut a sentence if a rehearsal runs over |
+| 13 | 1:00 | 138 | 1:04 |
+| **Total** | **5:00** | **658** | **≈5:04** - no slack: speak calmly, and cut a sentence if a rehearsal runs over |
 
-### To finish on Sun 15
-- [ ] Replace every *[pilot]* number with the final one (slide 9 already uses the frozen benchmark; recheck its
-      classes against the final runs)
-- [ ] Slide 7 right chart: `results/b13/sizes.png` from the final runs
-- [ ] Slide 8 chart: ask A for the A12 chart; fallback `results/b13/build_cost.png`
-- [ ] Slide 13 chart: `results/b13/status_map.png`; H4/H5 verdicts from `B13_summary.md`
-- [ ] Give the slides to C for merging into one deck; rehearse twice with a timer (Mon 16)
+### Status
+- [x] Every number from the final runs (slides 7, 8, 13 updated 11 Nov; slide 9 classes rechecked: unchanged)
+- [x] Slide 8 built on A's A12 data (LP gap vs solver time), with the "best known" footnote
+- [ ] Give `slides_B.pptx` to C for merging into one deck; rehearse twice with a timer (Mon 16)
