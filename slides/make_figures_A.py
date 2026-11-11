@@ -5,7 +5,7 @@
 slide 3: the P0 timetable, and its optimal 2-driver schedule ($945)
 slide 4: the P0 trip network (14 arcs); the arcs the optimal schedule uses are drawn bold
 slide 5: (a) Model 1's LP bound with and without the duty-limit rules (4)-(7), P0-P5
-         (b) model size: Model 1 variables vs Model 2 duties, from results/confirm.csv (preliminary)
+         (b) model size: Model 1 variables vs Model 2 duties, from results/runs.csv (final runs, 15 instances)
 """
 from __future__ import annotations
 
@@ -118,7 +118,7 @@ def slide5_lp():
 
 
 def slide5_size():
-    path = os.path.join(ROOT, "results", "confirm.csv")
+    path = os.path.join(ROOT, "results", "runs.csv")
     if not os.path.exists(path):
         return None
     d = pd.read_csv(path)
@@ -136,7 +136,7 @@ def slide5_size():
     ax.set_yscale("log")
     ax.set_xlabel("trips n")
     ax.set_ylabel("size (log scale)")
-    ax.set_title("Model 1 grows gently; Model 2's duty list explodes (confirmation runs)", loc="left", fontsize=10)
+    ax.set_title("Model 1 grows gently; Model 2's duty list explodes (final runs)", loc="left", fontsize=10)
     ax.legend(fontsize=8, frameon=False)
     fig.tight_layout()
     fig.savefig(os.path.join(OUT, "A_slide5_size.png"), dpi=200)

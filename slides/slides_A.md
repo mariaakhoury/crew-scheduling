@@ -88,7 +88,7 @@ started, and D adds up the driving.
 
 **On the slide**
 - Left: `A_slide5_size.png` — Model 1 stays below 60,000 variables up to 500 trips; Model 2's duty list
-  passes 2 million and cannot be built on 10 of the 24 confirmation instances
+  passes 2 million and cannot be built on 5 of the 15 benchmark instances (final runs)
 - Right: `A_slide5_lp.png` — Model 1's LP bound with the duty rules vs with rules (4)–(7) deleted (P0–P5):
   almost the same, identical on P3 and P4
 - One line: the rules that make the problem hard only become active once the solver branches
