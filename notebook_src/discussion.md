@@ -170,6 +170,8 @@ that shares nothing with the models (the independent checker).
 |---|---|
 | Naive and tight big-M give exactly the same LP bound (H2) | Model 1's LP leaves the chain rows (4), (6) slack, so the size of M never matters; its weakness is the formulation |
 | SP's build share falls as \|P\| grows (H4) | building is cheap up to 63,633 duties; the root LP grows faster. The advantage ends at the 2,000,000 cap, as a cliff |
+| AF stopped at the time limit with gaps of 4.7-14.4 % on 3 instances where its schedule already was the optimum (SP proves it) | the gap measures AF's weak lower bound, not its schedule: AF lacks the proof, not the answer (C) |
+| The MIP start made two quick AF proofs slower (n = 60: 38.8 → 71.5 s, 7.3 → 9.7 s) | a different first incumbent sends branch-and-bound down a different tree; with one seed this is performance variability (H6, C) |
 | _e.g. SP time limit at n = 200 with 1.7 M duties [pilot]_ | _each node LP has 1.7 M columns: a strong bound but a slow LP (§4.6)_ |
 | _e.g. AF build 38.8 s on one instance [pilot]_ | _memory swapping on the 7.7 GB pilot laptop; not seen on same-size instances_ |
 | | |
@@ -180,4 +182,6 @@ that shares nothing with the models (the independent checker).
 - An exact arc reduction for Model 1: delete every arc i -> j whose two trips alone break a limit
   (e_j - s_i > L or d_i + d_j > W). That is 56,669 of 153,818 arcs (36.8 %) on our benchmark (B's count): Model 1
   becomes about a third smaller with the same integer optimum. Found after the code freeze, so not in the runs.
+- Several seeds per configuration, to separate the effect of the MIP start from performance variability (H6: 3 of
+  15 AF pairs got worse with the start, which one seed cannot explain away) (C).
 - _add from the final results_

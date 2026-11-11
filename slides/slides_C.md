@@ -115,7 +115,7 @@ parameters, recorded in env.txt and in every row. *Why is the gap of AF large ev
 the gap is (incumbent − bound) / incumbent; AF's LP is 1.9-15.8 % below the optimum (A12), so the gap overstates
 how far the schedule is from optimal. *What about the equal-budget column?* - end-to-end time counts SP's
 enumeration and build too: SP's worst end-to-end is still 0.9 s where it is built; where it is not, it spends
-3-76 s discovering that the menu is too big.
+3-75 s discovering that the menu is too big.
 
 ---
 
