@@ -34,7 +34,7 @@ This equals the official cost, Σ (\$300 + \$0.50 × spread), because each duty'
 | (1) | `c1_pred` | every trip either starts a duty or comes after exactly one trip |
 | (2) | `c2_succ` | every trip either ends a duty or is followed by exactly one trip |
 | (3) | bound on T | a duty starts no later than each of its trips, and no earlier than ℓ<sub>j</sub> |
-| (4) | `c4_Tchain` | if *j* follows *i*, they share the same duty start: T<sub>j</sub> ≤ T<sub>i</sub> |
+| (4) | `c4_Tchain` | if *j* follows *i*, T cannot increase: T<sub>j</sub> ≤ T<sub>i</sub>, so every T in a duty is at most its first trip's start |
 | (5) | `c5_spread` | trip *j* ends at most L minutes after its duty started |
 | (6) | `c6_Dchain` | if *j* follows *i*, driving grows by *j*'s length: D<sub>j</sub> ≥ D<sub>i</sub> + d<sub>j</sub> |
 | (7) | bound on D | driving up to *j* is at most U<sub>j</sub> ≤ W |
@@ -73,8 +73,8 @@ $$
 $$
 
 **Why it is correct, in one line each.** (1)-(2) cut the trips into chains (each trip one way in, one way out);
-(3)-(5) give every trip of a chain the same start time $T$, no later than the first trip's start, so
-$e_{\text{last}} - s_{\text{first}} \le L$; (6)-(7) add up the driving along the chain and cap it at $U_j \le W$.
+(3)-(5): $T$ can only decrease along a chain and starts at most at the first trip's start $s_{\text{first}}$, so
+$T_{\text{last}} \le s_{\text{first}}$ and (5) gives $e_{\text{last}} - s_{\text{first}} \le L$; (6)-(7) add up the driving along the chain and cap it at $U_j \le W$.
 The second term of the objective is a constant (total driving); together with the waiting term it equals
 $\sum_{\text{duties}} (F + c \cdot \text{spread})$, the official cost. Rows: $3n + 2|A|$; variables: $|A| + 4n$.
 LP relaxation (`relax=True`): $x, u, v \in [0, 1]$. Naive big-M variant (A6): $M^T = \max_j s_j - \min_i \ell_i$
