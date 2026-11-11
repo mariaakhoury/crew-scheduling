@@ -87,7 +87,8 @@ not the schedule.
 
 **Show:** the comparison table (C9, `results/report/tables.md`, methods in rows) and the performance profile (A16,
 `slides/figures/C_slide12_profile.png`).
-Highlight three numbers: SP optimal 10 / 15, AF optimal 7 / 15, SP not built 5 / 15.
+Highlight three numbers: SP optimal 10 / 15, AF optimal 7 / 15, SP not built 5 / 15 (the profile curves end at
+67 % and 47 %: the share of all 15 instances each model solved).
 
 **Numbers (final runs):**
 - SP: optimal on all 10 instances it could build, every one in under 1 s end-to-end (max 0.9 s, n = 100,
@@ -161,5 +162,5 @@ real timetables?* - only for this generator's family; we say so. *Why column gen
 
 ### Before Gate 3 - what is left
 1. A and B check the H1-H5 and H8 wording against their own write-ups (`notebook_src/discussion.md`).
-2. Figures: `py slides/make_figures_C.py` (done, 10 Nov). **Re-run after A fixes `profile_curve`** (divide by all 15, so SP ends at 67 %, AF at 47 %).
+2. Figures: `py slides/make_figures_C.py` (done; slide 12 profile redrawn 11 Nov after A's fix 1e7c726: SP ends at 67 % = 10/15, AF at 47 % = 7/15).
 3. Merge: A's slides 1-5 + B's `slides_B.pptx` (6-9, 13) + these four into `slides_groupM.pptx` / `.pdf`.
