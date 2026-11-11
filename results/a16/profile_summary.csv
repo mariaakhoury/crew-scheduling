@@ -1,0 +1,5 @@
+method,runs,solved,fastest_on,solved_within_120s_end_to_end,sgm_end_to_end_s
+AF,15,7,0,7,55.99153397515471
+AF+S,15,7,0,7,58.52159071254212
+SP,15,10,8,10,19.622310543986018
+SP+S,15,10,2,10,19.681338380703078
