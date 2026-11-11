@@ -70,7 +70,8 @@ def test_class_column_filled_from_lookup_or_left_out(df, tmp_path):
 
 
 def test_index_name_says_averages_cover_built_runs_only(df):
-    assert summary_table(df, "SP", classes=False).index.name == "SP: instance (Average/Sum over the 2 of 3 built)"
+    assert summary_table(df, "SP", classes=False).index.name == ("SP: instance (Average/Sum: results over the 2 of 3 built; "
+                                                                    "n, arcs and end-to-end over all 3)")
     assert summary_table(df, "AF", classes=False).index.name == "AF: instance"
 
 

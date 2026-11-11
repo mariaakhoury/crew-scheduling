@@ -150,7 +150,8 @@ def summary_table(df: pd.DataFrame, method: str, classes=None) -> pd.DataFrame:
     features = [c for c in FEATURES if c != "class" or (rows["class"] != "").any()]
     table = rows.set_index("instance")[features + RESULTS].copy()
     n_built = int(rows["n_vars"].notna().sum())
-    note = f" (Average/Sum over the {n_built} of {len(rows)} built)" if method != "H" and n_built < len(rows) else ""
+    note = (f" (Average/Sum: results over the {n_built} of {len(rows)} built; n, arcs and end-to-end over all "
+            f"{len(rows)})") if method != "H" and n_built < len(rows) else ""
     table.index.name = f"{method}: instance{note}"
     text_cols = [c for c in table.columns if c in ("status", "class")]
     # numeric columns as float64 and text columns as object BEFORE adding the Average/Sum rows, so no column ever

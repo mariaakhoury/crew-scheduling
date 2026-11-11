@@ -1,4 +1,4 @@
-SP+S: instance (Average/Sum over the 10 of 15 built),n,m,L,W,n_arcs,class,status,objective,best_bound,gap_pct,solver_time_s,end_to_end_s,n_vars,n_constrs,nodes
+"SP+S: instance (Average/Sum: results over the 10 of 15 built; n, arcs and end-to-end over all 15)",n,m,L,W,n_arcs,class,status,objective,best_bound,gap_pct,solver_time_s,end_to_end_s,n_vars,n_constrs,nodes
 rt_n20_m2_L360_s201,20.0,2.0,360.0,270.0,84.0,EASY,OPTIMAL,2276.0,2276.0,0.0,0.0060000419616699,0.0321361000096658,371.0,20.0,1.0
 rt_n30_m3_L360_s201,30.0,3.0,360.0,270.0,143.0,EASY,OPTIMAL,3543.5,3543.5,0.0,0.0110001564025878,0.044107099995017,525.0,30.0,1.0
 rt_n40_m2_L480_s201,40.0,2.0,480.0,360.0,350.0,EASY,OPTIMAL,4237.5,4237.5,0.0,0.0030000209808349,0.0396349000075133,922.0,40.0,1.0

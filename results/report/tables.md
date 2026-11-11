@@ -68,7 +68,7 @@
 
 ### Summary: SP
 
-| SP: instance (Average/Sum over the 10 of 15 built) | n | m | L | W | n_arcs | class | status | objective | best_bound | gap_pct | solver_time_s | end_to_end_s | n_vars | n_constrs | nodes |
+| SP: instance (Average/Sum: results over the 10 of 15 built; n, arcs and end-to-end over all 15) | n | m | L | W | n_arcs | class | status | objective | best_bound | gap_pct | solver_time_s | end_to_end_s | n_vars | n_constrs | nodes |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | rt_n20_m2_L360_s201 | 20 | 2 | 360 | 270 | 84 | EASY | OPTIMAL | 2,276.00 | 2,276.00 | 0 | 0.01 | 0.05 | 371 | 20 | 1 |
 | rt_n30_m3_L360_s201 | 30 | 3 | 360 | 270 | 143 | EASY | OPTIMAL | 3,543.50 | 3,543.50 | 0 | 0.01 | 0.04 | 525 | 30 | 1 |
@@ -90,7 +90,7 @@
 
 ### Summary: SP+S
 
-| SP+S: instance (Average/Sum over the 10 of 15 built) | n | m | L | W | n_arcs | class | status | objective | best_bound | gap_pct | solver_time_s | end_to_end_s | n_vars | n_constrs | nodes |
+| SP+S: instance (Average/Sum: results over the 10 of 15 built; n, arcs and end-to-end over all 15) | n | m | L | W | n_arcs | class | status | objective | best_bound | gap_pct | solver_time_s | end_to_end_s | n_vars | n_constrs | nodes |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | rt_n20_m2_L360_s201 | 20 | 2 | 360 | 270 | 84 | EASY | OPTIMAL | 2,276.00 | 2,276.00 | 0 | 0.01 | 0.03 | 371 | 20 | 1 |
 | rt_n30_m3_L360_s201 | 30 | 3 | 360 | 270 | 143 | EASY | OPTIMAL | 3,543.50 | 3,543.50 | 0 | 0.01 | 0.04 | 525 | 30 | 1 |
