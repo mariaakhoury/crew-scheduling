@@ -138,7 +138,7 @@ pairs), SP+S vs SP 2.6 % (10 comparable pairs; 5 not built either way). Gurobi a
 10/10) and AF's first incumbent came at a median 0.16 of the time without the start, but by B12's tie rule
 AF+S vs AF gives 2 wins, 10 ties and 3 losses, and SP+S vs SP 10 ties:
 - **Where it helped (2):** one clear gain on a large instance, `rt_n500_m3_L360` (time limit either way): 3.9 %
-  cheaper, $45,143.50 → $43,400.50 - there AF is still searching for good schedules at the time limit, so a
+  cheaper, \$45,143.50 → \$43,400.50 - there AF is still searching for good schedules at the time limit, so a
   ready-made one is worth something; and one mid-size proof, `rt_n50_m3_L600`, 29 % faster (3.7 → 2.6 s).
 - **Ties (10):** the other three n = 300-500 instances ended 0.2-0.9 % cheaper, below the tie threshold; the other
   time-limit instances ended with the same schedule (on the 3 where SP knows the optimum, AF had already found it:
