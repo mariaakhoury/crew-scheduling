@@ -241,14 +241,14 @@ if RUN_MODE == "full":
 runs = pd.read_csv(RUNS_CSV) if os.path.exists(RUNS_CSV) else None
 print(f"{len(runs)} rows loaded from {RUNS_CSV}" if runs is not None else f"{RUNS_CSV} not found: results cells are skipped")"""
 
-RESULTS_TABLES = """from crew.analysis import summary_table, comparison_table
-if runs is not None:
+RESULTS_TABLES = """from crew.analysis import summary_table, comparison_table, to_display
+if runs is not None:          # to_display: blank cells instead of NaN, and the "≥" marks on censored averages
     for method in ["H", "AF", "AF+S", "SP", "SP+S"]:
         if (runs["method"] == method).any():
             print("Summary table:", method)
-            display(summary_table(runs, method))
+            display(to_display(summary_table(runs, method)))
     print("Comparison table")
-    display(comparison_table(runs))"""
+    display(to_display(comparison_table(runs)))"""
 
 CHARTS = """from crew import analysis_strength, analysis_profiles, analysis_heuristic
 os.makedirs("figures", exist_ok=True)
