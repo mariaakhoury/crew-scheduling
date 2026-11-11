@@ -136,7 +136,9 @@ Bottom line: limitations and "what next" in one sentence each.
 | H4 | SP's build share grows with \|P\| | **not confirmed** | Spearman ρ = −0.92 over 10 built SP runs: build share falls from 72 % to 32 % (median 48 %) |
 | H5 | SP becomes unbuildable; AF always built | **confirmed** | SP not built on 5 of 15, AF build failures 0 |
 | H6 | The MIP start helps AF more than SP | **not confirmed** | median improvement 2.6 % AF vs 2.6 % SP; AF: 2 wins, 10 ties, 3 losses |
-| H8 | Difficulty grows with trips per duty more than with n | **too close to call** | rank correlation with difficulty: trips per duty 0.84, n 0.83 |
+| H8 | Difficulty grows with trips per duty more than with n | **cannot be decided** | rank correlation with difficulty: trips per duty 0.84, n 0.83 (n and trips per duty move together, ρ = 0.97) |
+
+H7 (reduced-cost fixing) was withdrawn in Master Plan v1.5 and its ID is not reused; H9 (L-sweep) and H10 (driver cut AF+C) were optional (P2) experiments that were not run, so they have no verdict.
 
 **Script (186 words):**
 "Here is what the theory predicted and what we measured. First, the bounds: Theorem 3 says Model 2's LP is at least

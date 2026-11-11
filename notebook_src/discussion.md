@@ -17,6 +17,8 @@
 | H6 | The MIP start helps AF more than SP | **not confirmed** (median 2.6 % AF vs 2.6 % SP) | `results/b12` | C (B12 data) |
 | H8 | Difficulty grows with trips per duty more than with n alone | **cannot be decided** (ρ 0.84 vs 0.83; n and trips per duty move together, ρ = 0.97) | `results/b13` | **B** |
 
+H7 (reduced-cost fixing) was withdrawn in Master Plan v1.5 and its ID is not reused; H9 (L-sweep) and H10 (driver cut AF+C) were optional (P2) experiments that were not run, so they have no verdict.
+
 ### H5 - SP becomes unbuildable, AF is always built (B)
 
 **Rule (§10.9).** Confirmed if at least 2 benchmark instances have SP not built (COLUMN_CAP, BUILD_LIMIT,
@@ -196,4 +198,3 @@ that shares nothing with the models (the independent checker).
 - Several seeds per configuration, to separate the effect of the MIP start from performance variability (H6: 3 of
   15 AF pairs got worse with the start, which one seed cannot explain away) (C).
 - Separate the effect of n from trips per duty (H8): the L-sweep (one timetable, only L changed).
-- _add from the final results_

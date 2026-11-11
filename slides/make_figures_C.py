@@ -56,9 +56,9 @@ def slide14(df: pd.DataFrame) -> None:
     res = check_schedule(inst, schedule, float(row["objective"]))     # independent re-check before drawing
     if not res.ok:
         raise SystemExit(f"checker rejects {row['run_id']}: {res}")
-    title = (f"{row['instance']}: {len(inst.trips)} trips, best schedule found by {row['method']} "
-             f"({row['status'].lower().replace('_', ' ')}, proven gap {row['gap_pct']:.1f} %)")
-    _, ax = plt.subplots(figsize=(12, 6.5))                 # slide-shaped (16:9-ish), not one row per inch
+    title = f"{len(inst.trips)} trips, {row['method']}"
+    # drawn small (7 x 3.9 in) so that the text stays readable when the picture is ~4.4 in wide on the slide
+    _, ax = plt.subplots(figsize=(7, 3.9))
     fig = gantt(inst, schedule, title=title, ax=ax)
     _save(fig, "C_slide14_gantt.png")
     print(f"  slide 14: {row['run_id']}  duties={len(schedule)}  cost={row['objective']:,.2f}  "

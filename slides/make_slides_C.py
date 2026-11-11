@@ -305,7 +305,7 @@ def slide14(prs, k, notes):
                   notes["14"])
     C = ("confirmed", {"fill": TEAL_LT, "bold": True})
     NC = ("not confirmed", {"fill": CORAL_LT, "bold": True})
-    TC = ("too close to call", {"fill": AMBER_LT, "bold": True})
+    TC = ("cannot be decided", {"fill": AMBER_LT, "bold": True})
     rows = [["", "We expected", "Verdict", "Evidence"],
             ["H1", "Model 1's LP ≤ Model 2's LP", C, "10 / 10; Model 2's LP = optimum"],
             ["H2", "Naive big-M is a little weaker", ("confirmed: no gap", C[1]), "identical on 15 / 15"],
@@ -314,9 +314,11 @@ def slide14(prs, k, notes):
             ["H5", "Model 2 becomes unbuildable", C, f"{k['sp_not_built']} / {k['N']} not built; Model 1: 0"],
             ["H6", "The start helps Model 1 more", NC, "median 2.6 % vs 2.6 %"],
             ["H8", "Trips per duty matter more than n", TC, "rank corr. 0.84 vs 0.83"]]
-    table(s, 0.6, 1.75, 7.5, [0.55, 2.95, 1.75, 2.25], rows, size=13, name="Verdict table", row_h=0.47)
-    picture(s, os.path.join(FIG, "C_slide14_gantt.png"), 8.4, 1.75, w=4.3, name="Largest instance Gantt")
-    text(s, 8.4, 4.15, 4.3, 1.4, [
+    table(s, 0.6, 1.75, 7.5, [0.55, 2.95, 1.75, 2.25], rows, size=13, name="Verdict table", row_h=0.44)
+    text(s, 0.6, 5.3, 7.5, 0.3, "H7 (reduced-cost fixing) was withdrawn in plan v1.5; H9 and H10 were optional and not run.",
+         size=11, color=MUTED, name="H7 note")
+    picture(s, os.path.join(FIG, "C_slide14_gantt.png"), 8.3, 1.75, w=4.4, name="Largest instance Gantt")
+    text(s, 8.3, 4.35, 4.4, 1.2, [
         [("Largest instance: 500 trips, 77 drivers, $35,342", {"bold": True})],
         "Model 1 with the start, proven gap 23.1 %; every duty re-checked by the independent checker.",
     ], size=13)
