@@ -47,7 +47,9 @@ def gantt(inst: Instance, schedule: list[list[int]], title: str | None = None, a
     Trips in `highlight` get a thick red outline (e.g. the trip greedy strands)."""
     n_duties = len(schedule)
     if ax is None:
-        fig, ax = plt.subplots(figsize=(11, max(2.5, 0.32 * n_duties + 1.2)))
+        # one row per duty, but never taller than a slide: with many duties the bars get thinner, the text stays
+        # readable (77 duties used to give a 26-inch figure whose text vanished when shrunk onto a slide)
+        fig, ax = plt.subplots(figsize=(11, min(6.5, max(2.5, 0.32 * n_duties + 1.2))))
     else:
         fig = ax.figure
     small = n_duties <= 30                       # write labels and costs only when they stay readable
