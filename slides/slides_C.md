@@ -33,11 +33,11 @@ at the first schedule no single move can improve (a local optimum).
 
 ---
 
-## Slide 11 - "The heuristic gives both models a complete start; it pays off only for Model 1 on the largest instances" (1:10)
+## Slide 11 - "The heuristic gives both models a complete start; it rarely changes the result" (1:10)
 
 **Key message:** the heuristic is fast and always feasible, so it can be handed to Gurobi as a complete MIP start;
-Gurobi accepted every start, but it changed the result only where Model 1 was still searching at the time limit,
-and it cannot fix Model 1's weak bound.
+Gurobi accepted every start, but for Model 1 it was a clear gain only twice (2 wins, 10 ties, 3 losses by B12's
+tie rule), it never mattered for Model 2, and it cannot fix Model 1's weak bound.
 
 **Show:** left, a flow picture: timetable → greedy → local search → complete start (x, u, v, T, D for Model 1;
 z for Model 2) → Gurobi log line "User MIP start produced solution". Right, the B12 paired chart
@@ -51,24 +51,29 @@ z for Model 2) → Gurobi log line "User MIP start produced solution". Right, th
   and on the 500-trip instance with 3 terminals and 6 h duties it is **1.5 % cheaper** than it
 - starts accepted: AF 15/15, SP 10/10; AF's first incumbent arrives at a median 0.16 of the time it takes without
   the start
-- with the start, AF ended with a cheaper schedule on all 4 of the largest instances (n = 300-500: −0.2 % to
-  −3.9 %); on the other 11 AF pairs it was a tie or slower (two n = 60 instances took longer to prove: 38.8 → 71.5 s
-  and 7.3 → 9.7 s); SP was solved at the root node with or without the start
+- AF+S vs AF (B12 tie rule): **2 wins** - one clear gain on a large instance (n = 500, 3 terminals, 6 h: 3.9 %
+  cheaper, $45,143.50 → $43,400.50) and one on a mid-size proof (n = 50, 3 terminals: 29 % faster, 3.7 → 2.6 s);
+  **10 ties**, including the other three n = 300-500 instances (0.2-0.9 % cheaper: below the tie threshold);
+  **3 losses** - two slower proofs (n = 60: 38.8 → 71.5 s and 7.3 → 9.7 s) and one worse proven gap with the same
+  schedule (n = 50, 10 h: 4.7 → 6.0 %, a weaker bound at the time limit)
+- SP+S vs SP: 10 ties - solved at the root node with or without the start
 
 **Script (156 words):**
 "Why build a heuristic if we have two exact models? Because it is almost free - under half a second even with 500
 trips - and it is always a legal schedule. That lets us give Gurobi a *complete* start: for Model 1 we translate
 the duties into every variable - arcs, start and end markers, spread and driving times; for Model 2 we switch on
-exactly the duty columns we used. Gurobi accepted the start every time. Did it help? Only where Model 1 was still
-searching when the clock ran out: on the four largest instances, Model 1 with the start ended up to 4 percent
-cheaper. On one 500-trip instance, the half-second heuristic alone beat two minutes of plain Model 1. But the start
-only improves the *upper* side. Model 1's gap stays open because its *lower* bound is weak, and Model 2 is solved at
+exactly the duty columns we used. Gurobi accepted the start every time. Did it help? Rarely. Model 1 gained
+clearly twice: a 500-trip instance ended 4 percent cheaper, and one 50-trip proof was 29 percent faster. Most runs
+were ties, and three were worse - two proofs took longer because the start sent the search down a different path.
+On one 500-trip instance the half-second heuristic alone beat two minutes of plain Model 1. But a start only improves
+the *upper* side. Model 1's gap stays open because its *lower* bound is weak, and Model 2 is solved at
 the root node anyway - there is nothing left for a start to do."
 
 **Likely questions:** *How do you know Gurobi used the start?* - we read the log line and compare its objective with
-the heuristic cost (`start_accepted`, 25 of 25). *Why was AF+S slower on two small instances?* - a different first
+the heuristic cost (`start_accepted`, 25 of 25). *Why was AF+S worse on three instances?* - a different first
 incumbent sends branch-and-bound down a different tree; on instances that are proved in seconds that variation is
-larger than the benefit of the start (performance variability, one seed). *Why a complete start, not a partial
+larger than the benefit of the start (performance variability, one seed); on the third, the schedule was the same
+but the bound at the time limit was weaker for the same reason. *Why a complete start, not a partial
 one?* - a partial start makes Gurobi solve a sub-MIP to complete it, which can fail; a complete one is checked in
 one step.
 
@@ -130,7 +135,7 @@ Bottom line: limitations and "what next" in one sentence each.
 | H3 | SP needs fewer nodes and less solver time | **confirmed** | 7 instances both proved: SP 1 node each (AF up to 77,832); faster on 6, n = 20 tie (0.04 s) |
 | H4 | SP's build share grows with \|P\| | **not confirmed** | Spearman ρ = −0.92 over 10 built SP runs; median build share 48 % |
 | H5 | SP becomes unbuildable; AF always built | **confirmed** | SP not built on 5 of 15, AF build failures 0 |
-| H6 | The MIP start helps AF more than SP | **not confirmed** | median improvement 2.6 % AF vs 2.6 % SP; AF gains only on the 4 largest instances |
+| H6 | The MIP start helps AF more than SP | **not confirmed** | median improvement 2.6 % AF vs 2.6 % SP; AF: 2 wins, 10 ties, 3 losses |
 | H8 | Difficulty grows with trips per duty more than with n | **too close to call** | rank correlation with difficulty: trips per duty 0.84, n 0.83 |
 
 **Script (186 words):**
@@ -138,8 +143,8 @@ Bottom line: limitations and "what next" in one sentence each.
 as strong as Model 1's - it held on every instance, and Model 2's LP was exactly the optimum every time. The naive
 big-M version gave the very same LP bound as our tight one. Second, size: Model 2 failed to build on 5 of 15
 instances, Model 1 never. Third, speed: where both proved the optimum, Model 2 needed one node and was faster on 6
-of 7. Two predictions failed. The heuristic start did not help Model 1 more than Model 2 overall - it only paid off
-on the four largest instances. On the right is the largest one: 500 trips covered by one legal schedule, checked
+of 7. Two predictions failed. The heuristic start did not help Model 1 more than Model 2: it was a clear gain
+only twice, and mostly a tie. On the right is the largest one: 500 trips covered by one legal schedule, checked
 trip by trip. Limits of our study: one generator family, one machine, one seed per configuration, and the driving
 limit tied to the spread. What next? Instead of writing Model 2's whole menu, generate only the duties that can
 improve the solution - column generation. Its pricing problem is a shortest path with two resources on our trip
@@ -156,5 +161,5 @@ real timetables?* - only for this generator's family; we say so. *Why column gen
 
 ### Before Gate 3 - what is left
 1. A and B check the H1-H5 and H8 wording against their own write-ups (`notebook_src/discussion.md`).
-2. Figures: `py slides/make_figures_C.py` (done, 10 Nov).
+2. Figures: `py slides/make_figures_C.py` (done, 10 Nov). **Re-run after A fixes `profile_curve`** (divide by all 15, so SP ends at 67 %, AF at 47 %).
 3. Merge: A's slides 1-5 + B's `slides_B.pptx` (6-9, 13) + these four into `slides_groupM.pptx` / `.pdf`.

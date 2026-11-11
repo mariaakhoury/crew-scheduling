@@ -84,20 +84,22 @@ the heuristic is within 0.8-7.8 % of plain AF's 120 s incumbent and 1.5 % cheape
 
 **Verdict: not confirmed.** B12 (`crew.analysis_heuristic`, rule §10.9): median improvement AF+S vs AF 2.6 % (15
 pairs), SP+S vs SP 2.6 % (10 comparable pairs; 5 not built either way). Gurobi accepted every start (AF 15/15, SP
-10/10) and AF's first incumbent came at a median 0.16 of the time without the start, but the final result moved
-only in one place:
-- **Where it helped:** AF on the 4 largest instances (n = 300-500, time limit either way): the final schedule was
-  0.2-3.9 % cheaper with the start (`rt_n500_m3_L360`: $45,143.50 → $43,400.50). There AF is still searching for
-  good schedules at the time limit, so a ready-made one is worth something.
-- **Where it did not:** the other 4 AF time-limit instances ended with the same schedule (on the 3 where SP knows
-  the optimum, AF had already found it: the open gap is the bound, which a start cannot move). SP is solved at the
-  root node with or without the start; its differences are hundredths of a second.
-- **Where it hurt:** two AF instances that are proved in seconds took longer with the start (`rt_n60_m2_L480`
-  38.8 → 71.5 s, `rt_n60_m3_L360` 7.3 → 9.7 s). A different first incumbent sends branch-and-bound down a
-  different tree; with one seed this is performance variability, not a bad start.
+10/10) and AF's first incumbent came at a median 0.16 of the time without the start, but by B12's tie rule
+AF+S vs AF gives 2 wins, 10 ties and 3 losses, and SP+S vs SP 10 ties:
+- **Where it helped (2):** one clear gain on a large instance, `rt_n500_m3_L360` (time limit either way): 3.9 %
+  cheaper, $45,143.50 → $43,400.50 - there AF is still searching for good schedules at the time limit, so a
+  ready-made one is worth something; and one mid-size proof, `rt_n50_m3_L600`, 29 % faster (3.7 → 2.6 s).
+- **Ties (10):** the other three n = 300-500 instances ended 0.2-0.9 % cheaper, below the tie threshold; the other
+  time-limit instances ended with the same schedule (on the 3 where SP knows the optimum, AF had already found it:
+  the open gap is the bound, which a start cannot move). SP is solved at the root node with or without the start;
+  its differences are hundredths of a second.
+- **Where it hurt (3):** two AF instances that are proved in seconds took longer with the start (`rt_n60_m2_L480`
+  38.8 → 71.5 s, `rt_n60_m3_L360` 7.3 → 9.7 s), and `rt_n50_m2_L600` ended with the same schedule but a weaker bound
+  (gap 4.7 → 6.0 %). A different first incumbent sends branch-and-bound down a different tree; with one seed this
+  is performance variability, not a bad start.
 
 So the expectation was right about *why* SP needs no help, but wrong about AF: on most instances AF either proves
-the optimum quickly by itself or is stuck on its bound, and only on the largest ones is it short of good schedules.
+the optimum quickly by itself or is stuck on its bound, and it is short of good schedules only on the largest ones, where the start gave its one clear gain.
 
 ### Conclusions (C11)
 
@@ -112,8 +114,9 @@ the optimum quickly by itself or is stuck on its bound, and only on the largest 
 3. **The menu explodes.** Model 2 could not be built on 5 of 15 instances (more than 2,000,000 duties): every
    instance with n ≥ 300, and already n = 100 when duties may last 10 hours.
 4. **The heuristic is cheap and useful as a start for big instances, not as an answer.** Under half a second,
-   always legal, a median 2.4 % above the optimum; as a complete start it improved Model 1 only on the largest
-   instances (up to 3.9 %) and never changed Model 2 (H6 not confirmed).
+   always legal, a median 2.4 % above the optimum; as a complete start it was a clear gain for Model 1 only twice
+   (3.9 % cheaper at n = 500, a 29 % faster proof at n = 50), mostly a tie, and never changed Model 2 (H6 not
+   confirmed).
 5. **Practical rule for this problem family:** count the duties first; if the menu fits, solve Model 2; otherwise
    solve Model 1 with the heuristic start and report its proven gap, knowing the gap mostly measures the bound.
 
