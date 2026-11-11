@@ -10,10 +10,10 @@
 
 | ID | Statement | Verdict | Evidence | Owner |
 |---|---|---|---|---|
-| H1 | LP-AF <= LP-SP on every instance where SP is built (Theorem 3) | _after Gate 3_ | LP-AF / LP-SP rows | A |
-| H2 | Naive big-M gives an LP bound at most as strong as the tight one; difference small | _after Gate 3_ | LP-AF-naive rows | A |
-| H3 | Where both are built and solved, SP needs fewer nodes and less solver time | _after Gate 3_ | paired nodes / times | A |
-| H4 | SP's end-to-end advantage shrinks as \|P\| grows (build share rises with \|P\|) | _after Gate 3_ | `results/b13` | A + B |
+| H1 | LP-AF <= LP-SP on every instance where SP is built (Theorem 3) | **confirmed** (10/10; LP-SP = optimum on all 10) | LP-AF / LP-SP rows, `results/a12` | A |
+| H2 | Naive big-M gives an LP bound at most as strong as the tight one; difference small | **confirmed** (identical on 15/15) | LP-AF-naive rows | A |
+| H3 | Where both are built and solved, SP needs fewer nodes and less solver time | **confirmed** (SP faster on 6/7 = 86 %) | paired nodes / times | A |
+| H4 | SP's end-to-end advantage shrinks as \|P\| grows (build share rises with \|P\|) | **not confirmed** (rho = -0.92) | SP timers, `results/b13` | A + B |
 | H5 | SP becomes unbuildable for long duties and large n; AF is built on every instance | _after Gate 3_ | `results/b13` | **B** |
 | H6 | The MIP start helps AF more than SP | **not confirmed** (median 2.6 % AF vs 2.6 % SP) | `results/b12` | C (B12 data) |
 | H8 | Difficulty grows with trips per duty more than with n alone | _after Gate 3_ | `results/b13` | **B** |
@@ -50,15 +50,54 @@ almost every instance with n >= 100 is censored at 30 s, so the ranks cannot sep
 **Final verdict:** _fill from `results/b13/h8_correlations.csv` after Gate 3; say which feature ranks higher and
 whether the difference is large enough to call._
 
+### H1 - LP dominance, Theorem 3 (A)
+
+**Rule (§10.9).** LP-AF <= LP-SP within 10^-6 on every final instance where SP is built; a violation is a bug (Q22).
+
+**Final verdict: confirmed.** On all 10 instances where SP was built, LP-AF <= LP-SP (Q22 green, `crew.analysis_strength`).
+The gap between the two is large: **LP-SP equals the proven optimum on all 10** (0 % LP gap), while LP-AF is
+1.9-15.8 % below it (median 8.9 %). So SP's LP already "knows" the answer, which is why SP solves every one of
+them at the root node (H3).
+
+### H2 - naive versus tight big-M (A, task A8)
+
+**Rule (§10.9).** The naive constants (one M per family: M_T = latest start - smallest l, M_D = W) must give an LP
+bound no stronger than the tight per-arc constants (Q21); the size of the difference is reported as measured.
+
+**Final verdict: confirmed, with a difference of zero.** LP-AF-naive and LP-AF are identical on all 15 instances
+(largest difference 2 x 10^-11, rounding). The direction holds; the size we expected ("small") is in fact nothing.
+**Why:** the big-M constants only appear in the chain rows (4) and (6), and Model 1's LP barely uses those rows:
+on P0-P5, deleting rows (4)-(7) altogether moves the LP bound by at most 1.3 points, and not at all on P3 and P4
+(slide 5, `slides/make_figures_A.py`). The LP solution spreads x fractionally so that the chain rows are slack
+whatever M is. Tight constants are still the right choice (they cost nothing), but they are not where Model 1's
+weakness comes from: the weakness is the formulation, not the constants.
+
+### H3 - SP needs fewer nodes and less solver time (A)
+
+**Rule (§10.9).** On the instances both plain models solve to proven optimality: confirmed if SP is faster on at
+least 75 % of them, not confirmed below 50 %.
+
+**Final verdict: confirmed.** Both models proved the optimum on 7 instances (n = 20-60). SP was faster on 6 of 7
+(86 %) and never needed more nodes: always 1, against 1 to 77,832 for AF (strictly fewer on 5, tied at 1 node on
+the two smallest). The one "loss" is n = 20: 0.006 s against 0.005 s, a tie in practice. The gap widens fast:
+at n = 60, L = 480, AF needed 38.8 s and 77,832 nodes, SP 0.13 s at the root. Beyond these 7, SP also proved the
+optimum on 3 instances where AF stopped at the time limit (n = 50-100), and on those 3 AF's schedule already was
+the optimum: AF lacks the proof, not the schedule.
+
 ### H4 - build share of SP (A + B)
 
 **Rule.** Build share = (enumeration + build) / end-to-end time of SP, against \|P\|; we read Spearman rho > 0.3 as
 confirmed, 0 < rho <= 0.3 as partly confirmed (our reading rule, stated here before the final runs).
 
-**Pilot [pilot].** rho = -0.54 over 11 built SP runs: **not confirmed** at the pilot limit. The likely reason: the
-largest SP model that was built (1.7 million duties) hit the 30 s *solve* limit, so solve time, not build time,
-dominated its end-to-end time - each node LP has 1.7 million columns. This is the "a stronger bound is not
-automatically faster" argument of Master Plan §4.6. Re-check on the final runs before writing the verdict.
+**Final verdict: not confirmed.** Over the 10 SP runs that were built, the build share *falls* as \|P\| grows,
+from 72 % (371 duties) to 32 % (63,633 duties): rho = -0.92. At this size, building is cheap (at most 0.3 s) and
+the root LP, which has one column per duty, grows faster than the build. This repeats the pilot (rho = -0.54) and
+is the "a stronger bound is not automatically faster" argument of Master Plan §4.6.
+
+**But the advantage does disappear, abruptly.** The 5 instances with more than 2,000,000 duties (n >= 300, and
+n = 100 with L = 600) were never built: there SP's advantage drops from "best method" to "no answer" in one step,
+at the cap, instead of shrinking gradually. So H4's mechanism (enumeration cost grows with \|P\|) is real, but on
+this benchmark it shows up as a cliff, not as a slope.
 
 ### Heuristic contribution - data for H6 (B12; C writes the verdict)
 
@@ -129,6 +168,8 @@ that shares nothing with the models (the independent checker).
 
 | Result | Explanation |
 |---|---|
+| Naive and tight big-M give exactly the same LP bound (H2) | Model 1's LP leaves the chain rows (4), (6) slack, so the size of M never matters; its weakness is the formulation |
+| SP's build share falls as \|P\| grows (H4) | building is cheap up to 63,633 duties; the root LP grows faster. The advantage ends at the 2,000,000 cap, as a cliff |
 | _e.g. SP time limit at n = 200 with 1.7 M duties [pilot]_ | _each node LP has 1.7 M columns: a strong bound but a slow LP (§4.6)_ |
 | _e.g. AF build 38.8 s on one instance [pilot]_ | _memory swapping on the 7.7 GB pilot laptop; not seen on same-size instances_ |
 | | |
@@ -136,4 +177,7 @@ that shares nothing with the models (the independent checker).
 ### What we would try next
 - Column generation for SP: price duties with a resource-constrained shortest path (spread, driving) on the
   acyclic trip graph instead of enumerating \|P\|.
+- An exact arc reduction for Model 1: delete every arc i -> j whose two trips alone break a limit
+  (e_j - s_i > L or d_i + d_j > W). That is 56,669 of 153,818 arcs (36.8 %) on our benchmark (B's count): Model 1
+  becomes about a third smaller with the same integer optimum. Found after the code freeze, so not in the runs.
 - _add from the final results_
