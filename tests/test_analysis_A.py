@@ -61,6 +61,14 @@ def test_q22_holds_and_catches_a_violation(df):
     assert not strength.q22_check(bad)["ok"].all()
 
 
+def test_naive_vs_tight(df):
+    d = pd.concat([df, pd.DataFrame([_row("i1", "LP-AF-naive", "OPTIMAL", 85.0, 0.1)])], ignore_index=True)
+    t = strength.naive_vs_tight(d)
+    assert t.loc["i1", "difference"] == pytest.approx(5.0) and t.loc["i1", "Q21 ok"]
+    d.loc[d["method"] == "LP-AF-naive", "objective"] = 95.0      # naive stronger than tight: a bug
+    assert not strength.naive_vs_tight(d).loc["i1", "Q21 ok"]
+
+
 def test_strength_charts_draw(df):
     strength.plot_gap_vs_time(df)
     strength.plot_time_split(df)
