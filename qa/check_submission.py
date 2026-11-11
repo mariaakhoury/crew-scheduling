@@ -56,7 +56,8 @@ def check_notebook(c: Checklist, path: str) -> None:
     text = json.dumps(nb)
     c.add("No personal file paths in the notebook (§11.3)", not PERSONAL_PATH.search(text))
     src = "\n".join("".join(x.get("source", "")) for x in cells).lower()
-    for item, words in [("Problem description and application", ("application", "bus")),
+    any_of = {"Problem description and application": ("application", "airline", "crew pairing", "railway", "train")}
+    for item, words in [("Problem description and application", ("bus",)),
                         ("Both models written (constraints (1)-(8))", ("c1_pred", "c8_cover")),
                         ("Heuristic code (greedy + local search)", ("greedy", "local search")),
                         ("Independent checker used", ("check_schedule",)),
@@ -64,6 +65,9 @@ def check_notebook(c: Checklist, path: str) -> None:
                         ("Small and large instance visualised (Gantt)", ("gantt",)),
                         ("Hardware, threads and time limits stated", ("threads", "time limit"))]:
         missing = [w for w in words if w not in src]
+        alts = any_of.get(item)
+        if alts and not any(a in src for a in alts):          # at least one way of naming a real-world use
+            missing.append("one of " + "/".join(alts))
         c.add(f"Notebook: {item}", not missing, f"missing keyword(s): {missing}" if missing else "")
     comments = sum(line.strip().startswith("#") for x in code for line in "".join(x.get("source", "")).splitlines())
     c.add("Code is commented (professor §3)", comments >= 50, f"{comments} comment lines")

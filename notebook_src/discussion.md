@@ -1,10 +1,9 @@
 ## Discussion: theory versus experiments
 
-> **DRAFT (B, 9 Nov).** Shared file: A writes H1-H4 (task A9), B writes H5 and H8 (B10), C writes H6 and the
-> conclusions (C11). Every number below marked *[pilot]* comes from the 30 s + 30 s pilot (`results/pilot.csv`,
-> 24 candidates) and is **preliminary**; it is replaced by the final-run numbers after Gate 3 (Fri 13). Verdict rules
-> are the ones fixed in Master Plan §10.9, written before the final runs. A "not confirmed" verdict with a good
-> explanation is a valid result.
+> Shared file: A writes H1-H4 (task A9), B writes H5 and H8 (B10), C writes H6 and the conclusions (C11). Numbers
+> come from the final runs (`results/runs.csv`: 15 frozen instances, tag v1.0-final-run, verify_results PASS)
+> unless marked *[pilot]*. Verdict rules are the ones fixed in Master Plan §10.9, written before the final runs. A
+> "not confirmed" verdict with a good explanation is a valid result.
 
 ### Hypothesis register
 
@@ -14,9 +13,9 @@
 | H2 | Naive big-M gives an LP bound at most as strong as the tight one; difference small | **confirmed** (identical on 15/15) | LP-AF-naive rows | A |
 | H3 | Where both are built and solved, SP needs fewer nodes and less solver time | **confirmed** (SP faster on 6/7 = 86 %) | paired nodes / times | A |
 | H4 | SP's end-to-end advantage shrinks as \|P\| grows (build share rises with \|P\|) | **not confirmed** (rho = -0.92) | SP timers, `results/b13` | A + B |
-| H5 | SP becomes unbuildable for long duties and large n; AF is built on every instance | _after Gate 3_ | `results/b13` | **B** |
+| H5 | SP becomes unbuildable for long duties and large n; AF is built on every instance | **confirmed** (SP not built on 5 of 15, AF on 15 of 15) | `results/b13` | **B** |
 | H6 | The MIP start helps AF more than SP | **not confirmed** (median 2.6 % AF vs 2.6 % SP) | `results/b12` | C (B12 data) |
-| H8 | Difficulty grows with trips per duty more than with n alone | _after Gate 3_ | `results/b13` | **B** |
+| H8 | Difficulty grows with trips per duty more than with n alone | **cannot be decided** (ρ 0.84 vs 0.83; n and trips per duty move together, ρ = 0.97) | `results/b13` | **B** |
 
 ### H5 - SP becomes unbuildable, AF is always built (B)
 
@@ -27,13 +26,19 @@ MEM_LIMIT_BUILD, KILLED_BUILD) and AF has 0 build failures. Build failures are n
 must be enumerated and stored before Gurobi starts, so long duties (large L, W) and dense timetables (many
 connections per trip) explode the column count. Arc-flow has \|A\| + 4n variables, polynomial in n.
 
-**Pilot [pilot].** SP was not built on 13 of 24 candidates: 7 exceeded the 2,000,000-duty cap, 6 could not be
-enumerated within the 30 s build limit (n = 400-500). AF was built on 23 of 24; the one failure
-(rt_n400_m2_L480) took 38.8 s to build where same-size instances took about 2 s, which points to memory swapping on
-the 7.7 GB pilot laptop rather than to the model. At the final 120 s build limit on the final-run machine we expect
-0 AF build failures.
+**Evidence (final runs, `results/b13/B13_summary.md`).** SP was **not built on 5 of the 15** benchmark instances,
+all for the same reason: the duty list passed the 2,000,000-duty cap (COLUMN_CAP) while it was being enumerated
+(after 3-75 s, inside the 120 s build limit). They are exactly the instances with the largest menus: every instance
+with n >= 300 (n = 300 and the three n = 500), and already n = 100 when a duty may last 10 hours (L = 600). The
+largest SP that could be built had 63,633 duties (n = 100, L = 8 h) and was solved in 0.6 s. **AF was built on all
+15**, the largest (n = 500, 58,864 variables) in 2.2 s. Both rows show up as "not built" in the tables, never as a
+time limit.
 
-**Final verdict:** _fill from `results/b13/B13_summary.md` (H5 line) after Gate 3._
+**Verdict: confirmed.** The prediction held for the reason we gave: \|P\| is exponential in the trips per duty,
+\|A\| + 4n is polynomial in n. (In the pilot, one AF build ran past the 30 s pilot limit on the 7.7 GB pilot laptop -
+memory swapping, not the model; on the final-run machine AF never needed more than 2.2 s.) This is also why the
+benchmark has a "no model finishes" group at all: on those 5 instances the stronger model cannot even start, and the
+weaker one runs out of time.
 
 ### H8 - difficulty and trips per duty (B)
 
@@ -44,11 +49,17 @@ observation for this generator only.
 **Limitation.** W = 0.75 L ties the two duty limits, so the effects of spread and driving time cannot be separated;
 and the hardest instances are censored at the time limit, which is why a rank statistic is used.
 
-**Pilot [pilot].** Spearman correlation with difficulty: n 0.55, trips per duty 0.54, L 0.11. At the pilot limit
-almost every instance with n >= 100 is censored at 30 s, so the ranks cannot separate n from trips per duty yet.
+**Evidence (final runs, `results/b13/h8_correlations.csv`).** Spearman rank correlation with difficulty over the 15
+instances: **trips per duty 0.84, n 0.83, L 0.35**.
 
-**Final verdict:** _fill from `results/b13/h8_correlations.csv` after Gate 3; say which feature ranks higher and
-whether the difference is large enough to call._
+**Verdict: cannot be decided with this benchmark.** 0.84 against 0.83 is no difference, and the data cannot produce
+one: in our benchmark the number of trips and the trips per duty rise together (rank correlation **0.97** between n
+and trips per duty: larger rotation timetables also give longer chains per driver), so their effects are
+confounded. In addition, 8 of the 15 instances are censored at the 120 s limit, which ties their difficulty at the
+top. What the data does show: difficulty follows the *size of the problem* (n, or equivalently trips per duty)
+much more than the duty length L alone (0.35). Separating n from trips per duty would need instances with the same
+n and different trips per duty (for example, the same timetable with only L changed: the optional L-sweep, task A14,
+which we did not run).
 
 ### H1 - LP dominance, Theorem 3 (A)
 
@@ -101,11 +112,10 @@ this benchmark it shows up as a cliff, not as a slope.
 
 ### Heuristic contribution - data for H6 (B12; C writes the verdict)
 
-**Pilot [pilot].** Every start was accepted (AF 22/22, SP 11/11). With the start, the first incumbent appeared much
-earlier (median time ratio 0.12 for AF, 0.27 for SP), but the final result changed little: on AF the time-limit gap
-improved by a median of 7 %, on SP the solver time by 9 %. Where SP solved at the root node the start had nothing
-to add. The bound, not the incumbent, keeps AF's gap open, so a better start cannot close it. Local search improved
-greedy on 9 of 24 candidates.
+**Final runs (`results/b12/B12_summary.md`).** Every start was accepted (AF 15/15, SP 10/10). With the start, AF's
+first incumbent came at a median 0.16 of the time without it (SP's at once: it starts from the start). Paired
+outcome: AF 2 wins, 10 ties, 3 losses; SP 0 wins, 10 ties, 0 losses (tie = within 10 % or 1 s). Local search
+improved greedy on 2 of 15. The verdict and its explanation are in H6 below.
 
 ### H6 - the MIP start helps AF more than SP (C)
 
@@ -170,14 +180,18 @@ that shares nothing with the models (the independent checker).
 |---|---|
 | Naive and tight big-M give exactly the same LP bound (H2) | Model 1's LP leaves the chain rows (4), (6) slack, so the size of M never matters; its weakness is the formulation |
 | SP's build share falls as \|P\| grows (H4) | building is cheap up to 63,633 duties; the root LP grows faster. The advantage ends at the 2,000,000 cap, as a cliff |
-| _e.g. SP time limit at n = 200 with 1.7 M duties [pilot]_ | _each node LP has 1.7 M columns: a strong bound but a slow LP (§4.6)_ |
-| _e.g. AF build 38.8 s on one instance [pilot]_ | _memory swapping on the 7.7 GB pilot laptop; not seen on same-size instances_ |
-| | |
+| H8 cannot be decided (n 0.83 vs trips per duty 0.84) | n and trips per duty are almost perfectly correlated in our benchmark (ρ = 0.97), so their effects cannot be separated; 8 of 15 instances censored at 120 s |
+| The start made AF slower on two quick instances (`rt_n60_m2_L480` 38.8 → 71.5 s) | a different first incumbent sends branch-and-bound down a different tree (see H6) |
+| SP not built already at n = 100 when duties may last 10 h | 10-hour duties fit many more trips, and \|P\| is exponential in the trips per duty (H5) |
+| [pilot] SP time limit at n = 200 with 1.7 M duties; solved at the final 120 s limit in 64 s | each node LP has 1.7 M columns: a strong bound but a slow LP (§4.6) |
+| [pilot] one AF build took 38.8 s | memory swapping on the 7.7 GB pilot laptop; on the final-run machine every AF build took at most 2.2 s |
 
 ### What we would try next
 - Column generation for SP: price duties with a resource-constrained shortest path (spread, driving) on the
   acyclic trip graph instead of enumerating \|P\|.
 - An exact arc reduction for Model 1: delete every arc i -> j whose two trips alone break a limit
   (e_j - s_i > L or d_i + d_j > W). That is 56,669 of 153,818 arcs (36.8 %) on our benchmark (B's count): Model 1
-  becomes about a third smaller with the same integer optimum. Found after the code freeze, so not in the runs.
+  becomes about a third smaller with the same integer optimum, and its LP bound cannot get weaker. Found after the
+  code freeze, so not in the runs.
+- Separate the effect of n from trips per duty (H8): the L-sweep (one timetable, only L changed).
 - _add from the final results_
