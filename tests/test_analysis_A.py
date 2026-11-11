@@ -72,13 +72,13 @@ def test_ratios_and_unsolved_is_inf(df):
     r = prof.ratios(df)
     assert r.loc["i1", "SP"] == 1.0 and r.loc["i1", "AF"] == pytest.approx(10.0)
     assert np.isinf(r.loc["i2", "AF"])
-    assert "i3" not in r.index                       # nobody solved it: no fastest method
+    assert np.isinf(r.loc["i3"]).all()               # nobody solved it: inf for every method
 
 
 def test_profile_end_points(df):
     p = prof.profile_curve(df)
-    assert p["SP"].iloc[0] == 1.0                    # SP fastest on both solvable instances
-    assert p["AF"].iloc[-1] == 0.5                   # AF solves 1 of the 2 at any factor
+    assert p["SP"].iloc[0] == pytest.approx(2 / 3)   # share of ALL 3 instances: SP fastest on 2
+    assert p["AF"].iloc[-1] == pytest.approx(1 / 3)  # AF solves 1 of the 3 at any factor
 
 
 def test_sgm_formula():

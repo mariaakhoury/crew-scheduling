@@ -108,3 +108,7 @@ will now show a model that is the opposite: a much stronger bound, at the price 
 - Why is the big-M s_j − ℓ_i valid? When the arc is unused, T_j ≤ s_j and T_i ≥ ℓ_i, so no real schedule is cut off (Theorem 2).
 - Why not 1440? It is not always valid (it depends on the data); we compute valid constants per instance.
 - Why no symmetry? Drivers have no index: a duty is a chain of arcs, not "driver k".
+- **What next for Model 1? An exact arc reduction.** An arc i → j can never be in a legal duty if the pair alone
+  breaks a limit: e_j − s_i > L (spread) or d_i + d_j > W (driving). On our benchmark that is 56,669 of 153,818
+  arcs (36.8 %, Amani's count). Deleting them changes no integer solution, makes Model 1 about a third smaller,
+  and the LP can no longer use them fractionally. We found this after the code freeze, so it is future work.

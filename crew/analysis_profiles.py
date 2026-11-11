@@ -13,7 +13,8 @@ Which method is fastest, how often, and by how much? Every number is recomputed 
   win_tie_loss(df, metric)       every pair of methods: wins / ties / losses per instance
 
 "Solved" means OPTIMAL and accepted by the checker. A method that did not solve an instance counts as never
-solving it in the profile (ratio = inf). In the shifted geometric mean it counts with the most time it could
+solving it in the profile (ratio = inf), and every curve is a share of ALL instances, including those no method
+solved, so a curve ends at the share of instances that method solved (Dolan and More 2002). In the shifted geometric mean it counts with the most time it could
 have used (time limit + build limit), so a fast failure (e.g. COLUMN_CAP after 30 s) is not rewarded.
 Default metric: end-to-end time, which includes duty enumeration and model building.
 """
@@ -52,15 +53,14 @@ def run_times(df: pd.DataFrame, metric: str = "end_to_end") -> pd.DataFrame:
 
 
 def ratios(df: pd.DataFrame, metric: str = "end_to_end") -> pd.DataFrame:
-    """Time / fastest time on that instance. Instances no method solved are dropped (no fastest exists)."""
+    """Time / fastest time on that instance. On an instance no method solved, every ratio is inf."""
     t = run_times(df, metric)
     best = t.min(axis=1)
-    t = t[np.isfinite(best)]
-    return t.div(best[np.isfinite(best)], axis=0)
+    return t.div(best.where(np.isfinite(best), np.inf), axis=0).where(np.isfinite(best), np.inf)
 
 
 def profile_curve(df: pd.DataFrame, metric: str = "end_to_end", taus=None) -> pd.DataFrame:
-    """rho_m(tau) = share of instances (that at least one method solved) where method m is within tau x fastest."""
+    """rho_m(tau) = share of ALL instances on which method m is within tau x the fastest method."""
     r = ratios(df, metric)
     if taus is None:
         finite = r.to_numpy()[np.isfinite(r.to_numpy())]
@@ -85,7 +85,9 @@ def plot_profile(df: pd.DataFrame, metric: str = "end_to_end", ax=None):
     ax.set_ylim(-0.02, 1.02)
     ax.set_xlabel(f"within this factor of the fastest method ({metric.replace('_', '-')} time, log scale)")
     ax.set_ylabel("share of instances solved")
-    ax.set_title(f"Performance profile ({len(ratios(df, metric))} instances solved by at least one method)")
+    r = ratios(df, metric)
+    solvable = int(np.isfinite(r.to_numpy()).any(axis=1).sum())
+    ax.set_title(f"Performance profile: {len(r)} instances ({solvable} solved by at least one method)")
     ax.grid(color="0.9")
     ax.legend()
     return ax.figure
