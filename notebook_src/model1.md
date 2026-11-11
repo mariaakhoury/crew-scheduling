@@ -23,9 +23,9 @@ T and D are "memories" carried along each chain: T remembers when the duty began
 
 ### Cost
 
-Total = $300 × (number of duties) + $0.50 × (all driving minutes) + $0.50 × (waiting minutes on used arcs).
+Total = \$300 × (number of duties) + \$0.50 × (all driving minutes) + \$0.50 × (waiting minutes on used arcs).
 Driving is the same in every schedule, so the model really trades **drivers against waiting**.
-This equals the official cost, Σ ($300 + $0.50 × spread), because each duty's spread is its driving plus its waits.
+This equals the official cost, Σ (\$300 + \$0.50 × spread), because each duty's spread is its driving plus its waits.
 
 ### Rules (constraints)
 
@@ -42,6 +42,43 @@ This equals the official cost, Σ ($300 + $0.50 × spread), because each duty's 
 (1) and (2) cut the trips into chains. (3) and (4) together enforce the spread limit L; (6) and (7) enforce the
 driving limit W. Rule (5) is already implied by the bound ℓ<sub>j</sub> ≥ e<sub>j</sub> − L, so it changes nothing; we keep it
 because it is easy to read, and Gurobi removes it. Without (4), however, a 14-hour duty would look legal.
+
+### Full mathematical formulation
+
+**Sets and data.** Trips $J = \{0, \dots, n-1\}$; trip $j$ starts at $s_j$, ends at $e_j$ and drives
+$d_j = e_j - s_j$ minutes. Arcs $A = \{(i, j) : \text{dest}_i = \text{origin}_j,\ e_i + \tau \le s_j\}$.
+Costs $F = 300$ per duty and $c = 0.5$ per minute; limits $L$ (spread) and $W$ (driving).
+With $s_{\min} = \min_k s_k$: $\ell_j = \max(s_{\min},\, e_j - L)$ and $U_j = \min(W,\, e_j - s_{\min})$.
+Big-M constants per arc: $M^T_{ij} = s_j - \ell_i$ and $M^D_{ij} = U_i$.
+
+**Variables.** $x_{ij} \in \{0,1\}$ for $(i,j) \in A$; $u_j, v_j \in \{0,1\}$; $T_j$ and $D_j$ continuous, $j \in J$.
+
+$$
+\min \; F \sum_{j \in J} u_j \;+\; c \sum_{j \in J} d_j \;+\; c \sum_{(i,j) \in A} (s_j - e_i)\, x_{ij}
+$$
+
+subject to
+
+$$
+\begin{aligned}
+& u_j + \sum_{i:(i,j) \in A} x_{ij} = 1 && \forall j \in J && (1)\ \texttt{c1\_pred}\\
+& v_i + \sum_{j:(i,j) \in A} x_{ij} = 1 && \forall i \in J && (2)\ \texttt{c2\_succ}\\
+& \ell_j \le T_j \le s_j && \forall j \in J && (3)\ \text{variable bounds}\\
+& T_j \le T_i + M^T_{ij}\,(1 - x_{ij}) && \forall (i,j) \in A && (4)\ \texttt{c4\_Tchain}\\
+& e_j - T_j \le L && \forall j \in J && (5)\ \texttt{c5\_spread}\\
+& D_j \ge D_i + d_j - M^D_{ij}\,(1 - x_{ij}) && \forall (i,j) \in A && (6)\ \texttt{c6\_Dchain}\\
+& d_j \le D_j \le U_j && \forall j \in J && (7)\ \text{variable bounds}\\
+& x_{ij},\, u_j,\, v_j \in \{0, 1\}
+\end{aligned}
+$$
+
+**Why it is correct, in one line each.** (1)-(2) cut the trips into chains (each trip one way in, one way out);
+(3)-(5) give every trip of a chain the same start time $T$, no later than the first trip's start, so
+$e_{\text{last}} - s_{\text{first}} \le L$; (6)-(7) add up the driving along the chain and cap it at $U_j \le W$.
+The second term of the objective is a constant (total driving); together with the waiting term it equals
+$\sum_{\text{duties}} (F + c \cdot \text{spread})$, the official cost. Rows: $3n + 2|A|$; variables: $|A| + 4n$.
+LP relaxation (`relax=True`): $x, u, v \in [0, 1]$. Naive big-M variant (A6): $M^T = \max_j s_j - \min_i \ell_i$
+and $M^D = W$ for every arc.
 
 ### The big-M numbers
 
@@ -80,4 +117,4 @@ other way round. Model 2 is "stronger"; Model 1 is smaller. Which one solves fas
 
 `crew/model_arcflow.py`: `build_arcflow(inst, arcs, relax=False, naive_m=False)` returns the model and its
 variables; `decode_arcflow(inst, vars)` turns the solution back into duties: start at each trip with u = 1 and
-follow the chosen arcs. On P0 it gives $945 with duties {T1, T2, T5, T6} and {T3, T4, T7, T8}.
+follow the chosen arcs. On P0 it gives \$945 with duties {0, 1, 4, 5} and {2, 3, 6, 7}.
