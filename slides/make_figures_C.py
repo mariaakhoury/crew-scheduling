@@ -2,6 +2,7 @@
 
     py slides/make_figures_C.py            # writes slides/figures/C_*.png and prints the numbers used
 
+slide 10: P0 case study - greedy / after local search / optimal, trip 7 outlined (A11 `viz.case_study`)
 slide 11: effect of the heuristic start, AF+S vs AF and SP+S vs SP (B12 chart, `analysis_heuristic.plot_paired`)
 slide 12: performance profile on end-to-end time (A16 chart, `analysis_profiles.plot_profile`)
 slide 14: the largest final instance with a verified schedule, drawn with A7 `viz.gantt`
@@ -24,7 +25,9 @@ import pandas as pd
 from crew import analysis_heuristic, analysis_profiles
 from crew.checker import check_schedule
 from crew.instance import load_instance
-from crew.viz import gantt
+from crew.localsearch import heuristic
+from crew.greedy import greedy_insertion
+from crew.viz import case_study, cost_table, gantt
 
 RESULTS = os.path.join(ROOT, "results")
 RUNS = os.path.join(RESULTS, "runs.csv")
@@ -62,8 +65,19 @@ def slide14(df: pd.DataFrame) -> None:
           f"gap={row['gap_pct']:.2f} %  checker OK")
 
 
+def slide10() -> None:
+    p0 = load_instance(os.path.join(ROOT, "instances", "proto", "P0_example8.json"))
+    schedules = {"Greedy": greedy_insertion(p0), "After local search": heuristic(p0).schedule,
+                 "Optimal": p0.reference["schedule"]}
+    table = cost_table(p0, schedules)                                   # asserts every cost against the checker
+    assert table["total $"].tolist() == [1177.5, 945.0, 945.0], table
+    _save(case_study(p0, schedules, highlight=[7]), "C_slide10_case.png")
+    print(table.to_string())
+
+
 def main() -> None:
     os.makedirs(OUT, exist_ok=True)
+    slide10()
     df = pd.read_csv(RUNS)
     _save(analysis_heuristic.plot_paired(df), "C_slide11_start_effect.png")
     v = analysis_heuristic.h6_verdict(df)
