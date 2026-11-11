@@ -33,7 +33,7 @@ always a legal schedule and every instance has a solution.
 | terminals m | 2, 3 | fewer terminals = more connections per trip = harder |
 | spread limit L | 360, 480, 600 min (6, 8, 10 h) | longer duties = more trips per duty = more possible duties |
 | driving limit W | 0.75 L | a fixed ratio, so a duty is limited by both rules |
-| costs, tau | F = $300, c = $0.50/min, tau = 10 min | **fixed** for every instance (data rule V6): difficulty comes from the timetable, not from the prices |
+| costs, tau | F = \$300, c = \$0.50/min, tau = 10 min | **fixed** for every instance (data rule V6): difficulty comes from the timetable, not from the prices |
 | seed | 201 | the final seeds (the pilot files are the candidate instances) |
 
 The grid was built in two steps, both before any final run:
