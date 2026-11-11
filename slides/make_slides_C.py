@@ -59,6 +59,21 @@ def numbers() -> dict:
     }
 
 
+def comparison_from_report() -> dict[str, dict[str, str]]:
+    """The comparison table exactly as the notebook shows it (with '≥' marks): parsed from results/report/tables.md,
+    which `python -m crew.analysis` writes from runs.csv (C9)."""
+    md = open(os.path.join(ROOT, "results", "report", "tables.md"), encoding="utf-8").read()
+    block = md.split("### Comparison of methods", 1)[1].strip().splitlines()
+    head = [c.strip() for c in block[0].strip("|").split("|")]
+    out = {}
+    for line in block[2:]:
+        if not line.startswith("|"):
+            break
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        out[cells[0]] = dict(zip(head, cells))
+    return out
+
+
 def notes_from_md() -> dict[str, str]:
     """Speaker notes per slide number = the script + likely questions of slides_C.md."""
     text = open(os.path.join(ROOT, "slides", "slides_C.md"), encoding="utf-8").read()
@@ -261,20 +276,28 @@ def slide11(prs, k, notes):
 def slide12(prs, k, notes):
     s = new_slide(prs, 12, "Model 2 wins whenever it can be built; Model 1 is the only option beyond that",
                   notes["12"])
-    N = k["N"]
-    assert k["sp_max_e2e"] < 1, k["sp_max_e2e"]
-    tiles = [(f"{k['sp_opt']} / {N}", "Model 2 proved the optimum, each under 1 s", TEAL),
-             (f"{k['af_opt']} / {N}", f"Model 1 proved the optimum (n ≤ {k['af_max_opt_n']})", CORAL),
-             (f"{k['sp_not_built']} / {N}", "Model 2 not built: more than 2 million duties", AMBER),
-             (f"{k['tl_same']} / {k['tl_known']}", "Model 1 time limits already at the optimum", NAVY)]
-    for i, (big, label, c) in enumerate(tiles):
-        stat_tile(s, 0.6 + i * 3.1, 1.75, 2.8, 1.3, big, label, c, f"Stat {i + 1}")
-    picture(s, os.path.join(FIG, "C_slide12_profile.png"), 0.6, 3.3, h=3.55, name="Performance profile")
+    comp = comparison_from_report()
+    cols = [("OPTIMAL (proven)", "Optimal"), ("TIME_LIMIT", "Time limit"), ("not built", "Not built"),
+            ("avg gap %", "Avg gap %"), ("max gap %", "Max gap %"), ("avg solver time (s)", "Avg solver s"),
+            ("avg end-to-end (s)", "Avg end-to-end s"), ("avg #nodes", "Avg nodes")]
+    names = {"H": "Heuristic", "AF": "Model 1", "AF+S": "Model 1 + start", "SP": "Model 2", "SP+S": "Model 2 + start"}
+    rows = [["Method (15 instances)"] + [c[1] for c in cols]]
+    for m in ["H", "AF", "AF+S", "SP", "SP+S"]:
+        hi = m.startswith("SP")
+        rows.append([(names[m], {"bold": True, "color": TEAL if hi else (CORAL if m.startswith("AF") else NAVY)})]
+                    + [(comp[m][c[0]], {"bold": hi and c[0] in ("OPTIMAL (proven)", "avg gap %")})
+                       if hi else comp[m][c[0]] for c in cols])
+    table(s, 0.6, 1.7, 12.1, [2.3, 1.25, 1.1, 1.1, 1.1, 1.1, 1.3, 1.55, 1.3], rows, size=13,
+          name="Comparison table", row_h=0.36)
+    text(s, 0.6, 3.95, 12.1, 0.28, "≥ = includes runs stopped at the 120 s limit (a lower bound). Solver time, gap "
+         "and nodes: built runs only; end-to-end includes Model 2's failed builds (3-75 s each).", size=11, color=MUTED,
+         name="Table note")
+    picture(s, os.path.join(FIG, "C_slide12_profile.png"), 0.6, 4.35, h=2.55, name="Performance profile")
     cd = CategoryChartData()
     cd.categories = [r[0] for r in k["gap_rows"]]
     cd.add_series("Model 1's schedule", [100.0] * len(k["gap_rows"]))
     cd.add_series("Model 1's proven lower bound", [round(r[1], 1) for r in k["gap_rows"]])
-    gf = s.shapes.add_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, Inches(6.2), Inches(3.3), Inches(6.5), Inches(3.55), cd)
+    gf = s.shapes.add_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, Inches(5.3), Inches(4.3), Inches(7.4), Inches(2.6), cd)
     gf.name = "Schedule vs bound chart"
     ch = gf.chart
     style_chart(ch)

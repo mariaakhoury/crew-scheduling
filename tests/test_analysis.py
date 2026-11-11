@@ -59,6 +59,21 @@ def test_summary_table_averages_follow_the_rules(df):
     assert shown.at["i3", "objective"] == "–"
 
 
+def test_class_column_filled_from_lookup_or_left_out(df, tmp_path):
+    # runs.csv leaves "class" empty and pd.read_csv turns it into NaN: never show a column of NaN (audit, 11 Nov)
+    raw = df.assign(**{"class": float("nan")})
+    t = summary_table(raw, "AF", classes={"i1": "EASY", "i2": "TIME_LIMIT", "i3": "TIME_LIMIT"})
+    assert t.loc[["i1", "i2", "i3"], "class"].tolist() == ["EASY", "TIME_LIMIT", "TIME_LIMIT"]
+    assert "class" not in summary_table(raw, "AF", classes=False).columns
+    own = raw.assign(**{"class": "HARD"})                                  # a class already in runs.csv wins
+    assert set(summary_table(own, "AF", classes={"i1": "EASY"}).loc[["i1", "i2"], "class"]) == {"HARD"}
+
+
+def test_index_name_says_averages_cover_built_runs_only(df):
+    assert summary_table(df, "SP", classes=False).index.name == "SP: instance (Average/Sum over the 2 of 3 built)"
+    assert summary_table(df, "AF", classes=False).index.name == "AF: instance"
+
+
 def test_uncensored_average_has_no_marker(df):
     t = summary_table(df[df["instance"] == "i1"], "AF")
     assert not t.attrs["censored"] and not to_display(t).at["Average", "solver_time_s"].startswith("≥")

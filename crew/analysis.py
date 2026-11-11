@@ -1,7 +1,7 @@
 """Required tables from results/runs.csv (tasks C7, C9). Owner: Member C (A adds the A16 profile functions here).
 
 Shared interfaces (Master Plan §7.3):
-    summary_table(df, method) -> DataFrame     one per method (H, AF, AF+S, SP, SP+S): instances in rows,
+    summary_table(df, method, classes=None)    one per method (H, AF, AF+S, SP, SP+S): instances in rows,
                                                an "Average" and a "Sum" row at the bottom
     comparison_table(df) -> DataFrame          methods in rows
 
@@ -36,6 +36,7 @@ FEATURES = ["n", "m", "L", "W", "n_arcs", "class"]
 RESULTS = ["status", "objective", "best_bound", "gap_pct", "solver_time_s", "end_to_end_s",
            "n_vars", "n_constrs", "nodes"]
 SUM_COLUMNS = ["objective", "best_bound", "solver_time_s", "end_to_end_s", "n_vars", "n_constrs", "nodes"]
+DEFAULT_MANIFEST = "instances/final/MANIFEST.csv"               # class_at_selection of the frozen benchmark (B9)
 # The professor's tables cover the solution methods (Master Plan §11.1); LP-* rows feed the strength analysis (A12)
 REQUIRED_METHODS = ("H", "AF", "AF+S", "SP", "SP+S")
 
@@ -109,14 +110,48 @@ def _is_censored(rows: pd.DataFrame, col: str) -> bool:
 
 # ------------------------------------------------------------------ summary table (one per method)
 
-def summary_table(df: pd.DataFrame, method: str) -> pd.DataFrame:
-    """Instances in rows (by n, then L, then name); features + results; "Average" and "Sum" rows at the bottom."""
+def class_lookup(classes=None) -> dict[str, str]:
+    """{instance: class}. classes: a dict, a DataFrame with columns instance/class, False (no lookup), or None =
+    the class_at_selection column of DEFAULT_MANIFEST if that file exists (relative to the working folder)."""
+    if classes is False:
+        return {}
+    if classes is None:
+        import os
+        if not os.path.exists(DEFAULT_MANIFEST):
+            return {}
+        man = pd.read_csv(DEFAULT_MANIFEST, dtype=str)
+        if "class_at_selection" not in man:
+            return {}
+        classes = dict(zip(man["name"], man["class_at_selection"]))
+    if isinstance(classes, pd.DataFrame):
+        classes = dict(zip(classes["instance"], classes["class"]))
+    return {str(k): str(v) for k, v in classes.items() if pd.notna(v) and str(v).strip()}
+
+
+def _with_classes(rows: pd.DataFrame, classes) -> pd.DataFrame:
+    """Fill the class column (runs.csv leaves it empty; read_csv may turn it into NaN) from `classes`."""
+    rows = rows.copy()
+    own = rows["class"].fillna("").astype(str).str.strip() if "class" in rows else pd.Series("", index=rows.index)
+    if (own == "").any():
+        lookup = class_lookup(classes)
+        own = own.where(own != "", rows["instance"].map(lookup).fillna(""))
+    rows["class"] = own
+    return rows
+
+
+def summary_table(df: pd.DataFrame, method: str, classes=None) -> pd.DataFrame:
+    """Instances in rows (by n, then L, then name); features + results; "Average" and "Sum" rows at the bottom.
+    The class column comes from runs.csv or, where empty, from `classes` (see class_lookup); it is left out only if
+    no class is known. If some instances were not built, the index name says that Average/Sum cover the built ones."""
     rows = df[df["method"] == method].sort_values(["n", "L", "instance"])
     if rows.empty:
         raise ValueError(f"no rows for method {method!r}")
+    rows = _with_classes(rows, classes)
     features = [c for c in FEATURES if c != "class" or (rows["class"] != "").any()]
     table = rows.set_index("instance")[features + RESULTS].copy()
-    table.index.name = f"{method}: instance"
+    n_built = int(rows["n_vars"].notna().sum())
+    note = f" (Average/Sum over the {n_built} of {len(rows)} built)" if method != "H" and n_built < len(rows) else ""
+    table.index.name = f"{method}: instance{note}"
     text_cols = [c for c in table.columns if c in ("status", "class")]
     # numeric columns as float64 and text columns as object BEFORE adding the Average/Sum rows, so no column ever
     # changes dtype on assignment (pandas 2.x warns about that and pandas 3 forbids it)
@@ -570,7 +605,7 @@ def write_report(runs_csv: str, outdir: str, manifest_csv: Optional[str] = None,
     out, md = {}, [f"## Results tables (recomputed from `{os.path.basename(runs_csv)}`, {len(df)} live rows)\n"]
     for method in REQUIRED_METHODS:
         try:
-            t = summary_table(df, method)
+            t = summary_table(df, method, classes if classes is not None else False)
         except ValueError as exc:
             out[f"summary_{method}"] = f"skipped: {exc}"
             continue

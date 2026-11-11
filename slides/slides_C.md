@@ -86,7 +86,8 @@ not the schedule.
 
 **Show:** the comparison table (C9, `results/report/tables.md`, methods in rows) and the performance profile (A16,
 `slides/figures/C_slide12_profile.png`).
-Highlight three numbers: SP optimal 10 / 15, AF optimal 7 / 15, SP not built 5 / 15 (the profile curves end at
+On the slide: the comparison table on top (8 columns of `results/report/tables.md`, with its ≥ marks), the
+profile and the found-not-proved chart below. Highlight: SP optimal 10 / 15, AF optimal 7 / 15, SP not built 5 / 15 (the profile curves end at
 67 % and 47 %: the share of all 15 instances each model solved).
 
 **Numbers (final runs):**
