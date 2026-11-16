@@ -115,7 +115,7 @@ experiment (Gurobi academic licence, about 2 hours, only on the run machine).
 A bus company runs a timetable of trips between terminals. Each trip needs one driver. A driver's **duty** is a
 chain of trips: each trip must leave from the terminal where the previous one arrived, at least 10 minutes later.
 A duty may last at most **L** minutes from first departure to last arrival (its *spread*), and contain at most
-**W** minutes of driving. Every duty costs **$300** plus **$0.50 per minute of spread**. We want the cheapest set
+**W** minutes of driving. Every duty costs **\\$300** plus **\\$0.50 per minute of spread**. We want the cheapest set
 of duties that covers every trip exactly once. The same structure appears in airline crew pairing, train crew
 rostering and delivery-route driver planning.
 
