@@ -140,7 +140,7 @@ def new_slide(prs, number: int, title: str, notes: str):
         p.alignment = PP_ALIGN.LEFT
         for r in p.runs:
             r.font.name, r.font.size, r.font.bold, r.font.color.rgb = HEAD, Pt(32), True, NAVY
-    text(s, 0.6, 7.0, 9.0, 0.3, f"Group M · Bus crew scheduling · Member C (Maria) · slide {number}",
+    text(s, 0.6, 7.0, 9.0, 0.3, f"Group M · Bus crew scheduling · Member C (Maria) · " + (f"slide {number}" if number else "backup"),
          size=10, color=MUTED, name="Footer")
     s.notes_slide.notes_text_frame.text = notes
     return s
@@ -355,6 +355,143 @@ def slide14(prs, k, notes):
     ], size=14)
 
 
+# ------------------------------------------------------------------ backup: the summary tables (professor's slide list)
+def md_table(title: str) -> tuple[list[str], list[list[str]]]:
+    """One table of results/report/tables.md (written by `python -m crew.analysis` from runs.csv): header, rows."""
+    md = open(os.path.join(ROOT, "results", "report", "tables.md"), encoding="utf-8").read()
+    block = md.split(f"### {title}\n", 1)[1].strip().splitlines()
+    head = [c.strip() for c in block[0].strip().strip("|").split("|")]
+    rows = []
+    for line in block[2:]:
+        if not line.startswith("|"):
+            break
+        rows.append([c.strip() for c in line.strip().strip("|").split("|")])
+    return head, rows
+
+
+def _inst_label(name: str) -> str:
+    m = re.match(r"rt_n(\d+)_m(\d+)_L(\d+)_s\d+", name)
+    return f"n {m.group(1)} · {m.group(2)} term. · {int(m.group(3)) // 60} h" if m else name
+
+
+STATUS_SHORT = {"OPTIMAL": "optimal", "TIME_LIMIT": "time limit", "COLUMN_CAP": "not built", "HEURISTIC": "",
+                "": ""}
+
+
+def summary_rows(method: str) -> dict[str, dict[str, str]]:
+    head, rows = md_table(f"Summary: {method}")
+    return {r[0]: dict(zip(["instance"] + head[1:], r)) for r in rows}
+
+
+def grouped_table(slide, x, y, col_w, groups, header, body, size=10, row_h=0.255, name=None):
+    """A table with a merged group-header row (e.g. 'Model 1 (arc-flow)') above the column headers."""
+    n_rows, n_cols = len(body) + 2, len(header)
+    shape = slide.shapes.add_table(n_rows, n_cols, Inches(x), Inches(y), Inches(sum(col_w)), Inches(row_h * n_rows))
+    if name:
+        shape.name = name
+    tbl = shape.table
+    for j, w in enumerate(col_w):
+        tbl.columns[j].width = Inches(w)
+
+    def put(cell, val, fill, color=NAVY, bold=False, align=PP_ALIGN.LEFT):
+        cell.text = str(val)
+        cell.margin_left = cell.margin_right = Inches(0.05)
+        cell.margin_top = cell.margin_bottom = Inches(0.01)
+        cell.vertical_anchor = MSO_ANCHOR.MIDDLE
+        cell.fill.solid()
+        cell.fill.fore_color.rgb = fill
+        for para in cell.text_frame.paragraphs:
+            para.alignment = align
+            for r in para.runs:
+                r.font.name, r.font.size, r.font.bold, r.font.color.rgb = BODY, Pt(size), bold, color
+
+    col = 0
+    for label, span, fill in groups:                       # row 0: group headers
+        cell = tbl.cell(0, col)
+        if span > 1:
+            cell.merge(tbl.cell(0, col + span - 1))
+        put(cell, label, fill, NAVY if fill == PANEL else WHITE, True, PP_ALIGN.CENTER)
+        col += span
+    for j, h in enumerate(header):                          # row 1: column headers
+        put(tbl.cell(1, j), h, NAVY, WHITE, True, PP_ALIGN.LEFT if j < 2 else PP_ALIGN.RIGHT)
+    for i, row in enumerate(body):
+        last = i == len(body) - 1
+        for j, v in enumerate(row):
+            put(tbl.cell(i + 2, j), v, PANEL if (i % 2 or last) else WHITE, NAVY, last,
+                PP_ALIGN.LEFT if j < 2 else PP_ALIGN.RIGHT)
+    for i in range(n_rows):
+        tbl.rows[i].height = Inches(row_h)
+    return tbl
+
+
+def _num(v: str) -> str:
+    return "–" if v in ("", "nan") else v
+
+
+def backup_model1(prs, k, notes):
+    s = new_slide(prs, 0, "Backup: summary table, Model 1 and Model 1 + start", notes["B1"])
+    af, afs = summary_rows("AF"), summary_rows("AF+S")
+    names = [n for n in af if n not in ("Average", "Sum")]
+    body = []
+    for n in names + ["Average"]:
+        a, b = af[n], afs[n]
+        body.append([_inst_label(n) if n != "Average" else "Average (15)", a["class"] if n != "Average" else "",
+                     _num(a["n_vars"]), _num(a["n_constrs"]),
+                     STATUS_SHORT.get(a["status"], a["status"]), _num(a["solver_time_s"]), _num(a["objective"]),
+                     _num(a["best_bound"]), _num(a["gap_pct"]), _num(a["nodes"]),
+                     STATUS_SHORT.get(b["status"], b["status"]), _num(b["solver_time_s"]), _num(b["objective"]),
+                     _num(b["gap_pct"]), _num(b["nodes"])])
+    header = ["Instance", "Class", "Vars", "Rows", "Status", "Time s", "Objective $", "Bound $", "Gap %", "Nodes",
+              "Status", "Time s", "Objective $", "Gap %", "Nodes"]
+    groups = [("Instance", 4, PANEL), ("Model 1 (arc-flow)", 6, CORAL), ("Model 1 + heuristic start", 5, CORAL)]
+    grouped_table(s, 0.6, 1.45, [1.4, 0.78, 0.8, 0.75, 0.68, 0.6, 0.85, 0.82, 0.5, 0.92, 0.68, 0.6, 0.85, 0.5,
+                                 0.92], groups, header, body, name="Summary table Model 1")
+    text(s, 0.6, 6.45, 12.1, 0.45, "Same 15 instances, 120 s limit, 4 threads, one laptop. Time = solver time. "
+         "≥ = the average includes runs stopped at the time limit, so it is a lower bound. Vars and rows are the "
+         "same with and without the start. Full tables with Sum rows: notebook section 17.", size=11, color=MUTED)
+
+
+def backup_model2(prs, k, notes):
+    s = new_slide(prs, 0, "Backup: summary table, Model 2 and the heuristic", notes["B2"])
+    sp, sps, h = summary_rows("SP"), summary_rows("SP+S"), summary_rows("H")
+    af, afs = summary_rows("AF"), summary_rows("AF+S")
+    names = [n for n in sp if n not in ("Average", "Sum")]
+
+    def val(t, n, c):
+        v = t[n][c].replace(",", "").replace("≥ ", "")
+        return float(v) if v not in ("", "–", "nan") else None
+
+    body, gaps = [], []
+    for n in names:
+        best = min(v for v in (val(t, n, "objective") for t in (sp, sps, h, af, afs)) if v is not None)
+        hg = 100 * (val(h, n, "objective") - best) / best
+        if sp[n]["status"] == "OPTIMAL":          # median over the proven optima, as on slide 11
+            gaps.append(hg)
+        a, b, hh = sp[n], sps[n], h[n]
+        built = a["n_vars"] not in ("", "–")
+        body.append([_inst_label(n), a["class"], _num(a["n_vars"]) if built else "> 2 M",
+                     STATUS_SHORT.get(a["status"], a["status"]), _num(a["solver_time_s"]), _num(a["objective"]),
+                     _num(a["gap_pct"]), _num(a["nodes"]),
+                     STATUS_SHORT.get(b["status"], b["status"]), _num(b["solver_time_s"]), _num(b["objective"]),
+                     _num(hh["end_to_end_s"]), _num(hh["objective"]), f"{hg:.1f}"])
+    a, b, hh = sp["Average"], sps["Average"], h["Average"]
+    gs = sorted(gaps)
+    med = gs[len(gs) // 2] if len(gs) % 2 else (gs[len(gs) // 2 - 1] + gs[len(gs) // 2]) / 2
+    body.append(["Average", "", _num(a["n_vars"]), "10 built", _num(a["solver_time_s"]), _num(a["objective"]),
+                 _num(a["gap_pct"]), _num(a["nodes"]), "10 built", _num(b["solver_time_s"]), _num(b["objective"]),
+                 _num(hh["end_to_end_s"]), _num(hh["objective"]), f"med. {med:.1f}*"])
+    header = ["Instance", "Class", "Duties |P|", "Status", "Time s", "Objective $", "Gap %", "Nodes",
+              "Status", "Time s", "Objective $", "Time s", "Cost $", "vs best %"]
+    groups = [("Instance", 3, PANEL), ("Model 2 (set partitioning)", 5, TEAL), ("Model 2 + start", 3, TEAL),
+              ("Heuristic (greedy + local search)", 3, NAVY)]
+    grouped_table(s, 0.6, 1.45, [1.5, 0.85, 0.85, 0.8, 0.6, 0.9, 0.55, 0.55, 0.8, 0.6, 0.9, 0.6, 0.9, 0.9],
+                  groups, header, body, name="Summary table Model 2 and heuristic")
+    text(s, 0.6, 6.45, 12.1, 0.45, "Not built = more than 2,000,000 legal duties (Model 2 stops listing them). "
+         "Model 2 averages cover the 10 built instances. Heuristic 'vs best %' = above the best schedule any "
+         "method found (the proven optimum where Model 2 was built); * median over the 10 proven optima. Full tables: notebook section 17.",
+         size=11, color=MUTED)
+
+
 def main() -> None:
     k, notes = numbers(), notes_from_md()
     prs = Presentation(TEMPLATE)
@@ -362,7 +499,12 @@ def main() -> None:
     for sid in list(ids):                       # keep B's theme and layouts, drop B's slides
         prs.part.drop_rel(sid.rId)
         ids.remove(sid)
-    for build in (slide10, slide11, slide12, slide14):
+    notes["B1"] = ("Backup, only if asked. One row per benchmark instance for Model 1, without and with the heuristic "
+                   "start: status, solver time, objective, bound, gap and nodes; averages at the bottom.")
+    notes["B2"] = ("Backup, only if asked. Model 2 without and with the start, and the heuristic alone: where Model 2 "
+                   "is built it is optimal at the root node in under a second; where it is not, the heuristic and "
+                   "Model 1 are the only answers.")
+    for build in (slide10, slide11, slide12, slide14, backup_model1, backup_model2):
         build(prs, k, notes)
     prs.core_properties.title = "Group M - slides 10-12, 14 (Member C)"
     prs.core_properties.author = "Group M"
