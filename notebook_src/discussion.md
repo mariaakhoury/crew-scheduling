@@ -22,7 +22,7 @@ H7 (reduced-cost fixing) was withdrawn from our plan before the experiments and 
 
 **Rule (fixed before the runs).** LP-AF <= LP-SP within 10^-6 on every final instance where SP is built; a violation would be a bug.
 
-**Final verdict: confirmed.** On all 10 instances where SP was built, LP-AF <= LP-SP (Q22 green, `crew.analysis_strength`).
+**Final verdict: confirmed.** On all 10 instances where SP was built, LP-AF <= LP-SP (checked automatically by `crew.analysis_strength`).
 The gap between the two is large: **LP-SP equals the proven optimum on all 10** (0 % LP gap), while LP-AF is
 1.9-15.8 % below it (median 8.9 %). So SP's LP already "knows" the answer, which is why SP solves every one of
 them at the root node (H3).
@@ -30,7 +30,7 @@ them at the root node (H3).
 ### H2 - naive versus tight big-M
 
 **Rule (fixed before the runs).** The naive constants (one M per family: M_T = latest start - smallest l, M_D = W) must give an LP
-bound no stronger than the tight per-arc constants (Q21); the size of the difference is reported as measured.
+bound no stronger than the tight per-arc constants; the size of the difference is reported as measured.
 
 **Final verdict: confirmed, with a difference of zero.** LP-AF-naive and LP-AF are identical on all 15 instances
 (largest difference 2 x 10^-11, rounding). The direction holds; the size we expected ("small") is in fact nothing.

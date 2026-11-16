@@ -44,7 +44,7 @@ CODE_SECTIONS = [
     ("8. Heuristic: greedy insertion + local search",
      "Greedy gives each trip, in start order, to the open duty where it adds the least cost. Local search then "
      "improves the schedule with tail swaps, merges and swap-then-merge, accepting only legal moves that save "
-     "at least $0.50.",
+     "at least \$0.50.",
      ["greedy.py", "localsearch.py"]),
     ("9. Integration: the heuristic as a MIP start",
      "The heuristic schedule is given to Gurobi as a complete starting solution for both models (+S methods).",
