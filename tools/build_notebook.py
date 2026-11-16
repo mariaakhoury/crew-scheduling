@@ -41,15 +41,15 @@ CODE_SECTIONS = [
      ["checker.py", "brute.py"]),
     ("6. Model 1: arc-flow", None, ["model_arcflow.py"]),
     ("7. Model 2: set partitioning", None, ["duties.py", "model_setpart.py"]),
-    ("9. Heuristic: greedy insertion + local search",
+    ("8. Heuristic: greedy insertion + local search",
      "Greedy gives each trip, in start order, to the open duty where it adds the least cost. Local search then "
      "improves the schedule with tail swaps, merges and swap-then-merge, accepting only legal moves that save "
      "at least $0.50.",
      ["greedy.py", "localsearch.py"]),
-    ("10. Integration: the heuristic as a MIP start",
+    ("9. Integration: the heuristic as a MIP start",
      "The heuristic schedule is given to Gurobi as a complete starting solution for both models (+S methods).",
      ["integration.py"]),
-    ("11. Experiment and analysis code",
+    ("10. Experiment and analysis code",
      "The runner solves every (instance, method) pair in its own process and writes one row per run to "
      "`results/runs.csv`. Every table and chart below is recomputed from that file by the analysis modules.",
      ["runner.py", "run_child.py", "final_runs.py", "highs_fallback.py", "analysis.py", "analysis_heuristic.py",
@@ -290,27 +290,27 @@ def build_notebook() -> nbf.NotebookNode:
     C += code_cells
     C += [md("Schema used by the loader (rule V1); written next to the notebook so it needs no extra file."),
           code("%%writefile instance.schema.json\n" + _read(os.path.join(ROOT, "instance.schema.json")))]
-    C += [md("## 12. Import the package and self-check"), code(_import_cell(modules))]
-    C += [md("## 13. Small worked example: P0\n\nBoth models, brute force agree on $945; greedy strands trip 7 "
-             "($1,177.50) and local search repairs it."), code(SOLVE_HELPERS), code(P0_DEMO)]
+    C += [md("## 11. Import the package and self-check"), code(_import_cell(modules))]
+    C += [md("## 12. Small worked example: P0\n\nBoth models, brute force agree on \\$945; greedy strands trip 7 "
+             "(\\$1,177.50) and local search repairs it."), code(SOLVE_HELPERS), code(P0_DEMO)]
     case = _md_file("case_p0.md")
     if case:
         C.append(md(re.sub(r"```python.*?```", "", case, flags=re.S).strip()))
-    C += [md("## 14. Prototype check: P0 to P5\n\nBoth models must equal the reference optimum and pass the checker."),
+    C += [md("## 13. Prototype check: P0 to P5\n\nBoth models must equal the reference optimum and pass the checker."),
           code(PROTO_CHECK)]
     bench = _md_file("benchmark.md")
-    C += [md("## 15. Benchmark" + ("\n\n" + bench if bench else "")), code(BENCHMARK)]
-    C += [md("## 16. Experiments\n\nIn demo mode the saved `results/runs.csv` of the final runs is loaded."),
+    C += [md("## 14. Benchmark" + ("\n\n" + bench if bench else "")), code(BENCHMARK)]
+    C += [md("## 15. Experiments\n\nIn demo mode the saved `results/runs.csv` of the final runs is loaded."),
           code(RESULTS_LOAD)]
-    C += [md("## 17. Results: summary tables and the comparison table\n\nAverages over time-limit runs are "
+    C += [md("## 16. Results: summary tables and the comparison table\n\nAverages over time-limit runs are "
              "lower bounds and are marked with ≥."), code(RESULTS_TABLES)]
-    C += [md("## 18. Charts\n\nModel strength (A12), performance profiles (A16) and the heuristic's effect "
-             "(B12), all recomputed from `results/runs.csv`."), code(CHARTS),
-          md("Scalability (B13): model sizes, build cost and status by instance."), code(SCALING)]
-    C += [md("## 19. A large instance"), code(LARGE_GANTT)]
+    C += [md("## 17. Charts\n\nModel strength, performance profiles and the heuristic's effect "
+             "(MIP start), all recomputed from `results/runs.csv`."), code(CHARTS),
+          md("Scalability: model sizes, build cost and status by instance."), code(SCALING)]
+    C += [md("## 18. A large instance"), code(LARGE_GANTT)]
     disc = _md_file("discussion.md")
-    C += [md("## 20. Discussion" + ("\n\n" + disc if disc else ""))]
-    C += [md("## 21. Reproducibility"), code(REPRO)]
+    C += [md("## 19. Discussion" + ("\n\n" + disc if disc else ""))]
+    C += [md("## 20. Reproducibility"), code(REPRO)]
     nb = nbf.v4.new_notebook()
     nb["cells"] = C
     nb["metadata"]["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}

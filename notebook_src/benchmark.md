@@ -1,6 +1,6 @@
 ## Benchmark: where the instances come from and what makes them hard
 
-> **Owner: B (tasks B5, B6, B9, B16).** Numbers marked *[pilot]* come from the 30 s + 30 s pilot on 43 candidate
+> Numbers marked *[pilot]* come from the 30 s + 30 s pilot on 43 candidate
 > instances (`results/pilot.csv` + `results/pilot_small.csv`). The selected benchmark and its table come from the
 > confirmation runs at the final limits (`results/confirm.csv`, final-run machine) and the freeze
 > (`instances/final/`). Final classes and results are reported with the final runs.
@@ -98,7 +98,7 @@ than 2,000,000 duties). † = selected by the fill-up rule. Class mix at selecti
 time limit 8; SP not built 5. **The fill-up was used for 2 places** (both time-limit instances) because only 2
 medium and 1 hard instance existed (targets 5 and 5): on these timetables Model 1 mostly either finishes in
 seconds or not at all within 120 s, so few instances fall in between. The final classes are recomputed from the
-final runs (Master Plan §10.3 step 5) and reported with the results. Full documentation:
+final runs and reported with the results. Full documentation:
 `instances/final/README.md`; fingerprints: `instances/final/MANIFEST.csv`; the selection with every candidate
 considered: `instances/final/SELECTION.md`.
 

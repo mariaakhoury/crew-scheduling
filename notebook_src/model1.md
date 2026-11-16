@@ -77,7 +77,7 @@ $$
 $T_{\text{last}} \le s_{\text{first}}$ and (5) gives $e_{\text{last}} - s_{\text{first}} \le L$; (6)-(7) add up the driving along the chain and cap it at $U_j \le W$.
 The second term of the objective is a constant (total driving); together with the waiting term it equals
 $\sum_{\text{duties}} (F + c \cdot \text{spread})$, the official cost. Rows: $3n + 2|A|$; variables: $|A| + 4n$.
-LP relaxation (`relax=True`): $x, u, v \in [0, 1]$. Naive big-M variant (A6): $M^T = \max_j s_j - \min_i \ell_i$
+LP relaxation (`relax=True`): $x, u, v \in [0, 1]$. Naive big-M variant: $M^T = \max_j s_j - \min_i \ell_i$
 and $M^D = W$ for every arc.
 
 ### The big-M numbers
@@ -91,7 +91,7 @@ switches the rule off:
 Here ℓ<sub>j</sub> = max(earliest start, e<sub>j</sub> − L) is the earliest any duty containing *j* could start, and
 U<sub>j</sub> = min(W, e<sub>j</sub> − earliest start) is the most driving possible up to *j* (`graph.big_m_bounds`).
 These are the smallest numbers that are always big enough, using only the variable bounds.
-**Smaller M = tighter model:** the LP relaxation gives a better lower bound. The "naive" version (task A6) uses one
+**Smaller M = tighter model:** the LP relaxation gives a better lower bound. The "naive" version uses one
 big number per rule instead (M<sup>T</sup> = latest start − smallest ℓ, M<sup>D</sup> = W): same best schedule, weaker bound.
 
 ### Size

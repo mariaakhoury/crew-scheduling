@@ -448,7 +448,7 @@ def backup_model1(prs, k, notes):
                                  0.92], groups, header, body, name="Summary table Model 1")
     text(s, 0.6, 6.45, 12.1, 0.45, "Same 15 instances, 120 s limit, 4 threads, one laptop. Time = solver time. "
          "≥ = the average includes runs stopped at the time limit, so it is a lower bound. Vars and rows are the "
-         "same with and without the start. Full tables with Sum rows: notebook section 17.", size=11, color=MUTED)
+         "same with and without the start. Full tables with Sum rows: notebook section 16.", size=11, color=MUTED)
 
 
 def backup_model2(prs, k, notes):
@@ -488,7 +488,7 @@ def backup_model2(prs, k, notes):
                   groups, header, body, name="Summary table Model 2 and heuristic")
     text(s, 0.6, 6.45, 12.1, 0.45, "Not built = more than 2,000,000 legal duties (Model 2 stops listing them). "
          "Model 2 averages cover the 10 built instances. Heuristic 'vs best %' = above the best schedule any "
-         "method found (the proven optimum where Model 2 was built); * median over the 10 proven optima. Full tables: notebook section 17.",
+         "method found (the proven optimum where Model 2 was built); * median over the 10 proven optima. Full tables: notebook section 16.",
          size=11, color=MUTED)
 
 

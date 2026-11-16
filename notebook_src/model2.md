@@ -26,10 +26,10 @@ Constraint (8) says: every trip is driven by exactly one chosen duty. All the wo
 if it is legal, so the model itself needs no big-M constraints and no time variables.
 
 ### Size as a function of the instance
-* variables: $|P|$  ·  constraint rows: $n$  ·  nonzeros: $\sum_{p} |p|$ (checked against Gurobi by test Q28)
+* variables: $|P|$  ·  constraint rows: $n$  ·  nonzeros: $\sum_{p} |p|$ (checked against Gurobi by a test)
 * $|P|$ grows **exponentially** with the number of trips that fit in one duty. Longer duties (larger $L$, $W$)
   and denser timetables make it explode: with the *old* pilot generator (planted, seed 1), $n = 200$ went from
-  66,393 duties at $L = 360$ to 14.5 million at $L = 600$ (Master Plan §3.2; the counts for the final rotation
+  66,393 duties at $L = 360$ to 14.5 million at $L = 600$ (the counts for the final rotation
   generator are measured again and reported in the scalability section). That is why the code stops at `COLUMN_CAP` = 2,000,000 duties or after the
   120 s build limit, and reports the instance as **not built** (a build result, never a timeout).
 
@@ -39,7 +39,7 @@ Depth-first search: start a duty at every trip; extend it by any trip that can f
 
 *Completeness.* Adding a trip can only increase the spread and the driving time, so every prefix of a legal
 duty is itself legal. The search extends every legal prefix, therefore it reaches every legal duty.
-Trips inside a duty are ordered by time, so each duty is produced exactly once. (Test Q12: on P0 the search
+Trips inside a duty are ordered by time, so each duty is produced exactly once. (A test checks this: on P0 the search
 finds 40 duties, and on P0–P2 the count equals a brute-force check of all $2^n$ subsets of trips.)
 
 ### Theoretical argument: why it should be fast — and when it is not
@@ -61,7 +61,7 @@ finds 40 duties, and on P0–P2 the count equals a brute-force check of all $2^n
 **Expected (to be tested, hypotheses H3–H5).** Where it can be built, SP needs fewer nodes and less solver
 time than arc-flow; its advantage in end-to-end time shrinks as $|P|$ grows; and for long duties and large $n$
 it cannot be built while arc-flow always can. A stronger bound is not automatically faster.
-What the experiments showed is in §20 (Discussion): H3 and H5 confirmed, H4 not confirmed.
+What the experiments showed is in the Discussion section: H3 and H5 confirmed, H4 not confirmed.
 
 ### Warm start (used by SP+S)
 The heuristic schedule is a set of legal duties, so all of them are in the complete $P$. We set the start value
